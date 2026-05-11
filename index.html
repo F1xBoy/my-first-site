@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Logic Terminal v2.6</title>
+    <title>AI Nexus Terminal v2.7</title>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /* --- CSS: ВЗРОСЛЫЙ ТЕМНЫЙ ДИЗАЙН --- */
         :root {
             --bg: #0d1117;
             --card: #161b22;
@@ -13,7 +14,6 @@
             --success: #238636;
             --text: #c9d1d9;
             --border: #30363d;
-            --error: #f85149;
         }
 
         body {
@@ -144,7 +144,7 @@
         <button id="langBtn" class="lang-switch" onclick="toggleLang()">RU</button>
     </div>
     <div class="content">
-        <h2 id="ui-title">AI Terminal</h2>
+        <h2 id="ui-title">AI Терминал</h2>
         <div class="subtitle" id="ui-subtitle">Connected to Gemini 1.5 Flash</div>
         <textarea id="userInput" placeholder="Напиши что-нибудь..."></textarea>
         <button id="execBtn" class="btn-execute" onclick="runAI()">ВЫПОЛНИТЬ ЗАПРОС</button>
@@ -152,11 +152,12 @@
             <div id="loader" class="loader"></div>
             <span id="ui-status">Статус: Готов</span>
         </div>
-        <div class="output-area" id="output">Ожидание команды...</div>
+        <div id="output" class="output-area">Ожидание команды...</div>
     </div>
 </div>
 
 <script>
+    /* --- JS: МОЗГИ --- */
     let currentLang = 'RU';
     // Твой ключ
     const API_KEY = "AIzaSyDYMkGWL1nIhkUWXHxSsE9O0uiDKA2jOyA";
@@ -169,7 +170,7 @@
             btn: "ВЫПОЛНИТЬ ЗАПРОС",
             ready: "Статус: Готов",
             loading: "Статус: Нейронка думает...",
-            errorEmpty: "Ошибка: Пустое поле!"
+            errorEmpty: "Ошибка: Введи текст!"
         },
         EN: {
             title: "AI Terminal",
@@ -178,7 +179,7 @@
             btn: "EXECUTE COMMAND",
             ready: "Status: Ready",
             loading: "Status: AI is thinking...",
-            errorEmpty: "Error: Empty input!"
+            errorEmpty: "Error: Input is empty!"
         }
     };
 
@@ -212,7 +213,7 @@
         output.innerText = "...";
 
         try {
-            // ИСПОЛЬЗУЕМ СТАБИЛЬНЫЙ URL V1 (БЕЗ BETA)
+            // Исправленный стабильный URL (версия v1 без beta)
             const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
             
             const response = await fetch(url, {
@@ -230,7 +231,7 @@
             } else if (data.candidates && data.candidates[0].content.parts[0].text) {
                 output.innerText = data.candidates[0].content.parts[0].text;
             } else {
-                output.innerText = "AI вернул пустой ответ.";
+                output.innerText = "AI вернул пустой результат.";
             }
         } catch (error) {
             output.innerText = "Network Error: " + error.message;
