@@ -4,244 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Nexus Terminal v2.7</title>
+    <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        /* --- CSS: ВЗРОСЛЫЙ ТЕМНЫЙ ДИЗАЙН --- */
-        :root {
-            --bg: #0d1117;
-            --card: #161b22;
-            --accent: #58a6ff;
-            --success: #238636;
-            --text: #c9d1d9;
-            --border: #30363d;
-        }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .terminal-window {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            width: 95%;
-            max-width: 750px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-            overflow: hidden;
-        }
-
-        .window-header {
-            background: #21262d;
-            padding: 12px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .dots { display: flex; gap: 8px; }
-        .dot { width: 12px; height: 12px; border-radius: 50%; }
-        .red { background: #ff5f56; }
-        .yellow { background: #ffbd2e; }
-        .green { background: #27c93f; }
-
-        .lang-switch {
-            background: transparent;
-            color: var(--accent);
-            border: 1px solid var(--accent);
-            border-radius: 6px;
-            padding: 4px 12px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .content { padding: 30px; }
-        h2 { margin: 0 0 10px 0; font-size: 22px; color: var(--accent); }
-        .subtitle { color: #8b949e; font-size: 14px; margin-bottom: 25px; }
-
-        textarea {
-            width: 100%;
-            height: 160px;
-            background: #0d1117;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 15px;
-            color: #79c0ff;
-            font-family: 'Fira Code', monospace;
-            font-size: 14px;
-            resize: none;
-            box-sizing: border-box;
-            outline: none;
-            margin-bottom: 20px;
-        }
-
-        .btn-execute {
-            width: 100%;
-            background: var(--success);
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .btn-execute:hover { background: #2ea043; }
-        .btn-execute:disabled { background: #21262d; color: #8b949e; cursor: not-allowed; }
-
-        .output-area {
-            margin-top: 25px;
-            background: #010409;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-            min-height: 120px;
-            font-family: 'Fira Code', monospace;
-            font-size: 14px;
-            line-height: 1.6;
-            color: #d1d5da;
-            white-space: pre-wrap;
-            overflow-y: auto;
-            max-height: 400px;
-        }
-
-        .status-bar {
-            margin-top: 15px;
-            font-size: 12px;
-            color: #8b949e;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .loader {
-            width: 12px; height: 12px;
-            border: 2px solid var(--accent);
-            border-top: 2px solid transparent;
-            border-radius: 50%;
-            display: none;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-    </style>
 </head>
 <body>
 
 <div class="terminal-window">
     <div class="window-header">
-        <div class="dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div>
+        <div class="dots">
+            <div class="dot red"></div>
+            <div class="dot yellow"></div>
+            <div class="dot green"></div>
+        </div>
         <button id="langBtn" class="lang-switch" onclick="toggleLang()">RU</button>
     </div>
+
     <div class="content">
         <h2 id="ui-title">AI Терминал</h2>
         <div class="subtitle" id="ui-subtitle">Connected to Gemini 1.5 Flash</div>
+        
         <textarea id="userInput" placeholder="Напиши что-нибудь..."></textarea>
+        
         <button id="execBtn" class="btn-execute" onclick="runAI()">ВЫПОЛНИТЬ ЗАПРОС</button>
+
         <div class="status-bar">
             <div id="loader" class="loader"></div>
             <span id="ui-status">Статус: Готов</span>
         </div>
-        <div id="output" class="output-area">Ожидание команды...</div>
+
+        <div class="output-area" id="output">Результат появится здесь...</div>
     </div>
 </div>
 
-<script>
-    /* --- JS: МОЗГИ --- */
-    let currentLang = 'RU';
-    // Твой ключ
-    const API_KEY = "AIzaSyDYMkGWL1nIhkUWXHxSsE9O0uiDKA2jOyA";
-
-    const textData = {
-        RU: {
-            title: "AI Терминал",
-            subtitle: "Прямой доступ к Gemini 1.5 Flash",
-            placeholder: "Введи вопрос или код для анализа...",
-            btn: "ВЫПОЛНИТЬ ЗАПРОС",
-            ready: "Статус: Готов",
-            loading: "Статус: Нейронка думает...",
-            errorEmpty: "Ошибка: Введи текст!"
-        },
-        EN: {
-            title: "AI Terminal",
-            subtitle: "Direct access to Gemini 1.5 Flash",
-            placeholder: "Enter question or code...",
-            btn: "EXECUTE COMMAND",
-            ready: "Status: Ready",
-            loading: "Status: AI is thinking...",
-            errorEmpty: "Error: Input is empty!"
-        }
-    };
-
-    function toggleLang() {
-        currentLang = currentLang === 'RU' ? 'EN' : 'RU';
-        document.getElementById('langBtn').innerText = currentLang;
-        const d = textData[currentLang];
-        document.getElementById('ui-title').innerText = d.title;
-        document.getElementById('ui-subtitle').innerText = d.subtitle;
-        document.getElementById('userInput').placeholder = d.placeholder;
-        document.getElementById('execBtn').innerText = d.btn;
-        document.getElementById('ui-status').innerText = d.ready;
-    }
-
-    async function runAI() {
-        const input = document.getElementById('userInput').value;
-        const output = document.getElementById('output');
-        const status = document.getElementById('ui-status');
-        const loader = document.getElementById('loader');
-        const btn = document.getElementById('execBtn');
-        const d = textData[currentLang];
-
-        if (!input.trim()) {
-            output.innerText = d.errorEmpty;
-            return;
-        }
-
-        btn.disabled = true;
-        loader.style.display = 'block';
-        status.innerText = d.loading;
-        output.innerText = "...";
-
-        try {
-            // Исправленный стабильный URL (версия v1 без beta)
-            const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
-            
-            const response = await fetch(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: input }] }]
-                })
-            });
-
-            const data = await response.json();
-            
-            if (data.error) {
-                output.innerText = "Error: " + data.error.message;
-            } else if (data.candidates && data.candidates[0].content.parts[0].text) {
-                output.innerText = data.candidates[0].content.parts[0].text;
-            } else {
-                output.innerText = "AI вернул пустой результат.";
-            }
-        } catch (error) {
-            output.innerText = "Network Error: " + error.message;
-        } finally {
-            btn.disabled = false;
-            loader.style.display = 'none';
-            status.innerText = d.ready;
-        }
-    }
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
