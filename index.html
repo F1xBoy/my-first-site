@@ -3,208 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Nexus Translator</title>
-    <!-- Подключаем современный шрифт -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <title>AI Logic Terminal</title>
+    <!-- Подключаем шрифт для кода -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --accent-color: #38bdf8;
-            --text-main: #f8fafc;
-            --text-dim: #94a3b8;
-            --border: rgba(255, 255, 255, 0.1);
+            --bg: #0d1117;
+            --card: #161b22;
+            --accent: #58a6ff;
+            --success: #3fb950;
+            --text: #c9d1d9;
+            --border: #30363d;
         }
 
         body {
-            background-color: var(--bg-color);
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.1) 0px, transparent 50%);
-            color: var(--text-main);
+            background-color: var(--bg);
+            color: var(--text);
             font-family: 'Inter', sans-serif;
+            margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
+        }
+
+        .terminal-window {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 700px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
             overflow: hidden;
         }
 
-        .app-container {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);    
-            border: 1px solid var(--border);
-            padding: 40px;
-            border-radius: 24px;
-            width: 100%;
-            max-width: 450px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            transition: transform 0.3s ease;
+        /* Шапка окна */
+        .window-header {
+            background: #21262d;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
         }
 
-        .app-container:hover {
-            transform: translateY(-5px);
-        }
+        .dots { display: flex; gap: 8px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .red { background: #ff5f56; }
+        .yellow { background: #ffbd2e; }
+        .green { background: #27c93f; }
 
-        h1 {
-            font-weight: 600;
-            font-size: 28px;
-            letter-spacing: -0.025em;
-            margin-top: 0;
-            margin-bottom: 8px;
-            background: linear-gradient(to right, #38bdf8, #818cf8);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .subtitle {
-            color: var(--text-dim);
-            font-size: 14px;
-            margin-bottom: 32px;
-        }
-
-        .input-group {
-            margin-bottom: 24px;
-            text-align: left;
-        }
-
-        label {
-            display: block;
+        .lang-switch {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            border-radius: 4px;
+            padding: 2px 8px;
+            cursor: pointer;
             font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 8px;
-            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        /* Контент */
+        .content {
+            padding: 25px;
+        }
+
+        h2 {
+            margin-top: 0;
+            font-size: 20px;
+            color: var(--accent);
         }
 
         textarea {
             width: 100%;
-            height: 120px;
-            background: rgba(15, 23, 42, 0.5);
+            height: 180px;
+            background: #0d1117;
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 16px;
-            color: var(--text-main);
-            font-size: 16px;
-            font-family: inherit;
+            border-radius: 8px;
+            padding: 15px;
+            color: #79c0ff;
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
             resize: none;
             box-sizing: border-box;
             outline: none;
-            transition: border-color 0.2s;
+            margin-bottom: 20px;
         }
 
         textarea:focus {
-            border-color: var(--accent-color);
+            border-color: var(--accent);
         }
 
-        button {
+        .btn-execute {
             width: 100%;
-            background: var(--accent-color);
-            color: #0f172a;
+            background: var(--success);
+            color: white;
             border: none;
-            padding: 16px;
-            border-radius: 12px;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: bold;
             font-size: 16px;
-            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 4px 6px -1px rgba(56, 189, 248, 0.2);
+            transition: opacity 0.2s;
         }
 
-        button:hover {
-            background: #7dd3fc;
-            box-shadow: 0 10px 15px -3px rgba(56, 189, 248, 0.4);
+        .btn-execute:hover {
+            opacity: 0.9;
         }
 
-        button:active {
-            transform: scale(0.98);
+        .output-area {
+            margin-top: 25px;
+            background: #010409;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            min-height: 80px;
+            font-family: 'Fira Code', monospace;
+            font-size: 13px;
+            color: #d1d5da;
+            white-space: pre-wrap;
         }
 
-        .result-container {
-            margin-top: 32px;
-            text-align: left;
-            border-top: 1px solid var(--border);
-            padding-top: 24px;
-        }
-
-        #result {
-            font-size: 16px;
-            line-height: 1.6;
-            color: var(--text-main);
-            background: rgba(255, 255, 255, 0.03);
-            padding: 16px;
-            border-radius: 12px;
-            min-height: 60px;
-        }
-
-        .loading-dots:after {
-            content: ' .';
-            animation: dots 1s steps(5, end) infinite;
-        }
-
-        @keyframes dots {
-            0%, 20% { color: rgba(0,0,0,0); text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0); }
-            40% { color: var(--accent-color); text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0); }
-            60% { text-shadow: .25em 0 0 var(--accent-color), .5em 0 0 rgba(0,0,0,0); }
-            80%, 100% { text-shadow: .25em 0 0 var(--accent-color), .5em 0 0 var(--accent-color); }
+        .status-bar {
+            margin-top: 15px;
+            font-size: 11px;
+            color: #8b949e;
+            text-transform: uppercase;
         }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <h1>Nexus AI</h1>
-    <div class="subtitle">Умный перевод технологических текстов</div>
-    
-    <div class="input-group">
-        <label>Input Text (English)</label>
-        <textarea id="inputText" placeholder="Paste your text here..."></textarea>
+<div class="terminal-window">
+    <div class="window-header">
+        <div class="dots">
+            <div class="dot red"></div>
+            <div class="dot yellow"></div>
+            <div class="dot green"></div>
+        </div>
+        <button id="langBtn" class="lang-switch" onclick="toggleLang()">RU</button>
     </div>
 
-    <button id="mainBtn" onclick="translateText()">Translate Now</button>
+    <div class="content">
+        <h2 id="title">Система анализа кода</h2>
+        <textarea id="userInput" placeholder="Введите ваш код или запрос к AI..."></textarea>
+        
+        <button id="execBtn" class="btn-execute" onclick="runAI()">ВЫПОЛНИТЬ ЗАПРОС</button>
 
-    <div class="result-container">
-        <label>Translation Result</label>
-        <div id="result">Waiting for input...</div>
+        <div class="status-bar" id="status">Статус: Готов к работе</div>
+        <div class="output-area" id="output">Результат вычислений появится здесь...</div>
     </div>
 </div>
 
 <script>
-    async function translateText() {
-        const text = document.getElementById('inputText').value;
-        const resultDiv = document.getElementById('result');
-        const btn = document.getElementById('mainBtn');
-        
-        if(!text.trim()) {
-            resultDiv.innerText = "Please enter some text first.";
+    let currentLang = 'RU';
+
+    const translations = {
+        RU: {
+            title: "Система анализа кода",
+            placeholder: "Введите ваш код или запрос к AI...",
+            btn: "ВЫПОЛНИТЬ ЗАПРОС",
+            status: "Статус: Готов к работе",
+            wait: "Обработка данных через нейронную сеть...",
+            empty: "Ошибка: Поле ввода пусто!",
+            res: "Результат вычислений появится здесь..."
+        },
+        EN: {
+            title: "AI Logic Terminal",
+            placeholder: "Enter your code or prompt for AI...",
+            btn: "EXECUTE COMMAND",
+            status: "Status: Ready",
+            wait: "Processing data via neural network...",
+            empty: "Error: Input is empty!",
+            res: "Result will appear here..."
+        }
+    };
+
+    function toggleLang() {
+        currentLang = currentLang === 'RU' ? 'EN' : 'RU';
+        document.getElementById('langBtn').innerText = currentLang;
+        updateUI();
+    }
+
+    function updateUI() {
+        const t = translations[currentLang];
+        document.getElementById('title').innerText = t.title;
+        document.getElementById('userInput').placeholder = t.placeholder;
+        document.getElementById('execBtn').innerText = t.btn;
+        document.getElementById('status').innerText = t.status;
+        document.getElementById('output').innerText = t.res;
+    }
+
+    async function runAI() {
+        const input = document.getElementById('userInput').value;
+        const output = document.getElementById('output');
+        const status = document.getElementById('status');
+        const t = translations[currentLang];
+
+        if (!input.trim()) {
+            output.innerText = t.empty;
             return;
         }
 
-        // Визуальный фидбек
-        btn.disabled = true;
-        btn.innerText = "Processing...";
-        resultDiv.innerHTML = '<span class="loading-dots">Neural network is thinking</span>';
+        status.innerText = t.wait;
+        output.innerText = "...";
 
-        try {
-            // MyMemory API — бесплатный и не требует ключа
-            const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|ru`);
-            const data = await res.json();
-            
-            if (data.responseData) {
-                resultDiv.innerText = data.responseData.translatedText;
-            } else {
-                resultDiv.innerText = "Translation error. Try again.";
-            }
-        } catch (error) {
-            resultDiv.innerText = "Error: Connection lost.";
-        } finally {
-            btn.disabled = false;
-            btn.innerText = "Translate Now";
-        }
+        // Симуляция работы нейронки (здесь в будущем будет реальный API)
+        setTimeout(() => {
+            status.innerText = currentLang === 'RU' ? "Завершено" : "Completed";
+            output.innerText = `[AI System]: Запрос принят. Анализ завершен.\n\nДанные: "${input.substring(0, 50)}..."\n\nДля активации полноценного интеллекта нужно подключить API-ключ в следующем обновлении.`;
+        }, 1500);
     }
 </script>
 
