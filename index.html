@@ -3,37 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Nexus Terminal v2.7</title>
-    <link rel="stylesheet" href="./style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <title>VChat | Messaging</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<div class="terminal-window">
-    <div class="window-header">
-        <div class="dots">
-            <div class="dot red"></div>
-            <div class="dot yellow"></div>
-            <div class="dot green"></div>
+<div class="vchat-app">
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>VChat</h2>
         </div>
-        <button id="langBtn" class="lang-switch" onclick="toggleLang()">RU</button>
-    </div>
+        <div class="contacts">
+            <div class="contact active">
+                <div class="avatar">V</div>
+                <div class="contact-info">
+                    <span class="name">V-Assistant</span>
+                    <span class="status">online</span>
+                </div>
+            </div>
+        </div>
+    </aside>
 
-    <div class="content">
-        <h2 id="ui-title">AI Терминал</h2>
-        <div class="subtitle" id="ui-subtitle">Connected to Gemini 1.5 Flash</div>
-        
-        <textarea id="userInput" placeholder="Напиши что-нибудь..."></textarea>
-        
-        <button id="execBtn" class="btn-execute" onclick="runAI()">ВЫПОЛНИТЬ ЗАПРОС</button>
+    <main class="chat-window">
+        <header class="chat-header">
+            <div class="chat-info">
+                <span class="chat-name">V-Assistant</span>
+            </div>
+        </header>
 
-        <div class="status-bar">
-            <div id="loader" class="loader"></div>
-            <span id="ui-status">Статус: Готов</span>
+        <div class="messages-container" id="chatBox">
+            <div class="message system">Добро пожаловать в VChat! Напиши что-нибудь своему ассистенту.</div>
         </div>
 
-        <div class="output-area" id="output">Результат появится здесь...</div>
-    </div>
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="Написать сообщение..." onkeydown="if(event.key==='Enter') sendMessage()">
+            <button id="sendBtn" onclick="sendMessage()">➤</button>
+        </div>
+    </main>
 </div>
 
 <script src="script.js"></script>
