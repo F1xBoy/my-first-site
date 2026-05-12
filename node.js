@@ -7,11 +7,9 @@ async function sendMessage() {
     
     if (!text) return;
 
-    // 1. Добавляем твое сообщение на экран
     appendMessage('user', text);
     input.value = '';
 
-    // 2. Показываем, что ИИ "печатает"
     const loadingMsg = appendMessage('ai', '...');
 
     try {
@@ -24,16 +22,17 @@ async function sendMessage() {
         });
 
         const data = await response.json();
-        const aiText = data.candidates[0].content.parts[0].text;
-
-        // 3. Заменяем "..." на реальный ответ
-        loadingMsg.innerText = aiText;
+        
+        if (data.candidates && data.candidates[0].content.parts[0].text) {
+            loadingMsg.innerText = data.candidates[0].content.parts[0].text;
+        } else {
+            loadingMsg.innerText = "Хм, возникла заминка в матрице.";
+        }
         
     } catch (error) {
-        loadingMsg.innerText = "Ошибка связи. Проверь интернет, бро.";
+        loadingMsg.innerText = "Ошибка связи, бро. Проверь консоль.";
     }
 
-    // Скроллим вниз
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
