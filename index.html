@@ -3,109 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat | Admin Power</title>
+    <title>VChat | Fixed & Fast</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; background: #0e1621; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         * { box-sizing: border-box; }
 
-        .auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(14, 22, 33, 0.98); display: flex; justify-content: center; align-items: center; z-index: 10000; }
-        .auth-card { background: #17212b; padding: 25px; border-radius: 15px; width: 380px; border: 1px solid #2b5278; max-height: 90vh; overflow-y: auto; }
+        /* ОКНА */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-card { background: #17212b; padding: 20px; border-radius: 12px; width: 350px; border: 1px solid #2b5278; max-height: 80vh; overflow-y: auto; }
         
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #2b5278; background: #242f3d; color: white; outline: none; }
-        button { width: 100%; padding: 10px; background: #2b5278; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 5px; }
-        button.danger { background: #cc3333; }
-        button.warn { background: #f39c12; }
+        input, select, textarea { width: 100%; padding: 10px; margin: 5px 0; border-radius: 6px; border: 1px solid #2b5278; background: #242f3d; color: white; outline: none; }
+        button { width: 100%; padding: 10px; background: #2b5278; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 5px; }
+        button.danger { background: #a32a2a; }
         button.secondary { background: #313d4b; }
 
+        /* ИНТЕРФЕЙС */
         .tg-container { display: none; height: 100vh; width: 100vw; flex-direction: row; }
-        .tg-sidebar { width: 300px; background: #17212b; border-right: 1px solid #0e1621; display: flex; flex-direction: column; }
+        .tg-sidebar { width: 280px; background: #17212b; border-right: 1px solid #0e1621; display: flex; flex-direction: column; }
         
-        .profile-area { padding: 15px; background: #1c2936; display: flex; align-items: center; gap: 12px; }
-        .avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid #58a6ff; }
+        .profile-header { padding: 15px; background: #1c2936; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #0e1621; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid #58a6ff; }
         
         .chat-list { flex: 1; overflow-y: auto; }
-        .item { display: flex; align-items: center; padding: 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .item:hover { background: #242f3d; }
-        .item img { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; }
+        .chat-item { display: flex; align-items: center; padding: 10px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .chat-item:hover { background: #242f3d; }
+        .chat-item img { width: 40px; height: 40px; border-radius: 50%; margin-right: 10px; }
 
         .tg-main { flex: 1; display: flex; flex-direction: column; background: #0e1621; }
-        .tg-header { padding: 10px 20px; background: #17212b; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #0e1621; }
-        .tg-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .header { padding: 10px 20px; background: #17212b; display: flex; align-items: center; justify-content: space-between; height: 60px; }
+        .messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         
-        .msg { max-width: 70%; padding: 10px; border-radius: 12px; font-size: 14px; cursor: pointer; }
-        .msg.user { align-self: flex-end; background: #2b5278; }
-        .msg.other { align-self: flex-start; background: #182533; }
-        .msg-sender { font-size: 10px; color: #58a6ff; display: block; margin-bottom: 3px; }
+        .msg { max-width: 75%; padding: 8px 12px; border-radius: 10px; font-size: 14px; word-wrap: break-word; }
+        .msg.me { align-self: flex-end; background: #2b5278; }
+        .msg.he { align-self: flex-start; background: #182533; }
+        .msg-name { font-size: 10px; color: #58a6ff; font-weight: bold; margin-bottom: 2px; }
 
-        /* СПИСОК УЧАСТНИКОВ */
-        .member-row { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #242f3d; font-size: 13px; }
-        .role-tag { font-size: 9px; padding: 2px 5px; border-radius: 4px; background: #58a6ff; color: #0e1621; font-weight: bold; }
+        .input-bar { padding: 15px; background: #17212b; display: flex; gap: 10px; }
+        
+        .role-badge { font-size: 9px; background: #58a6ff; color: #000; padding: 1px 4px; border-radius: 3px; margin-left: 5px; }
     </style>
 </head>
 <body>
 
-    <div id="login-screen" class="auth-overlay">
-        <div class="auth-card">
-            <h2>VChat Admin Edition</h2>
+    <div id="login-scr" class="modal-overlay" style="display: flex;">
+        <div class="modal-card">
+            <h2 style="color:#58a6ff">VChat</h2>
             <input type="email" id="uEmail" placeholder="Email">
             <input type="text" id="uNick" placeholder="Никнейм">
-            <button onclick="login()">Войти</button>
+            <button onclick="auth()">Войти</button>
         </div>
     </div>
 
-    <div id="members-modal" class="auth-overlay" style="display:none;">
-        <div class="auth-card">
-            <h3>Участники группы</h3>
-            <div id="membersListCont" style="margin-bottom: 15px;"></div>
-            <button class="secondary" onclick="closeModal('members-modal')">Закрыть</button>
+    <div id="my-prof-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h3>Мой профиль</h3>
+            <input type="text" id="myNickNew" placeholder="Ник">
+            <input type="text" id="myAvNew" placeholder="Ссылка на аватар">
+            <button onclick="updateMe()">Сохранить</button>
+            <button class="secondary" onclick="closeM('my-prof-modal')">Закрыть</button>
         </div>
     </div>
 
-    <div id="group-admin-modal" class="auth-overlay" style="display:none;">
-        <div class="auth-card">
-            <h3>Управление группой</h3>
-            <input type="text" id="gNameEdit" placeholder="Название">
-            <textarea id="gDescEdit" placeholder="Описание"></textarea>
-            <input type="text" id="gAvEdit" placeholder="Ссылка на аватар">
-            <button onclick="saveGroupMeta()">Обновить инфо</button>
+    <div id="members-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h3>В группе:</h3>
+            <div id="memList" style="margin-bottom:15px"></div>
+            <button class="secondary" onclick="closeM('members-modal')">Закрыть</button>
+        </div>
+    </div>
+
+    <div id="admin-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h3>Админка</h3>
+            <input type="text" id="gNameNew" placeholder="Название">
+            <textarea id="gDescNew" placeholder="Описание"></textarea>
+            <button onclick="updateG()">Обновить</button>
             <hr>
-            <input type="text" id="addMemberInput" placeholder="Ник или Email">
-            <button class="secondary" onclick="addMember()">Добавить чела</button>
+            <input type="text" id="addEmail" placeholder="Email или Ник друга">
+            <button class="secondary" onclick="invite()">Добавить в группу</button>
             <hr>
-            <button class="warn" onclick="clearHistory()">Очистить историю сообщений</button>
-            <button class="danger" onclick="deleteGroup()">УДАЛИТЬ ГРУППУ</button>
-            <button class="secondary" onclick="closeModal('group-admin-modal')">Назад</button>
+            <button class="danger" onclick="clearChat()">Очистить историю</button>
+            <button class="danger" style="margin-top:20px" onclick="killG()">УДАЛИТЬ ГРУППУ</button>
+            <button class="secondary" onclick="closeM('admin-modal')">Назад</button>
         </div>
     </div>
 
-    <div id="main-app" class="tg-container">
+    <div id="app" class="tg-container">
         <aside class="tg-sidebar">
-            <div class="profile-area">
-                <img id="myAv" class="avatar" src="">
-                <div id="myNameDisplay" style="font-weight:bold">...</div>
+            <div class="profile-header">
+                <img id="myAvImg" class="avatar" src="" onclick="openMe()">
+                <div id="myName" style="font-weight:bold">...</div>
             </div>
             <div style="padding:10px; display:flex; gap:5px;">
-                <input type="text" id="search" placeholder="Поиск..." oninput="drawList()" style="margin:0">
-                <button onclick="initGroup()" style="width:40px">+</button>
+                <input type="text" id="srch" placeholder="Поиск..." oninput="render()" style="margin:0">
+                <button onclick="newG()" style="width:40px">+</button>
             </div>
-            <div class="chat-list" id="list"></div>
+            <div class="chat-list" id="chatList"></div>
         </aside>
 
         <main class="tg-main">
-            <header class="tg-header">
+            <header class="header">
                 <div>
-                    <span id="activeTitle" style="font-weight:bold">Выбери чат</span><br>
-                    <small id="activeDesc" style="color:#888; font-size:10px"></small>
+                    <b id="hTitle">Выбери чат</b><br>
+                    <small id="hDesc" style="color:#888;font-size:10px"></small>
                 </div>
-                <div id="headerActions" style="display:none;">
-                    <button class="secondary" style="width:auto; padding:5px" onclick="showMembers()">👥</button>
-                    <button id="adminBtn" class="secondary" style="width:auto; padding:5px; display:none;" onclick="openAdmin()">⚙</button>
+                <div id="hBtns" style="display:none; gap:5px">
+                    <button class="secondary" style="width:40px" onclick="showMem()">👥</button>
+                    <button id="admBtn" class="secondary" style="width:40px; display:none;" onclick="openAdm()">⚙</button>
                 </div>
             </header>
-            <div id="chatBox" class="tg-messages"></div>
-            <div class="tg-input-area">
-                <input type="text" id="mInput" placeholder="Сообщение..." onkeydown="if(event.key==='Enter') send()">
-                <button onclick="send()" style="width:50px">➤</button>
+            <div id="msgBox" class="messages"></div>
+            <div class="input-bar">
+                <input type="text" id="msgInp" placeholder="Сообщение..." onkeydown="if(event.key==='Enter') sendMsg()">
+                <button onclick="sendMsg()" style="width:50px">➤</button>
             </div>
         </main>
     </div>
@@ -114,189 +124,142 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
     <script>
-        const firebaseConfig = {
+        const cfg = {
             apiKey: "AIzaSyCg30e6q0vgQifYTXgl7ERe7aC-ZrLaOiY",
-            authDomain: "vchat-12103.firebaseapp.com",
             databaseURL: "https://vchat-12103-default-rtdb.firebaseio.com",
-            projectId: "vchat-12103",
-            storageBucket: "vchat-12103.firebasestorage.app",
-            messagingSenderId: "734798044186",
-            appId: "1:734798044186:web:4b81505707c1b3a03a05a3"
+            projectId: "vchat-12103"
         };
-        firebase.initializeApp(firebaseConfig);
+        firebase.initializeApp(cfg);
         const db = firebase.database();
 
-        let myKey = localStorage.getItem('vchat_key') || "";
-        let curChat = null; 
-        let cache = { users: {}, groups: {} };
+        let myID = localStorage.getItem('vchat_key') || "";
+        let active = null;
+        let data = { u: {}, g: {} };
 
-        function login() {
+        function auth() {
             const e = document.getElementById('uEmail').value.trim().toLowerCase();
             const n = document.getElementById('uNick').value.trim();
             if (e && n) {
-                myKey = btoa(e).replace(/=/g, "");
-                db.ref("users/" + myKey).update({ nickname: n, avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed="+n, email: e });
-                localStorage.setItem('vchat_key', myKey);
+                myID = btoa(e).replace(/=/g, "");
+                db.ref("users/" + myID).update({ nickname: n, avatar: "https://api.dicebear.com/7.x/pixel-art/svg?seed="+n, email: e });
+                localStorage.setItem('vchat_key', myID);
                 location.reload();
             }
         }
 
         window.onload = () => {
-            if (!myKey) return;
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('main-app').style.display = 'flex';
-            db.ref("users/" + myKey).on("value", s => {
-                document.getElementById('myNameDisplay').innerText = s.val().nickname;
-                document.getElementById('myAv').src = s.val().avatar;
+            if (!myID) return;
+            document.getElementById('login-scr').style.display = 'none';
+            document.getElementById('app').style.display = 'flex';
+            
+            db.ref("users/" + myID).on("value", s => {
+                const d = s.val();
+                document.getElementById('myName').innerText = d.nickname;
+                document.getElementById('myAvImg').src = d.avatar;
             });
-            db.ref("users").on("value", s => { cache.users = s.val(); drawList(); });
-            db.ref("groups").on("value", s => { cache.groups = s.val(); drawList(); });
+
+            db.ref("users").on("value", s => { data.u = s.val(); render(); });
+            db.ref("groups").on("value", s => { data.g = s.val(); render(); });
         };
 
-        function drawList() {
-            const cont = document.getElementById('list');
-            const q = document.getElementById('search').value.toLowerCase();
-            cont.innerHTML = "";
-            for (let id in cache.groups) {
-                const g = cache.groups[id];
-                if (g.name.toLowerCase().includes(q)) addItem(cont, g.name, g.avatar, id, 'GROUP');
+        function render() {
+            const list = document.getElementById('chatList');
+            const q = document.getElementById('srch').value.toLowerCase();
+            list.innerHTML = "";
+
+            for (let id in data.g) {
+                const g = data.g[id];
+                if (g.name.toLowerCase().includes(q)) addLi(list, g.name, g.avatar, id, 'GROUP');
             }
-            for (let id in cache.users) {
-                if (id !== myKey && cache.users[id].nickname.toLowerCase().includes(q)) addItem(cont, cache.users[id].nickname, cache.users[id].avatar, id, 'USER');
+            for (let id in data.u) {
+                if (id !== myID && data.u[id].nickname.toLowerCase().includes(q)) addLi(list, data.u[id].nickname, data.u[id].avatar, id, 'USER');
             }
         }
 
-        function addItem(cont, name, av, id, type) {
-            const div = document.createElement('div');
-            div.className = 'item';
-            div.onclick = () => selectChat(id, name, type);
-            div.innerHTML = `<img src="${av || 'https://api.dicebear.com/7.x/identicon/svg?seed='+id}">
-                             <div><b>${name}</b><br><small style="color:#58a6ff;font-size:9px">${type}</small></div>`;
-            cont.appendChild(div);
+        function addLi(cont, name, av, id, type) {
+            const d = document.createElement('div');
+            d.className = 'chat-item';
+            d.onclick = () => select(id, name, type);
+            d.innerHTML = `<img src="${av || 'https://api.dicebear.com/7.x/identicon/svg?seed='+id}">
+                           <div><b>${name}</b><br><small style="color:#58a6ff;font-size:9px">${type}</small></div>`;
+            cont.appendChild(d);
         }
 
-        function selectChat(id, name, type) {
-            curChat = { id, name, type };
-            document.getElementById('activeTitle').innerText = name;
-            document.getElementById('chatBox').innerHTML = "";
-            document.getElementById('headerActions').style.display = type === 'GROUP' ? 'flex' : 'none';
+        function select(id, name, type) {
+            active = { id, name, type };
+            document.getElementById('hTitle').innerText = name;
+            document.getElementById('msgBox').innerHTML = "";
+            document.getElementById('hBtns').style.display = type === 'GROUP' ? 'flex' : 'none';
             
             if (type === 'GROUP') {
-                const g = cache.groups[id];
-                document.getElementById('activeDesc').innerText = g.desc || "Групповой чат";
-                const myRole = g.roles ? g.roles[myKey] : 'member';
-                document.getElementById('adminBtn').style.display = (myRole === 'owner' || myRole === 'admin') ? 'block' : 'none';
+                const g = data.g[id];
+                document.getElementById('hDesc').innerText = g.desc || "";
+                const role = g.roles ? g.roles[myID] : 'member';
+                document.getElementById('admBtn').style.display = (role === 'owner' || role === 'admin') ? 'block' : 'none';
             }
 
-            const path = type === 'USER' ? (myKey < id ? myKey+"_"+id : id+"_"+myKey) : id;
+            const path = type === 'USER' ? (myID < id ? myID+"_"+id : id+"_"+myID) : id;
             db.ref("msgs/" + path).off();
             db.ref("msgs/" + path).on("child_added", s => {
                 const m = s.val();
-                const d = document.createElement('div');
-                d.id = "m_" + s.key;
-                d.className = 'msg ' + (m.sid === myKey ? 'user' : 'other');
-                d.innerHTML = `<small class="msg-sender">${m.snick}</small>${m.txt}`;
-                
-                // Удаление сообщения админом
-                d.onclick = () => {
-                    const g = cache.groups[id];
-                    const myRole = type === 'GROUP' ? (g.roles ? g.roles[myKey] : 'member') : 'none';
-                    if (m.sid === myKey || myRole === 'owner' || myRole === 'admin') {
-                        if (confirm("Удалить это сообщение?")) db.ref("msgs/"+path+"/"+s.key).remove();
-                    }
-                };
-                document.getElementById('chatBox').appendChild(d);
-                document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
-            });
-            db.ref("msgs/" + path).on("child_removed", s => document.getElementById("m_"+s.key)?.remove());
-        }
-
-        function send() {
-            const txt = document.getElementById('mInput').value.trim();
-            if (!txt || !curChat) return;
-            const path = curChat.type === 'USER' ? (myKey < curChat.id ? myKey+"_"+curChat.id : curChat.id+"_"+myKey) : curChat.id;
-            db.ref("msgs/" + path).push().set({ sid: myKey, snick: document.getElementById('myNameDisplay').innerText, txt: txt, time: Date.now() });
-            document.getElementById('mInput').value = "";
-        }
-
-        // АДМИНКА
-        function openAdmin() {
-            const g = cache.groups[curChat.id];
-            document.getElementById('gNameEdit').value = g.name;
-            document.getElementById('gDescEdit').value = g.desc || "";
-            document.getElementById('gAvEdit').value = g.avatar || "";
-            document.getElementById('group-admin-modal').style.display = 'flex';
-        }
-
-        function saveGroupMeta() {
-            db.ref("groups/"+curChat.id).update({
-                name: document.getElementById('gNameEdit').value,
-                desc: document.getElementById('gDescEdit').value,
-                avatar: document.getElementById('gAvEdit').value
-            });
-            alert("Обновлено!");
-        }
-
-        function showMembers() {
-            const g = cache.groups[curChat.id];
-            const cont = document.getElementById('membersListCont');
-            cont.innerHTML = "";
-            const myRole = g.roles ? g.roles[myKey] : 'member';
-
-            for (let uid in g.roles) {
-                const u = cache.users[uid];
-                const role = g.roles[uid];
                 const div = document.createElement('div');
-                div.className = 'member-row';
-                div.innerHTML = `<span>${u ? u.nickname : 'Unknown'} <span class="role-tag">${role}</span></span>`;
-                
-                // Действия для владельца
-                if (myRole === 'owner' && uid !== myKey) {
-                    const btnBox = document.createElement('div');
-                    btnBox.innerHTML = `
-                        <button class="secondary" style="width:auto; padding:2px 5px; font-size:9px" onclick="setRole('${uid}', 'admin')">Админ</button>
-                        <button class="danger" style="width:auto; padding:2px 5px; font-size:9px" onclick="kickUser('${uid}')">Бан</button>
-                    `;
-                    div.appendChild(btnBox);
-                }
-                cont.appendChild(div);
+                div.className = 'msg ' + (m.sid === myID ? 'me' : 'he');
+                div.innerHTML = `<div class="msg-name">${m.snick}</div>${m.txt}`;
+                document.getElementById('msgBox').appendChild(div);
+                document.getElementById('msgBox').scrollTop = document.getElementById('msgBox').scrollHeight;
+            });
+        }
+
+        function sendMsg() {
+            const t = document.getElementById('msgInp').value.trim();
+            if (!t || !active) return;
+            const path = active.type === 'USER' ? (myID < active.id ? myID+"_"+active.id : active.id+"_"+myID) : active.id;
+            db.ref("msgs/" + path).push().set({ sid: myID, snick: document.getElementById('myName').innerText, txt: t });
+            document.getElementById('msgInp').value = "";
+        }
+
+        function openMe() { document.getElementById('my-prof-modal').style.display='flex'; }
+        function openAdm() {
+            const g = data.g[active.id];
+            document.getElementById('gNameNew').value = g.name;
+            document.getElementById('gDescNew').value = g.desc || "";
+            document.getElementById('admin-modal').style.display='flex';
+        }
+        function showMem() {
+            const g = data.g[active.id];
+            const list = document.getElementById('memList');
+            list.innerHTML = "";
+            for(let uid in g.roles) {
+                const u = data.u[uid];
+                list.innerHTML += `<div style="padding:5px; border-bottom:1px solid #222">${u ? u.nickname : 'Аноним'} <span class="role-badge">${g.roles[uid]}</span></div>`;
             }
-            document.getElementById('members-modal').style.display = 'flex';
+            document.getElementById('members-modal').style.display='flex';
         }
 
-        function setRole(uid, role) { db.ref("groups/"+curChat.id+"/roles/"+uid).set(role); alert("Права изменены!"); }
-        
-        function kickUser(uid) {
-            if (confirm("Выкинуть чела?")) {
-                db.ref("groups/"+curChat.id+"/roles/"+uid).remove();
-                alert("Пользователь забанен!");
-            }
+        function updateMe() {
+            db.ref("users/"+myID).update({ nickname: document.getElementById('myNickNew').value, avatar: document.getElementById('myAvNew').value });
+            closeM('my-prof-modal');
         }
 
-        function clearHistory() {
-            if (confirm("Удалить ВСЕ сообщения в этом чате?")) db.ref("msgs/"+curChat.id).remove();
+        function invite() {
+            const inp = document.getElementById('addEmail').value.trim().toLowerCase();
+            let fid = null;
+            for(let id in data.u) { if(data.u[id].email === inp || data.u[id].nickname.toLowerCase() === inp) { fid = id; break; } }
+            if(fid) { db.ref("groups/"+active.id+"/roles/"+fid).set('member'); alert("Добавлен!"); } else { alert("Не найден"); }
         }
 
-        function initGroup() {
+        function newG() {
             const n = prompt("Имя группы:");
-            if (n) {
-                const id = "grp_" + Date.now();
-                db.ref("groups/"+id).set({ name: n, owner: myKey, roles: { [myKey]: 'owner' }, avatar: "", desc: "Новая группа" });
+            if(n) {
+                const id = "grp_"+Date.now();
+                db.ref("groups/"+id).set({ name: n, owner: myID, roles: { [myID]: 'owner' }, desc: "Новая группа" });
             }
         }
 
-        function addMember() {
-            const input = document.getElementById('addMemberInput').value.trim().toLowerCase();
-            let found = null;
-            for (let id in cache.users) {
-                if (cache.users[id].nickname.toLowerCase() === input || cache.users[id].email.toLowerCase() === input) { found = id; break; }
-            }
-            if (found) { db.ref("groups/"+curChat.id+"/roles/"+found).set('member'); alert("Добавлен!"); }
-            else { alert("Не найден!"); }
-        }
-
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-        function deleteGroup() { if (confirm("Удалить группу?")) { db.ref("groups/"+curChat.id).remove(); db.ref("msgs/"+curChat.id).remove(); location.reload(); } }
+        function closeM(id) { document.getElementById(id).style.display = 'none'; }
+        function clearChat() { if(confirm("Очистить?")) db.ref("msgs/"+active.id).remove(); }
+        function killG() { if(confirm("Удалить?")) { db.ref("groups/"+active.id).remove(); db.ref("msgs/"+active.id).remove(); location.reload(); } }
+        function updateG() { db.ref("groups/"+active.id).update({ name: document.getElementById('gNameNew').value, desc: document.getElementById('gDescNew').value }); alert("OK"); }
     </script>
 </body>
 </html>
