@@ -151,32 +151,61 @@
             }
         }
 
+        // 1. ЗАМЕНИ ЭТО
         window.onload = () => {
-            if (!myID) return;
+            if (!myID) {
+                document.getElementById('login-scr').style.display = 'flex';
+                document.getElementById('app').style.display = 'none';
+                return;
+            }
             
-            // ПРОВЕРКА: Если база была стерта, выкидываем юзера на регистрацию
-            db.ref("users/" + myID).once("value", s => {
-                if (!s.exists()) {
-                    localStorage.removeItem('vchat_key');
-                    location.reload();
-                    return;
+            // Просто пробуем загрузить данные без лишних релоадов
+            db.ref("users/" + myID).on("value", snapshot => {
+                const d = snapshot.val();
+                if(d) {
+                    document.getElementById('login-scr').style.display = 'none';
+                    document.getElementById('app').style.display = 'flex';
+                    document.getElementById('myName').innerText = d.nickname;
+                    document.getElementById('myAvImg').src = d.avatar;
+                } else {
+                    // Если данных нет, просто показываем вход, а не релоадим
+                    document.getElementById('login-scr').style.display = 'flex';
+                    document.getElementById('app').style.display = 'none';
                 }
-                
-                document.getElementById('login-scr').style.display = 'none';
-                document.getElementById('app').style.display = 'flex';
-                
-                db.ref("users/" + myID).on("value", snapshot => {
-                    const d = snapshot.val();
-                    if(d) {
-                        document.getElementById('myName').innerText = d.nickname;
-                        document.getElementById('myAvImg').src = d.avatar;
-                    }
-                });
             });
 
             db.ref("users").on("value", s => { cache.u = s.val() || {}; render(); });
             db.ref("groups").on("value", s => { cache.g = s.val() || {}; render(); });
         };
+
+        // 2. И ЗАМЕНИ ЭТО
+        function auth() {
+            const e = document.getElementById('uEmail').value.trim().toLowerCase();
+            const n = document.getElementById('uNick').value.trim();
+            
+            if (!e || !n) {
+                alert("Заполни все поля, бро!");
+                return;
+            }
+
+            myID = btoa(e).replace(/=/g, "");
+            
+            db.ref("users/" + myID).set({ 
+                nickname: n, 
+                avatar: "https://api.dicebear.com/7.x/pixel-art/svg?seed="+n, 
+                email: e, 
+                bio: "Я здесь!" 
+            }).then(() => {
+                console.log("Регистрация успешна!");
+                localStorage.setItem('vchat_key', myID);
+                // После успешной записи один раз скрываем вход
+                document.getElementById('login-scr').style.display = 'none';
+                document.getElementById('app').style.display = 'flex';
+            }).catch(error => {
+                console.error("Ошибка Firebase:", error);
+                alert("Ошибка базы: " + error.message);
+            });
+        }
 
         function render() {
             const list = document.getElementById('chatList');
