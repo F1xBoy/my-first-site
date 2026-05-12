@@ -10,10 +10,13 @@ async function sendMessage() {
     appendMessage('user', text);
     input.value = '';
 
-    const loadingMsg = appendMessage('ai', '...');
+    const loadingMsg = appendMessage('ai', 'Печатает...');
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+        // Пробуем стабильный URL v1
+        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+        
+        const response = await fetch(url, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -22,15 +25,18 @@ async function sendMessage() {
         });
 
         const data = await response.json();
-        
-        if (data.candidates && data.candidates[0].content.parts[0].text) {
+        console.log("Ответ от Google:", data); // Открой консоль (F12), чтобы видеть это
+
+        if (data.error) {
+            loadingMsg.innerText = "Ошибка Google: " + data.error.message;
+        } else if (data.candidates && data.candidates[0].content.parts[0].text) {
             loadingMsg.innerText = data.candidates[0].content.parts[0].text;
         } else {
-            loadingMsg.innerText = "Хм, возникла заминка в матрице.";
+            loadingMsg.innerText = "Странно, но ИИ прислал пустой ответ.";
         }
         
     } catch (error) {
-        loadingMsg.innerText = "Ошибка связи, бро. Проверь консоль.";
+        loadingMsg.innerText = "Ошибка сети: " + error.message;
     }
 
     chatBox.scrollTop = chatBox.scrollHeight;
@@ -38,7 +44,7 @@ async function sendMessage() {
 
 function appendMessage(sender, text) {
     const msgDiv = document.createElement('div');
-    msgDiv.classList.add('message', sender);
+    msgDiv.classList.add('msg-bubble', sender);
     msgDiv.innerText = text;
     chatBox.appendChild(msgDiv);
     chatBox.scrollTop = chatBox.scrollHeight;
