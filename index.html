@@ -9,41 +9,43 @@
 </head>
 <body>
 
-<div class="tg-container">
-    <aside class="tg-sidebar">
-        <div class="tg-search">
-            <input type="text" placeholder="Поиск">
+    <div id="login-screen" class="modal">
+        <div class="modal-content">
+            <h2>Добро пожаловать в VChat</h2>
+            <p>Никакой цензуры. Только общение.</p>
+            <input type="email" id="userEmail" placeholder="Твой E-mail">
+            <button onclick="enterChat()">Войти в чат</button>
         </div>
-        <div class="tg-contacts">
-            <div class="tg-contact active">
-                <div class="tg-avatar">V</div>
-                <div class="tg-contact-info">
-                    <div class="tg-name">V-Assistant</div>
-                    <div class="tg-last-msg">Бот на связи</div>
+    </div>
+
+    <div class="tg-container blur" id="main-app">
+        <aside class="tg-sidebar">
+            <div class="tg-header">VChat v1.0</div>
+            <div class="tg-contacts">
+                <div class="tg-contact active">
+                    <div class="tg-avatar">#</div>
+                    <div class="tg-info">
+                        <strong>Общий чат</strong>
+                        <span>Все онлайн</span>
+                    </div>
                 </div>
             </div>
-        </div>
-    </aside>
+        </aside>
 
-    <main class="tg-chat">
-        <header class="tg-chat-header">
-            <div class="tg-chat-title">
-                <strong>V-Assistant</strong>
-                <span>bot</span>
+        <main class="tg-main">
+            <div class="tg-chat-header" id="currentUserName">Чат</div>
+            <div class="tg-messages" id="chatBox">
+                <div class="msg system">Сообщения защищены (наверное)</div>
             </div>
-        </header>
+            <div class="tg-input-area">
+                <input type="text" id="userInput" placeholder="Написать сообщение..." onkeydown="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()">➤</button>
+            </div>
+        </main>
+    </div>
 
-        <div class="tg-messages" id="chatBox">
-            <div class="msg-bubble system">Это начало вашей переписки с ботом VChat</div>
-        </div>
-
-        <div class="tg-input-area">
-            <input type="text" id="userInput" placeholder="Написать сообщение..." onkeydown="if(event.key==='Enter') sendMessage()">
-            <button id="sendBtn" onclick="sendMessage()">➤</button>
-        </div>
-    </main>
-</div>
-
-<script src="node.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="node.js"></script>
 </body>
 </html>
