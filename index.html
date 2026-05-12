@@ -4,31 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VChat</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* Вшиваем стили прямо сюда, чтобы Vercel их не потерял */
+        body, html { margin: 0; padding: 0; height: 100%; background: #0e1621; color: white; font-family: sans-serif; }
+        .auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0e1621; display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .auth-card { background: #17212b; padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.5); width: 300px; }
+        .auth-card input { width: 100%; padding: 10px; margin: 15px 0; border-radius: 5px; border: 1px solid #2b5278; background: #242f3d; color: white; box-sizing: border-box; }
+        .auth-card button { width: 100%; padding: 10px; background: #2b5278; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        
+        .tg-container { display: none; height: 100vh; flex-direction: row; }
+        .tg-sidebar { width: 250px; background: #17212b; border-right: 1px solid #0e1621; padding: 15px; }
+        .tg-main { flex: 1; display: flex; flex-direction: column; }
+        .tg-header { padding: 15px; background: #17212b; font-weight: bold; border-bottom: 1px solid #0e1621; }
+        .tg-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .msg { max-width: 75%; padding: 10px; border-radius: 10px; font-size: 14px; }
+        .msg.user { align-self: flex-end; background: #2b5278; }
+        .msg.ai { align-self: flex-start; background: #182533; }
+        .tg-input-area { padding: 15px; background: #17212b; display: flex; gap: 10px; }
+        .tg-input-area input { flex: 1; padding: 10px; border-radius: 5px; border: none; background: #242f3d; color: white; outline: none; }
+        .tg-input-area button { background: none; border: none; color: #58a6ff; font-size: 20px; cursor: pointer; }
+    </style>
 </head>
 <body>
 
     <div id="login-screen" class="auth-overlay">
         <div class="auth-card">
-            <h1>VChat</h1>
-            <input type="email" id="userEmail" placeholder="Твой Email">
+            <h2>VChat</h2>
+            <input type="email" id="userEmail" placeholder="Введите почту">
             <button onclick="enterChat()">Войти</button>
         </div>
     </div>
 
-    <div class="tg-container" id="main-app" style="display:none;">
+    <div id="main-app" class="tg-container">
         <aside class="tg-sidebar">
-            <div class="sidebar-header">VChat</div>
-            <div class="tg-contacts">
-                <div class="tg-contact active">Общий чат</div>
-            </div>
+            <strong>Чаты</strong>
+            <div style="margin-top:20px; color:#58a6ff;">● Общий чат</div>
         </aside>
         <main class="tg-main">
-            <header class="tg-chat-header" id="userTitle">Чат</header>
-            <div class="tg-messages" id="chatBox"></div>
+            <header class="tg-header" id="displayUser">VChat</header>
+            <div id="chatBox" class="tg-messages"></div>
             <div class="tg-input-area">
-                <input type="text" id="userInput" placeholder="Сообщение..." onkeydown="if(event.key==='Enter') sendMessage()">
+                <input type="text" id="userInput" placeholder="Написать..." onkeydown="if(event.key==='Enter') sendMessage()">
                 <button onclick="sendMessage()">➤</button>
             </div>
         </main>
