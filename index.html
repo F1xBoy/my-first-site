@@ -80,5 +80,30 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="node.js"></script>
+    <div id="settings-modal" class="auth-overlay" style="display:none;">
+    <div class="auth-card">
+        <h3>Настройки профиля</h3>
+        
+        <label>Новый никнейм:</label>
+        <input type="text" id="editNickname" placeholder="Твой новый ник">
+        
+        <label>Ссылка на фото профиля:</label>
+        <input type="text" id="editAvatarUrl" placeholder="https://ссылка-на-картинку.jpg">
+        
+        <div style="margin: 10px 0;">
+            <p style="font-size: 12px; color: #8b949e;">Или выбери случайную:</p>
+            <div style="display: flex; justify-content: space-around; margin-bottom: 15px;">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="user-avatar" style="width:40px;height:40px" onclick="setFastAvatar('Felix')">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Anya" class="user-avatar" style="width:40px;height:40px" onclick="setFastAvatar('Anya')">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Max" class="user-avatar" style="width:40px;height:40px" onclick="setFastAvatar('Max')">
+            </div>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+            <button onclick="saveProfile()" style="background:#2b5278;">Сохранить</button>
+            <button onclick="closeSettings()" style="background:#cc3333;">Отмена</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
