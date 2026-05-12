@@ -1,41 +1,70 @@
-const API_KEY = "AIzaSyDYMkGWL1nIhkUWXHxSsE9O0uiDKA2jOyA";
-const chatBox = document.getElementById('chatBox');
+// Твои конфиги из Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyCg30e6q0vgQifYTXgl7ERe7aC-ZrLaOiY",
+  authDomain: "vchat-12103.firebaseapp.com",
+  databaseURL: "https://vchat-12103-default-rtdb.firebaseio.com", // Я добавил стандартный URL базы
+  projectId: "vchat-12103",
+  storageBucket: "vchat-12103.firebasestorage.app",
+  messagingSenderId: "734798044186",
+  appId: "1:734798044186:web:4b81505707c1b3a03a05a3"
+};
 
-async function sendMessage() {
-    const input = document.getElementById('userInput');
-    const text = input.value.trim();
-    if (!text) return;
+// Инициализация (используем старый синтаксис для совместимости)
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.database();
 
-    appendMessage('user', text);
-    input.value = '';
-    const loadingMsg = appendMessage('ai', 'Печатает...');
+let userEmail = "";
 
-    try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
-        const response = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ contents: [{ parts: [{ text: text }] }] })
-        });
-
-        const data = await response.json();
-
-        if (data.candidates && data.candidates[0].content.parts[0].text) {
-            loadingMsg.innerText = data.candidates[0].content.parts[0].text;
-        } else if (data.error) {
-            loadingMsg.innerText = "Ошибка API: " + data.error.message;
-        }
-    } catch (e) {
-        loadingMsg.innerText = "Ошибка сети: " + e.message;
+// Функция входа
+function enterChat() {
+    const email = document.getElementById('userEmail').value.trim();
+    if (email.includes('@')) {
+        userEmail = email;
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('main-app').classList.remove('blur');
+        listenForMessages();
+    } else {
+        alert("Бро, без нормальной почты не пущу!");
     }
-    chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-function appendMessage(sender, text) {
-    const msgDiv = document.createElement('div');
-    msgDiv.classList.add('msg', sender); // Убедись, что в CSS есть класс .msg.user и .msg.ai
-    msgDiv.innerText = text;
-    chatBox.appendChild(msgDiv);
+// Отправка сообщения в облако
+function sendMessage() {
+    const input = document.getElementById('userInput');
+    const msgText = input.value.trim();
+    
+    if (msgText && userEmail) {
+        db.ref("messages").push().set({
+            user: userEmail,
+            text: msgText,
+            time: firebase.database.ServerValue.TIMESTAMP
+        });
+        input.value = "";
+    }
+}
+
+// Получение сообщений в реальном времени
+function listenForMessages() {
+    db.ref("messages").limitToLast(50).on("child_added", (snapshot) => {
+        const msg = snapshot.val();
+        renderMessage(msg);
+    });
+}
+
+function renderMessage(msg) {
+    const chatBox = document.getElementById('chatBox');
+    const div = document.createElement('div');
+    
+    // Свои сообщения — справа, чужие — слева
+    div.classList.add('msg', msg.user === userEmail ? 'user' : 'ai');
+    
+    div.innerHTML = `
+        <small style="font-size: 10px; opacity: 0.5;">${msg.user}</small>
+        <div>${msg.text}</div>
+    `;
+    
+    chatBox.appendChild(div);
     chatBox.scrollTop = chatBox.scrollHeight;
-    return msgDiv;
 }
