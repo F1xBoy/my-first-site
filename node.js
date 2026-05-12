@@ -123,12 +123,39 @@ function renderMessage(m) {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-function changeAvatar() {
-    const nick = document.getElementById('myName').innerText;
-    const newSeed = prompt("Введите любое слово для новой аватарки:");
-    if (newSeed) {
-        const newUrl = "https://api.dicebear.com/7.x/avataaars/svg?seed=" + newSeed;
-        db.ref("users/" + myKey).update({ avatar: newUrl });
-        document.getElementById('myAvatar').src = newUrl;
+// Открыть настройки
+function openSettings() {
+    document.getElementById('settings-modal').style.display = 'flex';
+    document.getElementById('editNickname').value = document.getElementById('myName').innerText;
+    document.getElementById('editAvatarUrl').value = document.getElementById('myAvatar').src;
+}
+
+function closeSettings() {
+    document.getElementById('settings-modal').style.display = 'none';
+}
+
+// Быстрый выбор аватарки
+function setFastAvatar(seed) {
+    document.getElementById('editAvatarUrl').value = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+}
+
+// Сохранение новых данных
+function saveProfile() {
+    const newNick = document.getElementById('editNickname').value.trim();
+    const newAvatar = document.getElementById('editAvatarUrl').value.trim();
+
+    if (newNick && myKey) {
+        db.ref("users/" + myKey).update({
+            nickname: newNick,
+            avatar: newAvatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=" + newNick
+        }).then(() => {
+            // Обновляем UI
+            document.getElementById('myName').innerText = newNick;
+            document.getElementById('myAvatar').src = newAvatar;
+            closeSettings();
+        });
     }
 }
+
+// Измени обработчик клика в блоке профиля (внутри HTML или в JS)
+document.getElementById('myAvatar').onclick = openSettings;
