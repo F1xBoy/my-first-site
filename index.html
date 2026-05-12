@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat | Total Reset</title>
+    <title>VChat | Ultimate Fixed</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; background: #0e1621; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         * { box-sizing: border-box; }
 
-        /* Модалки */
+        /* Модальные окна */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal-card { background: #17212b; padding: 25px; border-radius: 12px; width: 360px; border: 1px solid #2b5278; }
         
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #2b5278; background: #242f3d; color: white; outline: none; }
+        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #2b5278; background: #242f3d; color: white; outline: none; }
         button { width: 100%; padding: 10px; background: #2b5278; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 5px; }
+        button:hover { background: #33618a; }
         button.danger { background: #a32a2a; }
         button.secondary { background: #313d4b; }
 
-        /* Структура */
+        /* Основной интерфейс */
         .tg-container { display: none; height: 100vh; width: 100vw; flex-direction: row; }
         .tg-sidebar { width: 280px; background: #17212b; border-right: 1px solid #0e1621; display: flex; flex-direction: column; }
         
@@ -33,40 +34,41 @@
         .header { padding: 10px 20px; background: #17212b; display: flex; align-items: center; justify-content: space-between; height: 65px; border-bottom: 1px solid #0e1621; }
         .messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         
-        .msg { max-width: 75%; padding: 8px 12px; border-radius: 10px; font-size: 14px; position: relative; }
+        .msg { max-width: 75%; padding: 8px 12px; border-radius: 10px; font-size: 14px; word-wrap: break-word; }
         .msg.me { align-self: flex-end; background: #2b5278; }
         .msg.he { align-self: flex-start; background: #182533; }
         .msg-name { font-size: 10px; color: #58a6ff; font-weight: bold; margin-bottom: 2px; }
 
         .input-bar { padding: 15px; background: #17212b; display: flex; gap: 10px; }
-        .role-badge { font-size: 9px; background: #58a6ff; color: #000; padding: 1px 4px; border-radius: 3px; margin-left: 5px; text-transform: uppercase; }
+        .role-badge { font-size: 9px; background: #58a6ff; color: #000; padding: 1px 4px; border-radius: 3px; margin-left: 5px; }
     </style>
 </head>
 <body>
 
     <div id="login-scr" class="modal-overlay" style="display: flex;">
         <div class="modal-card">
-            <h2 style="color:#58a6ff; margin-top:0">VChat 2026</h2>
+            <h2 style="color:#58a6ff; margin-top:0">VChat 2.0</h2>
+            <p style="font-size: 12px; color: #888;">Создайте новый профиль после очистки базы</p>
             <input type="email" id="uEmail" placeholder="Email">
             <input type="text" id="uNick" placeholder="Никнейм">
-            <button onclick="auth()">Начать с чистого листа</button>
+            <button onclick="auth()">Войти / Регистрация</button>
         </div>
     </div>
 
     <div id="my-prof-modal" class="modal-overlay">
         <div class="modal-card">
-            <h3>Мой профиль</h3>
-            <input type="text" id="myNickNew" placeholder="Ник">
-            <input type="text" id="myAvNew" placeholder="Ссылка на аватар">
+            <h3>Настройки профиля</h3>
+            <input type="text" id="myNickNew" placeholder="Новый ник">
+            <input type="text" id="myAvNew" placeholder="Ссылка на аватарку">
             <textarea id="myBioNew" placeholder="О себе..."></textarea>
             <button onclick="updateMe()">Сохранить</button>
-            <button class="secondary" onclick="closeM('my-prof-modal')">Закрыть</button>
+            <button class="secondary" onclick="closeM('my-prof-modal')">Отмена</button>
         </div>
     </div>
 
     <div id="members-modal" class="modal-overlay">
         <div class="modal-card">
-            <h3>В группе состоят:</h3>
+            <h3>Список участников</h3>
             <div id="memList" style="margin-bottom:15px; max-height: 200px; overflow-y: auto;"></div>
             <button class="secondary" onclick="closeM('members-modal')">Закрыть</button>
         </div>
@@ -74,15 +76,15 @@
 
     <div id="admin-modal" class="modal-overlay">
         <div class="modal-card">
-            <h3>Управление</h3>
-            <input type="text" id="gNameNew" placeholder="Имя группы">
-            <textarea id="gDescNew" placeholder="Описание группы"></textarea>
-            <button onclick="updateG()">Обновить</button>
+            <h3>Управление группой</h3>
+            <input type="text" id="gNameNew" placeholder="Название группы">
+            <textarea id="gDescNew" placeholder="Описание"></textarea>
+            <button onclick="updateG()">Сохранить настройки</button>
             <hr>
             <input type="text" id="addEmail" placeholder="Ник или Email">
-            <button class="secondary" onclick="invite()">Добавить участника</button>
+            <button class="secondary" onclick="invite()">Добавить в группу</button>
             <hr>
-            <button class="danger" onclick="clearChat()">Очистить историю</button>
+            <button class="danger" onclick="clearChat()">Очистить чат</button>
             <button class="danger" style="margin-top:10px" onclick="killG()">УДАЛИТЬ ГРУППУ</button>
             <button class="secondary" onclick="closeM('admin-modal')">Назад</button>
         </div>
@@ -104,7 +106,7 @@
         <main class="tg-main">
             <header class="header">
                 <div>
-                    <b id="hTitle">Выберите диалог</b><br>
+                    <b id="hTitle">Выберите чат</b><br>
                     <small id="hDesc" style="color:#888;font-size:11px"></small>
                 </div>
                 <div id="hBtns" style="display:none; gap:8px">
@@ -115,7 +117,7 @@
             </header>
             <div id="msgBox" class="messages"></div>
             <div class="input-bar">
-                <input type="text" id="msgInp" placeholder="Написать..." onkeydown="if(event.key==='Enter') sendMsg()">
+                <input type="text" id="msgInp" placeholder="Написать сообщение..." onkeydown="if(event.key==='Enter') sendMsg()">
                 <button onclick="sendMsg()" style="width:60px">➤</button>
             </div>
         </main>
@@ -137,12 +139,13 @@
         let active = null;
         let cache = { u: {}, g: {} };
 
+        // ВХОД / РЕГИСТРАЦИЯ
         function auth() {
             const e = document.getElementById('uEmail').value.trim().toLowerCase();
             const n = document.getElementById('uNick').value.trim();
             if (e && n) {
                 myID = btoa(e).replace(/=/g, "");
-                db.ref("users/" + myID).set({ nickname: n, avatar: "https://api.dicebear.com/7.x/pixel-art/svg?seed="+n, email: e, bio: "Я новенький!" });
+                db.ref("users/" + myID).set({ nickname: n, avatar: "https://api.dicebear.com/7.x/pixel-art/svg?seed="+n, email: e, bio: "Я здесь!" });
                 localStorage.setItem('vchat_key', myID);
                 location.reload();
             }
@@ -150,13 +153,25 @@
 
         window.onload = () => {
             if (!myID) return;
-            document.getElementById('login-scr').style.display = 'none';
-            document.getElementById('app').style.display = 'flex';
             
-            db.ref("users/" + myID).on("value", s => {
-                const d = s.val(); if(!d) return;
-                document.getElementById('myName').innerText = d.nickname;
-                document.getElementById('myAvImg').src = d.avatar;
+            // ПРОВЕРКА: Если база была стерта, выкидываем юзера на регистрацию
+            db.ref("users/" + myID).once("value", s => {
+                if (!s.exists()) {
+                    localStorage.removeItem('vchat_key');
+                    location.reload();
+                    return;
+                }
+                
+                document.getElementById('login-scr').style.display = 'none';
+                document.getElementById('app').style.display = 'flex';
+                
+                db.ref("users/" + myID).on("value", snapshot => {
+                    const d = snapshot.val();
+                    if(d) {
+                        document.getElementById('myName').innerText = d.nickname;
+                        document.getElementById('myAvImg').src = d.avatar;
+                    }
+                });
             });
 
             db.ref("users").on("value", s => { cache.u = s.val() || {}; render(); });
@@ -168,12 +183,10 @@
             const q = document.getElementById('srch').value.toLowerCase();
             list.innerHTML = "";
 
-            // Группы, где ты есть
             for (let id in cache.g) {
                 const g = cache.g[id];
                 if (g.roles && g.roles[myID] && g.name.toLowerCase().includes(q)) addLi(list, g.name, g.avatar, id, 'GROUP');
             }
-            // Юзеры
             for (let id in cache.u) {
                 if (id !== myID && cache.u[id].nickname.toLowerCase().includes(q)) addLi(list, cache.u[id].nickname, cache.u[id].avatar, id, 'USER');
             }
@@ -192,12 +205,11 @@
             active = { id, name, type };
             document.getElementById('hTitle').innerText = name;
             document.getElementById('msgBox').innerHTML = "";
-            const hBtns = document.getElementById('hBtns');
-            hBtns.style.display = type === 'GROUP' ? 'flex' : 'none';
+            document.getElementById('hBtns').style.display = type === 'GROUP' ? 'flex' : 'none';
             
             if (type === 'GROUP') {
                 const g = cache.g[id];
-                document.getElementById('hDesc').innerText = g.desc || "Без описания";
+                document.getElementById('hDesc').innerText = g.desc || "Групповой чат";
                 const role = g.roles ? g.roles[myID] : null;
                 document.getElementById('admBtn').style.display = (role === 'owner' || role === 'admin') ? 'block' : 'none';
                 document.getElementById('leaveBtn').style.display = (role && role !== 'owner') ? 'block' : 'none';
@@ -243,12 +255,9 @@
         }
 
         function leaveG() {
-            if(confirm("Точно выйти?")) {
+            if(confirm("Выйти из группы?")) {
                 db.ref("groups/"+active.id+"/roles/"+myID).remove();
-                active = null;
-                document.getElementById('hTitle').innerText = "Выберите диалог";
-                document.getElementById('hBtns').style.display = 'none';
-                render();
+                location.reload();
             }
         }
 
@@ -258,7 +267,7 @@
             list.innerHTML = "";
             for(let uid in g.roles) {
                 const u = cache.u[uid];
-                list.innerHTML += `<div style="padding:10px; border-bottom:1px solid #242f3d">${u ? u.nickname : 'Ушедший юзер'} <span class="role-badge">${g.roles[uid]}</span></div>`;
+                list.innerHTML += `<div style="padding:10px; border-bottom:1px solid #242f3d">${u ? u.nickname : 'Аноним'} <span class="role-badge">${g.roles[uid]}</span></div>`;
             }
             document.getElementById('members-modal').style.display='flex';
         }
@@ -271,31 +280,28 @@
         }
 
         function updateG() {
-            db.ref("groups/"+active.id).update({ 
-                name: document.getElementById('gNameNew').value, 
-                desc: document.getElementById('gDescNew').value 
-            });
-            alert("Готово!");
+            db.ref("groups/"+active.id).update({ name: document.getElementById('gNameNew').value, desc: document.getElementById('gDescNew').value });
+            alert("Обновлено");
         }
 
         function invite() {
             const inp = document.getElementById('addEmail').value.trim().toLowerCase();
             let fid = null;
             for(let id in cache.u) { if(cache.u[id].email === inp || cache.u[id].nickname.toLowerCase() === inp) { fid = id; break; } }
-            if(fid) { db.ref("groups/"+active.id+"/roles/"+fid).set('member'); alert("Добавлен!"); } else { alert("Не нашли такого"); }
+            if(fid) { db.ref("groups/"+active.id+"/roles/"+fid).set('member'); alert("Добавлен!"); } else { alert("Не найден"); }
         }
 
         function newG() {
-            const n = prompt("Название новой группы:");
+            const n = prompt("Название группы:");
             if(n) {
                 const id = "grp_"+Date.now();
-                db.ref("groups/"+id).set({ name: n, owner: myID, roles: { [myID]: 'owner' }, desc: "Добро пожаловать в "+n });
+                db.ref("groups/"+id).set({ name: n, owner: myID, roles: { [myID]: 'owner' }, desc: "Добро пожаловать!" });
             }
         }
 
         function closeM(id) { document.getElementById(id).style.display = 'none'; }
-        function clearChat() { if(confirm("Снести все сообщения?")) db.ref("msgs/"+active.id).remove(); }
-        function killG() { if(confirm("Удалить группу навсегда?")) { db.ref("groups/"+active.id).remove(); db.ref("msgs/"+active.id).remove(); active = null; render(); } }
+        function clearChat() { if(confirm("Очистить историю?")) db.ref("msgs/"+active.id).remove(); }
+        function killG() { if(confirm("Удалить группу?")) { db.ref("groups/"+active.id).remove(); db.ref("msgs/"+active.id).remove(); location.reload(); } }
     </script>
 </body>
 </html>
