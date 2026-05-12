@@ -12,36 +12,23 @@
     <div id="login-screen" class="auth-overlay">
         <div class="auth-card">
             <h1>VChat</h1>
-            <p>Введите почту, чтобы войти в систему</p>
-            <input type="email" id="userEmail" placeholder="example@mail.com">
-            <button onclick="enterChat()">Продолжить</button>
+            <input type="email" id="userEmail" placeholder="Твой Email">
+            <button onclick="enterChat()">Войти</button>
         </div>
     </div>
 
-    <div class="tg-container" id="main-app" style="display: none;">
+    <div class="tg-container" id="main-app" style="display:none;">
         <aside class="tg-sidebar">
-            <div class="sidebar-header">Чаты</div>
+            <div class="sidebar-header">VChat</div>
             <div class="tg-contacts">
-                <div class="tg-contact active">
-                    <div class="tg-avatar">#</div>
-                    <div class="tg-info">
-                        <strong>Общий чат</strong>
-                        <span>История сохранена</span>
-                    </div>
-                </div>
-                </div>
+                <div class="tg-contact active">Общий чат</div>
+            </div>
         </aside>
-
         <main class="tg-main">
-            <header class="tg-chat-header">
-                <span id="displayUser">Загрузка...</span>
-            </header>
-            
-            <div class="tg-messages" id="chatBox">
-                </div>
-
+            <header class="tg-chat-header" id="userTitle">Чат</header>
+            <div class="tg-messages" id="chatBox"></div>
             <div class="tg-input-area">
-                <input type="text" id="userInput" placeholder="Написать сообщение..." onkeydown="if(event.key==='Enter') sendMessage()">
+                <input type="text" id="userInput" placeholder="Сообщение..." onkeydown="if(event.key==='Enter') sendMessage()">
                 <button onclick="sendMessage()">➤</button>
             </div>
         </main>
