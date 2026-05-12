@@ -3,36 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat | Enterprise</title>
+    <title>VChat | Gold Edition</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; background: #0e1621; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         * { box-sizing: border-box; }
 
+        /* ЭКРАНЫ */
         .auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0e1621; display: flex; justify-content: center; align-items: center; z-index: 10000; }
-        .auth-card { background: #17212b; padding: 25px; border-radius: 15px; width: 340px; border: 1px solid #2b5278; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .auth-card { background: #17212b; padding: 25px; border-radius: 15px; width: 340px; border: 1px solid #2b5278; }
         
         input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #2b5278; background: #242f3d; color: white; outline: none; }
-        button { width: 100%; padding: 12px; background: #2b5278; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 5px; }
+        button { width: 100%; padding: 12px; background: #2b5278; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         button.danger { background: #cc3333; }
+        button.secondary { background: #313d4b; margin-top: 5px; }
 
         .tg-container { display: none; height: 100vh; width: 100vw; flex-direction: row; }
         .tg-sidebar { width: 300px; background: #17212b; border-right: 1px solid #0e1621; display: flex; flex-direction: column; }
         
-        .profile-area { padding: 15px; background: #1c2936; display: flex; align-items: center; gap: 12px; }
+        .profile-area { padding: 15px; background: #1c2936; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #0e1621; }
         .avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid #58a6ff; }
         
         .chat-list { flex: 1; overflow-y: auto; }
-        .item { display: flex; align-items: center; padding: 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.2s; }
+        .item { display: flex; align-items: center; padding: 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .item:hover { background: #242f3d; }
         .item img { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; }
-        .item-info { display: flex; flex-direction: column; }
-        .item-type { font-size: 9px; color: #58a6ff; font-weight: bold; }
 
-        .tg-main { flex: 1; display: flex; flex-direction: column; }
+        .tg-main { flex: 1; display: flex; flex-direction: column; background: #0e1621; }
         .tg-header { padding: 12px 20px; background: #17212b; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #0e1621; }
-        .tg-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
+        .tg-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
         
-        .msg { max-width: 70%; padding: 10px; border-radius: 12px; font-size: 14px; cursor: pointer; }
+        .msg { max-width: 70%; padding: 10px; border-radius: 12px; font-size: 14px; position: relative; }
         .msg.user { align-self: flex-end; background: #2b5278; }
         .msg.other { align-self: flex-start; background: #182533; }
         .msg-sender { font-size: 10px; color: #58a6ff; display: block; margin-bottom: 3px; }
@@ -44,10 +44,20 @@
 
     <div id="login-screen" class="auth-overlay">
         <div class="auth-card">
-            <h2 style="color:#58a6ff">VChat</h2>
+            <h2>VChat Gold</h2>
             <input type="email" id="uEmail" placeholder="Email">
             <input type="text" id="uNick" placeholder="Никнейм">
             <button onclick="login()">Войти</button>
+        </div>
+    </div>
+
+    <div id="my-settings-modal" class="auth-overlay" style="display:none;">
+        <div class="auth-card">
+            <h3>Мой профиль</h3>
+            <input type="text" id="myNickEdit" placeholder="Новый ник">
+            <input type="text" id="myAvEdit" placeholder="Ссылка на аватарку">
+            <button onclick="saveMyProfile()">Сохранить</button>
+            <button class="secondary" onclick="closeMySettings()">Назад</button>
         </div>
     </div>
 
@@ -57,19 +67,24 @@
             <input type="text" id="gNameEdit" placeholder="Название">
             <input type="text" id="gAvEdit" placeholder="Ссылка на аватарку">
             <select id="gPrivacy">
-                <option value="public">Публичная (видят все)</option>
-                <option value="private">Приватная (только свои)</option>
+                <option value="public">Публичная</option>
+                <option value="private">Приватная</option>
             </select>
-            <button onclick="saveGroupSettings()">Сохранить</button>
+            <hr>
+            <p style="font-size: 12px;">Добавить участника (Email):</p>
+            <input type="text" id="addMemberEmail" placeholder="friend@mail.com">
+            <button class="secondary" onclick="addMember()">Добавить</button>
+            <hr>
+            <button onclick="saveGroupSettings()">Сохранить всё</button>
             <button class="danger" onclick="deleteGroup()">УДАЛИТЬ ГРУППУ</button>
-            <button onclick="closeGSettings()" style="background:#444">Назад</button>
+            <button class="secondary" onclick="closeGSettings()">Назад</button>
         </div>
     </div>
 
     <div id="main-app" class="tg-container">
         <aside class="tg-sidebar">
             <div class="profile-area">
-                <img id="myAv" class="avatar" src="" onclick="alert('Ник: ' + document.getElementById('myNameDisplay').innerText)">
+                <img id="myAv" class="avatar" src="" onclick="openMySettings()">
                 <div id="myNameDisplay" style="font-weight:bold">...</div>
             </div>
             <div style="padding:10px; display:flex; gap:5px;">
@@ -82,7 +97,7 @@
         <main class="tg-main">
             <header class="tg-header">
                 <div id="activeTitle" style="font-weight:bold">Выбери чат</div>
-                <button id="gSetBtn" style="display:none; width:auto; padding:5px 10px; font-size:12px;" onclick="openGSettings()">Настройки</button>
+                <button id="gSetBtn" style="display:none; width:auto; padding:5px 10px;" onclick="openGSettings()">⚙ Группа</button>
             </header>
             <div id="chatBox" class="tg-messages"></div>
             <div class="tg-input-area">
@@ -117,7 +132,7 @@
             const n = document.getElementById('uNick').value.trim();
             if (e && n) {
                 myKey = btoa(e).replace(/=/g, "");
-                db.ref("users/" + myKey).update({ nickname: n, avatar: "https://api.dicebear.com/7.x/pixel-art/svg?seed=" + n, email: e });
+                db.ref("users/" + myKey).update({ nickname: n, avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=" + n, email: e });
                 localStorage.setItem('vchat_key', myKey);
                 location.reload();
             }
@@ -128,12 +143,14 @@
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('main-app').style.display = 'flex';
             
-            db.ref("users/" + myKey).once("value", s => {
-                document.getElementById('myNameDisplay').innerText = s.val().nickname;
-                document.getElementById('myAv').src = s.val().avatar;
+            db.ref("users/" + myKey).on("value", s => {
+                const d = s.val();
+                document.getElementById('myNameDisplay').innerText = d.nickname;
+                document.getElementById('myAv').src = d.avatar;
+                document.getElementById('myNickEdit').value = d.nickname;
+                document.getElementById('myAvEdit').value = d.avatar;
             });
 
-            // Слушаем и юзеров, и группы
             db.ref("users").on("value", s => { cache.users = s.val(); drawList(); });
             db.ref("groups").on("value", s => { cache.groups = s.val(); drawList(); });
         };
@@ -143,15 +160,16 @@
             const query = document.getElementById('search').value.toLowerCase();
             cont.innerHTML = "";
 
-            // Группы
             for (let id in cache.groups) {
                 const g = cache.groups[id];
-                if (g.privacy === 'private' && g.owner !== myKey) continue; // Приватные видит только владелец
+                // ПРОВЕРКА ПРИВАТНОСТИ: видим если паблик ИЛИ мы владелец ИЛИ мы в списке участников
+                const isMember = g.members && g.members[myKey];
+                if (g.privacy === 'private' && g.owner !== myKey && !isMember) continue;
+                
                 if (g.name.toLowerCase().includes(query)) {
                     addItem(cont, g.name, g.avatar, id, 'GROUP');
                 }
             }
-            // Юзеры
             for (let id in cache.users) {
                 if (id === myKey) continue;
                 const u = cache.users[id];
@@ -166,7 +184,7 @@
             div.className = 'item';
             div.onclick = () => selectChat(id, name, type, av);
             div.innerHTML = `<img src="${av || 'https://api.dicebear.com/7.x/identicon/svg?seed='+id}">
-                             <div class="item-info"><span class="item-type">${type}</span><b>${name}</b></div>`;
+                             <div style="display:flex;flex-direction:column"><small style="color:#58a6ff;font-size:9px">${type}</small><b>${name}</b></div>`;
             cont.appendChild(div);
         }
 
@@ -175,7 +193,6 @@
             document.getElementById('activeTitle').innerText = name;
             document.getElementById('chatBox').innerHTML = "";
             
-            // Кнопка настроек только для владельца группы
             const isOwner = type === 'GROUP' && cache.groups[id].owner === myKey;
             document.getElementById('gSetBtn').style.display = isOwner ? 'block' : 'none';
 
@@ -195,30 +212,26 @@
             const txt = document.getElementById('mInput').value.trim();
             if (!txt || !curChat) return;
             const chatPath = curChat.type === 'USER' ? (myKey < curChat.id ? myKey+"_"+curChat.id : curChat.id+"_"+myKey) : curChat.id;
-            
-            db.ref("msgs/" + chatPath).push().set({
-                sid: myKey,
-                snick: document.getElementById('myNameDisplay').innerText,
-                txt: txt,
-                time: Date.now()
-            });
+            db.ref("msgs/" + chatPath).push().set({ sid: myKey, snick: document.getElementById('myNameDisplay').innerText, txt: txt, time: Date.now() });
             document.getElementById('mInput').value = "";
         }
 
-        // ГРУППОВЫЕ ФУНКЦИИ
-        function initGroup() {
-            const name = prompt("Название новой группы:");
-            if (name) {
-                const id = "grp_" + Date.now();
-                db.ref("groups/" + id).set({
-                    name: name,
-                    owner: myKey,
-                    privacy: 'public',
-                    avatar: ""
-                });
-            }
+        // МОЙ ПРОФИЛЬ
+        function openMySettings() { document.getElementById('my-settings-modal').style.display = 'flex'; }
+        function closeMySettings() { document.getElementById('my-settings-modal').style.display = 'none'; }
+        function saveMyProfile() {
+            db.ref("users/" + myKey).update({ nickname: document.getElementById('myNickEdit').value, avatar: document.getElementById('myAvEdit').value });
+            closeMySettings();
         }
 
+        // ГРУППЫ
+        function initGroup() {
+            const name = prompt("Название группы:");
+            if (name) {
+                const id = "grp_" + Date.now();
+                db.ref("groups/" + id).set({ name: name, owner: myKey, privacy: 'public', avatar: "", members: { [myKey]: true } });
+            }
+        }
         function openGSettings() {
             const g = cache.groups[curChat.id];
             document.getElementById('gNameEdit').value = g.name;
@@ -226,8 +239,17 @@
             document.getElementById('gPrivacy').value = g.privacy;
             document.getElementById('group-settings-modal').style.display = 'flex';
         }
-
         function closeGSettings() { document.getElementById('group-settings-modal').style.display = 'none'; }
+        
+        function addMember() {
+            const email = document.getElementById('addMemberEmail').value.trim().toLowerCase();
+            if (email) {
+                const memberKey = btoa(email).replace(/=/g, "");
+                db.ref("groups/" + curChat.id + "/members/" + memberKey).set(true);
+                alert("Добавлен!");
+                document.getElementById('addMemberEmail').value = "";
+            }
+        }
 
         function saveGroupSettings() {
             db.ref("groups/" + curChat.id).update({
@@ -237,9 +259,8 @@
             });
             closeGSettings();
         }
-
         function deleteGroup() {
-            if (confirm("Удалить группу навсегда?")) {
+            if (confirm("Удалить?")) {
                 db.ref("groups/" + curChat.id).remove();
                 db.ref("msgs/" + curChat.id).remove();
                 location.reload();
