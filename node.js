@@ -11,151 +11,118 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let myKey = "";
+let myKey = localStorage.getItem('vchat_my_key') || "";
 let currentChatId = "";
-let allUsers = []; // Храним список всех для поиска
+let allUsers = [];
 
+// ВХОД
 function enterChat() {
-    const email = document.getElementById('userEmail').value.trim();
+    const email = document.getElementById('userEmail').value.trim().toLowerCase();
     const nick = document.getElementById('userNickname').value.trim();
 
-    if (email && nick) {
-        myKey = btoa(email.toLowerCase()).replace(/=/g, "");
+    if (email.includes('@') && nick) {
+        myKey = btoa(email).replace(/=/g, "");
         db.ref("users/" + myKey).update({
-            email: email.toLowerCase(),
+            email: email,
             nickname: nick,
             avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=" + nick
+        }).then(() => {
+            localStorage.setItem('vchat_my_key', myKey);
+            location.reload();
         });
-        localStorage.setItem('vchat_my_key', myKey);
-        location.reload(); // Перезагружаем для чистого старта
+    } else {
+        alert("Заполни поля правильно, бро!");
     }
 }
 
-// Авто-вход
+// АВТО-ВХОД
 window.onload = () => {
-    const savedKey = localStorage.getItem('vchat_my_key');
-    if (savedKey) {
-        myKey = savedKey;
+    if (myKey) {
         db.ref("users/" + myKey).once("value", (s) => {
             const data = s.val();
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('main-app').style.display = 'flex';
-            document.getElementById('myName').innerText = data.nickname;
-            document.getElementById('myAvatar').src = data.avatar;
-            loadAllUsers();
+            if (data) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-app').style.display = 'flex';
+                document.getElementById('myName').innerText = data.nickname;
+                document.getElementById('myAvatar').src = data.avatar;
+                loadUsers();
+            }
         });
     }
 };
 
-function loadAllUsers() {
+// ЗАГРУЗКА ЛЮДЕЙ
+function loadUsers() {
     db.ref("users").on("value", (snapshot) => {
         allUsers = [];
         const data = snapshot.val();
         for (let id in data) {
-            if (id !== myKey) { // Не показываем себя в списке
-                allUsers.push({ id, ...data[id] });
-            }
+            if (id !== myKey) allUsers.push({ id, ...data[id] });
         }
         renderUserList(allUsers);
     });
 }
 
-function renderUserList(users) {
+function renderUserList(list) {
     const container = document.getElementById('userList');
     container.innerHTML = "";
-    users.forEach(user => {
+    list.forEach(u => {
         const div = document.createElement('div');
         div.className = 'user-item';
-        div.onclick = () => startPrivateChat(user);
-        div.innerHTML = `
-            <img src="${user.avatar}">
-            <div class="info">
-                <span class="nick">${user.nickname}</span>
-                <span class="mail">${user.email}</span>
-            </div>
-        `;
+        div.onclick = () => startChat(u);
+        div.innerHTML = `<img src="${u.avatar}"><div class="info"><span class="nick">${u.nickname}</span><span class="mail">${u.email}</span></div>`;
         container.appendChild(div);
     });
 }
 
+// ПОИСК
 function filterUsers() {
-    const query = document.getElementById('searchInput').value.toLowerCase();
-    const filtered = allUsers.filter(u => 
-        u.nickname.toLowerCase().includes(query) || 
-        u.email.toLowerCase().includes(query)
-    );
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = allUsers.filter(u => u.nickname.toLowerCase().includes(q) || u.email.toLowerCase().includes(q));
     renderUserList(filtered);
 }
 
-function startPrivateChat(targetUser) {
-    currentChatId = myKey < targetUser.id ? myKey + "_" + targetUser.id : targetUser.id + "_" + myKey;
+// ЧАТ
+function startChat(target) {
+    currentChatId = myKey < target.id ? myKey + "_" + target.id : target.id + "_" + myKey;
+    document.getElementById('chatTitle').innerText = target.nickname;
+    const av = document.getElementById('activeChatAvatar');
+    av.src = target.avatar; av.style.display = 'block';
     
-    document.getElementById('chatTitle').innerText = targetUser.nickname;
-    const headerAvatar = document.getElementById('activeChatAvatar');
-    headerAvatar.src = targetUser.avatar;
-    headerAvatar.style.display = 'block';
-
     document.getElementById('chatBox').innerHTML = "";
     db.ref("chats/" + currentChatId).off();
     db.ref("chats/" + currentChatId).on("child_added", (snap) => {
-        renderMessage(snap.val());
+        const m = snap.val();
+        const div = document.createElement('div');
+        div.classList.add('msg', m.sender === myKey ? 'user' : 'other');
+        div.innerText = m.text;
+        document.getElementById('chatBox').appendChild(div);
+        document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
     });
 }
 
 function sendMessage() {
-    const text = document.getElementById('userInput').value.trim();
-    if (text && currentChatId) {
+    const input = document.getElementById('userInput');
+    if (input.value.trim() && currentChatId) {
         db.ref("chats/" + currentChatId).push().set({
             sender: myKey,
-            text: text,
+            text: input.value.trim(),
             time: Date.now()
         });
-        document.getElementById('userInput').value = "";
+        input.value = "";
     }
 }
 
-function renderMessage(m) {
-    const chatBox = document.getElementById('chatBox');
-    const div = document.createElement('div');
-    div.classList.add('msg', m.sender === myKey ? 'user' : 'other');
-    div.innerText = m.text;
-    chatBox.appendChild(div);
-    chatBox.scrollTop = chatBox.scrollHeight;
-}
+// НАСТРОЙКИ
+function openSettings() { document.getElementById('settings-modal').style.display = 'flex'; }
+function closeSettings() { document.getElementById('settings-modal').style.display = 'none'; }
+function setFastAv(s) { document.getElementById('editAvatarUrl').value = `https://api.dicebear.com/7.x/avataaars/svg?seed=${s}`; }
 
-// Открыть настройки
-function openSettings() {
-    document.getElementById('settings-modal').style.display = 'flex';
-    document.getElementById('editNickname').value = document.getElementById('myName').innerText;
-    document.getElementById('editAvatarUrl').value = document.getElementById('myAvatar').src;
-}
-
-function closeSettings() {
-    document.getElementById('settings-modal').style.display = 'none';
-}
-
-// Быстрый выбор аватарки
-function setFastAvatar(seed) {
-    document.getElementById('editAvatarUrl').value = `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
-}
-
-// Сохранение новых данных
 function saveProfile() {
-    const newNick = document.getElementById('editNickname').value.trim();
-    const newAvatar = document.getElementById('editAvatarUrl').value.trim();
-
-    if (newNick && myKey) {
-        db.ref("users/" + myKey).update({
-            nickname: newNick,
-            avatar: newAvatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=" + newNick
-        }).then(() => {
-            // Обновляем UI
-            document.getElementById('myName').innerText = newNick;
-            document.getElementById('myAvatar').src = newAvatar;
-            closeSettings();
-        });
+    const nick = document.getElementById('editNickname').value.trim();
+    const av = document.getElementById('editAvatarUrl').value.trim();
+    if (nick) {
+        db.ref("users/" + myKey).update({ nickname: nick, avatar: av || document.getElementById('myAvatar').src });
+        location.reload();
     }
 }
-
-// Измени обработчик клика в блоке профиля (внутри HTML или в JS)
-document.getElementById('myAvatar').onclick = openSettings;
