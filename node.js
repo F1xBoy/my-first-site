@@ -8,40 +8,43 @@ const firebaseConfig = {
     appId: "1:734798044186:web:4b81505707c1b3a03a05a3"
 };
 
+// Инициализация
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 const db = firebase.database();
-let currentUser = "";
+let currentUser = localStorage.getItem('vchat_user') || "";
 
-// Вход
+// Проверка при загрузке
+window.onload = () => {
+    if (currentUser) {
+        showApp();
+    }
+};
+
 function enterChat() {
     const email = document.getElementById('userEmail').value.trim();
     if (email.includes('@')) {
         currentUser = email;
-        localStorage.setItem('vchat_user', email); // Сохраняем вход в браузере
+        localStorage.setItem('vchat_user', email);
         showApp();
     } else {
-        alert("Введите корректный Email");
+        alert("Введи почту!");
     }
 }
 
-// Показ приложения и загрузка сообщений
 function showApp() {
     document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('main-app').style.display = 'flex';
-    document.getElementById('displayUser').innerText = currentUser;
-    
-    // Очищаем чат перед загрузкой истории
-    document.getElementById('chatBox').innerHTML = '';
-    listenForMessages();
+    const app = document.getElementById('main-app');
+    app.style.display = 'flex';
+    document.getElementById('userTitle').innerText = "Вы: " + currentUser;
+    loadMessages();
 }
 
-// Отправка
 function sendMessage() {
     const input = document.getElementById('userInput');
     const text = input.value.trim();
-    if (text) {
+    if (text && currentUser) {
         db.ref("messages/public").push().set({
             sender: currentUser,
             text: text,
@@ -51,35 +54,14 @@ function sendMessage() {
     }
 }
 
-// Слушатель базы
-function listenForMessages() {
-    // .on("child_added") автоматически подтянет ВСЕ старые сообщения при запуске
-    db.ref("messages/public").limitToLast(100).on("child_added", (snapshot) => {
-        const data = snapshot.val();
-        renderMessage(data);
+function loadMessages() {
+    const chatBox = document.getElementById('chatBox');
+    db.ref("messages/public").limitToLast(50).on("child_added", (snap) => {
+        const data = snap.val();
+        const div = document.createElement('div');
+        div.classList.add('msg', data.sender === currentUser ? 'user' : 'ai');
+        div.innerHTML = `<small style="font-size:9px; display:block; opacity:0.6">${data.sender}</small>${data.text}`;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
     });
 }
-
-function renderMessage(data) {
-    const chatBox = document.getElementById('chatBox');
-    const div = document.createElement('div');
-    const isMe = data.sender === currentUser;
-    
-    div.classList.add('msg', isMe ? 'user' : 'ai');
-    div.innerHTML = `
-        <small style="opacity:0.5; font-size:10px">${data.sender}</small>
-        <div>${data.text}</div>
-    `;
-    
-    chatBox.appendChild(div);
-    chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-// Авто-вход, если уже заходил раньше
-window.onload = () => {
-    const savedUser = localStorage.getItem('vchat_user');
-    if (savedUser) {
-        currentUser = savedUser;
-        showApp();
-    }
-};
