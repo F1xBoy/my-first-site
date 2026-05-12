@@ -3,40 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat | Messaging</title>
+    <title>VChat | Telegram Style</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<div class="vchat-app">
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <h2>VChat</h2>
+<div class="tg-container">
+    <aside class="tg-sidebar">
+        <div class="tg-search">
+            <input type="text" placeholder="Поиск">
         </div>
-        <div class="contacts">
-            <div class="contact active">
-                <div class="avatar">V</div>
-                <div class="contact-info">
-                    <span class="name">V-Assistant</span>
-                    <span class="status">online</span>
+        <div class="tg-contacts">
+            <div class="tg-contact active">
+                <div class="tg-avatar">V</div>
+                <div class="tg-contact-info">
+                    <div class="tg-name">V-Assistant</div>
+                    <div class="tg-last-msg">Бот на связи</div>
                 </div>
             </div>
         </div>
     </aside>
 
-    <main class="chat-window">
-        <header class="chat-header">
-            <div class="chat-info">
-                <span class="chat-name">V-Assistant</span>
+    <main class="tg-chat">
+        <header class="tg-chat-header">
+            <div class="tg-chat-title">
+                <strong>V-Assistant</strong>
+                <span>bot</span>
             </div>
         </header>
 
-        <div class="messages-container" id="chatBox">
-            <div class="message system">Добро пожаловать в VChat! Твой личный ИИ-ассистент на связи.</div>
+        <div class="tg-messages" id="chatBox">
+            <div class="msg-bubble system">Это начало вашей переписки с ботом VChat</div>
         </div>
 
-        <div class="input-area">
+        <div class="tg-input-area">
             <input type="text" id="userInput" placeholder="Написать сообщение..." onkeydown="if(event.key==='Enter') sendMessage()">
             <button id="sendBtn" onclick="sendMessage()">➤</button>
         </div>
