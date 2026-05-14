@@ -3,21 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat 5.0</title>
+    <title>VChat 5.1</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; background: #0e1621; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         * { box-sizing: border-box; }
 
-        /* АНИМАЦИИ */
+        /* АНИМАЦИИ ОТКРЫТИЯ */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes msgIn { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
+        /* АНИМАЦИИ ЗАКРЫТИЯ */
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+        @keyframes slideDown { from { transform: translateY(0); opacity: 1; } to { transform: translateY(20px); opacity: 0; } }
+
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; animation: fadeIn 0.2s ease-out forwards; }
         .modal-card { background: #17212b; padding: 25px; border-radius: 12px; width: 380px; border: 1px solid #2b5278; animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         
-        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #2b5278; background: #242f3d; color: white; outline: none; transition: border-color 0.2s ease, background-color 0.2s ease; }
-        input:focus, textarea:focus, select:focus { border-color: #58a6ff; background: #1c2936; }
+        /* Классы для анимации закрытия через JS */
+        .modal-overlay.closing { animation: fadeOut 0.2s ease-in forwards; }
+        .modal-card.closing { animation: slideDown 0.2s ease-in forwards; }
+
+        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #2b5278; background: #242f3d; color: white; outline: none; transition: border-color 0.2s ease, background-color 0.2s ease; }
+        input:focus, textarea:focus { border-color: #58a6ff; background: #1c2936; }
 
         button { width: 100%; padding: 10px; background: #2b5278; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 5px; transition: background-color 0.2s ease, transform 0.1s ease; }
         button:hover { background: #33618a; }
@@ -27,6 +35,19 @@
         button.secondary { background: #313d4b; padding: 5px 10px; font-size: 12px; width: auto; }
         button.secondary:hover { background: #415163; }
         .btn-success { background: #238636; margin-top: 10px; }
+
+        /* КАСТОМНЫЙ КРУГЛЫЙ ВЫБОР ФАЙЛОВ (DROPDOWN) */
+        .custom-select-wrapper { position: relative; width: 100%; margin: 8px 0; user-select: none; }
+        .custom-select-trigger { padding: 12px; background: #242f3d; border: 1px solid #2b5278; border-radius: 8px; color: white; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: border-color 0.2s; }
+        .custom-select-trigger:hover { border-color: #58a6ff; }
+        .custom-select-trigger::after { content: '▼'; font-size: 10px; color: #58a6ff; transition: transform 0.2s ease; }
+        .custom-select-wrapper.open .custom-select-trigger::after { transform: rotate(180deg); }
+        
+        .custom-options { position: absolute; top: 100%; left: 0; right: 0; background: #17212b; border: 1px solid #2b5278; border-radius: 8px; margin-top: 4px; overflow: hidden; z-index: 10; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease; shadow: 0 4px 12px rgba(0,0,0,0.5); }
+        .custom-select-wrapper.open .custom-options { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .custom-option { padding: 12px; cursor: pointer; transition: background 0.2s; color: #fff; }
+        .custom-option:hover { background: #242f3d; color: #58a6ff; }
+        .custom-option.selected { background: #2b5278; color: white; }
 
         .auth-switch-link { font-size: 13px; color: #58a6ff; text-align: center; margin-top: 15px; cursor: pointer; text-decoration: underline; }
         #login-view, #reg-view { animation: fadeIn 0.25s ease-out forwards; }
@@ -105,12 +126,15 @@
             <h3 style="margin-top:0; color:#58a6ff;">Отправить файл 📎</h3>
             
             <label class="p-info-label">Тип файла</label>
-            <select id="mediaType" onchange="switchMediaSource()">
-                <option value="img_url">Картинка (по ссылке URL)</option>
-                <option value="img_file">Картинка (с устройства)</option>
-                <option value="video">Видео (по ссылке URL)</option>
-                <option value="doc">Документ (по ссылке URL)</option>
-            </select>
+            <div class="custom-select-wrapper" id="mediaDropdown">
+                <div class="custom-select-trigger" onclick="toggleDropdown()">Картинка (по ссылке URL)</div>
+                <div class="custom-options">
+                    <div class="custom-option selected" data-value="img_url" onclick="selectOption(this)">Картинка (по ссылке URL)</div>
+                    <div class="custom-option" data-value="img_file" onclick="selectOption(this)">Картинка (с устройства)</div>
+                    <div class="custom-option" data-value="video" onclick="selectOption(this)">Видео (по ссылке URL)</div>
+                    <div class="custom-option" data-value="doc" onclick="selectOption(this)">Документ (по ссылке URL)</div>
+                </div>
+            </div>
 
             <div id="mediaUrlBlock">
                 <input type="text" id="mediaUrlInp" placeholder="Вставьте URL-ссылку на файл...">
@@ -234,6 +258,7 @@
         let myID = "";
         let active = null;
         let cache = { u: {}, g: {} };
+        let selectedMediaType = "img_url"; // Храним выбранный тип здесь
 
         authSystem.onAuthStateChanged(user => {
             if (user) {
@@ -292,18 +317,27 @@
 
         function logOut() { if(confirm("Выйти из аккаунта?")) authSystem.signOut().then(() => location.reload()); }
 
-        // МЕДИА ФУНКЦИОНАЛ
-        function openMediaModal() {
-            if(!active) return alert("Сначала выбери чат, бро! 💬");
-            document.getElementById('mediaUrlInp').value = "";
-            document.getElementById('mediaFileInp').value = "";
-            document.getElementById('mediaCaption').value = "";
-            document.getElementById('media-modal').style.display = 'flex';
+        // ЛОГИКА ДЛЯ КАСТОМНОГО ДРОПДАУНА
+        function toggleDropdown() {
+            document.getElementById('mediaDropdown').classList.toggle('open');
         }
 
-        function switchMediaSource() {
-            const type = document.getElementById('mediaType').value;
-            if(type === 'img_file') {
+        function selectOption(el) {
+            const val = el.getAttribute('data-value');
+            selectedMediaType = val;
+            
+            // Меняем текст на триггере
+            document.querySelector('.custom-select-trigger').innerText = el.innerText;
+            
+            // Убираем подсветку со старого и добавляем на новый
+            document.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('selected'));
+            el.classList.add('selected');
+            
+            // Закрываем меню
+            document.getElementById('mediaDropdown').classList.remove('open');
+            
+            // Переключаем отображение инпутов
+            if(val === 'img_file') {
                 document.getElementById('mediaUrlBlock').style.display = 'none';
                 document.getElementById('mediaFileBlock').style.display = 'block';
             } else {
@@ -312,8 +346,29 @@
             }
         }
 
+        // Закрытие дропдауна при клике мимо него
+        window.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('mediaDropdown');
+            if (dropdown && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('open');
+            }
+        });
+
+        function openMediaModal() {
+            if(!active) return alert("Сначала выбери чат, бро! 💬");
+            document.getElementById('mediaUrlInp').value = "";
+            document.getElementById('mediaFileInp').value = "";
+            document.getElementById('mediaCaption').value = "";
+            
+            // Сбрасываем селект на дефолт
+            const defaultOpt = document.querySelector('.custom-option[data-value="img_url"]');
+            if(defaultOpt) selectOption(defaultOpt);
+
+            document.getElementById('media-modal').style.display = 'flex';
+        }
+
         function sendMedia() {
-            const type = document.getElementById('mediaType').value;
+            const type = selectedMediaType;
             const caption = document.getElementById('mediaCaption').value.trim();
             const path = active.type === 'USER' ? (myID < active.id ? myID+"_"+active.id : active.id+"_"+myID) : active.id;
             
@@ -331,7 +386,7 @@
                 
                 const reader = new FileReader();
                 reader.onloadend = function() {
-                    msgData.mediaUrl = reader.result; // Конвертируем в Base64-строку
+                    msgData.mediaUrl = reader.result;
                     db.ref("msgs/" + path).push().set(msgData);
                     closeM('media-modal');
                 }
@@ -345,7 +400,6 @@
             }
         }
 
-        // РЕНДЕРИНГ МЕДИА ВНУТРИ СООБЩЕНИЙ
         function getMediaHtml(m) {
             if(!m.isMedia) return m.txt;
             
@@ -359,6 +413,22 @@
             }
             
             return contentHtml + (m.txt ? `<div style="margin-top:5px;">${m.txt}</div>` : "");
+        }
+
+        // КРАСИВОЕ АНИМИРОВАННОЕ ЗАКРЫТИЕ МОДАЛОК
+        function closeM(id) {
+            const overlay = document.getElementById(id);
+            const card = overlay.querySelector('.modal-card');
+            
+            overlay.classList.add('closing');
+            card.classList.add('closing');
+            
+            // Ждем окончания css-анимации (200мс), удаляем классы и тушим дисплей
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                overlay.classList.remove('closing');
+                card.classList.remove('closing');
+            }, 190);
         }
 
         function openUserCard(uid) {
@@ -430,7 +500,6 @@
                     const canDelete = (m.sid === myID) || (type === 'GROUP' && (currentRole === 'owner' || currentRole === 'admin'));
                     const delHtml = canDelete ? `<span class="msg-del" onclick="deleteMessage('${path}', '${mKey}')">🗑️</span>` : "";
 
-                    // Сюда рендерим текст ИЛИ медиа-контент
                     div.innerHTML = `<div class="msg-name" style="cursor:pointer;" onclick="openUserCard('${m.sid}')">${m.snick} ${delHtml}</div>
                                      ${getMediaHtml(m)}`;
                     document.getElementById('msgBox').appendChild(div);
@@ -504,7 +573,6 @@
             if(n) { const id = "grp_"+Date.now(); db.ref("groups/"+id).set({ name: n, owner: myID, roles: { [myID]: 'owner' }, desc: "Добро пожаловать!" }); }
         }
         function leaveG() { if(confirm("Выйти?")) { db.ref("groups/"+active.id+"/roles/"+myID).remove(); location.reload(); } }
-        function closeM(id) { document.getElementById(id).style.display = 'none'; }
         function clearChat() { if(confirm("Очистить?")) db.ref("msgs/"+active.id).remove(); }
         function killG() { if(confirm("Удалить группу?")) { db.ref("groups/"+active.id).remove(); db.ref("msgs/"+active.id).remove(); location.reload(); } }
     </script>
