@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat 3.8 | Split Auth UI</title>
+    <title>VChat 4.0 | User Profiles UI</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; background: #0e1621; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         * { box-sizing: border-box; }
@@ -49,13 +49,17 @@
         .input-bar { padding: 15px; background: #17212b; display: flex; gap: 10px; }
         .role-badge { font-size: 9px; background: #58a6ff; color: #000; padding: 1px 4px; border-radius: 3px; margin-left: 5px; }
         .mem-row { display: flex; align-items: center; justify-content: space-between; padding: 8px; border-bottom: 1px solid #242f3d; }
+        
+        /* Профиль Юзера Карточка */
+        .p-card-av { width: 80px; height: 80px; border-radius: 50%; border: 2px solid #58a6ff; display: block; margin: 0 auto 15px auto; object-fit: cover; }
+        .p-info-block { background: #242f3d; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 14px; border: 1px solid #2b5278; }
+        .p-info-label { font-size: 10px; color: #58a6ff; text-transform: uppercase; font-weight: bold; margin-bottom: 3px; }
     </style>
 </head>
 <body>
 
     <div id="login-scr" class="modal-overlay" style="display: flex;">
         <div class="modal-card">
-            
             <div id="login-view">
                 <h2 style="color:#58a6ff; margin-top:0; text-align: center;">Вход в VChat</h2>
                 <input type="email" id="uEmail" placeholder="Твой Email">
@@ -78,7 +82,6 @@
                 <button class="btn-success" onclick="register()">Создать новый аккаунт</button>
                 <div class="auth-switch-link" onclick="switchAuth('login')">Уже есть аккаунт? Войти</div>
             </div>
-
         </div>
     </div>
 
@@ -91,6 +94,25 @@
             <button onclick="updateMe()">Сохранить</button>
             <button class="secondary" onclick="closeM('my-prof-modal')">Закрыть</button>
             <button class="danger" style="margin-top:15px;" onclick="logOut()">Выйти из аккаунта</button>
+        </div>
+    </div>
+
+    <div id="user-prof-modal" class="modal-overlay">
+        <div class="modal-card">
+            <img id="pCardAv" class="p-card-av" src="">
+            <h3 id="pCardNick" style="text-align: center; margin: 0 0 15px 0; color: #58a6ff;">Никнейм</h3>
+            
+            <div class="p-info-block">
+                <div class="p-info-label">Email (нужен для приглашения в группы)</div>
+                <div id="pCardEmail" style="user-select: all; font-weight: bold; color: #fff;">email@mail.com</div>
+            </div>
+
+            <div class="p-info-block">
+                <div class="p-info-label">О себе</div>
+                <div id="pCardBio" style="color: #aaa; font-style: italic;">Информации нет</div>
+            </div>
+
+            <button class="secondary" style="width:100%; margin-top:10px;" onclick="closeM('user-prof-modal')">Закрыть</button>
         </div>
     </div>
 
@@ -133,9 +155,12 @@
 
         <main class="tg-main">
             <header class="header">
-                <div>
-                    <b id="hTitle">Выберите чат</b><br>
-                    <small id="hDesc" style="color:#888;font-size:11px"></small>
+                <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="openUserCardFromHeader()">
+                    <img id="hAv" src="" style="width:35px; height:35px; border-radius:50%; display:none; object-fit: cover;">
+                    <div>
+                        <b id="hTitle">Выберите чат</b><br>
+                        <small id="hDesc" style="color:#888;font-size:11px"></small>
+                    </div>
                 </div>
                 <div id="hBtns" style="display:none; gap:8px">
                     <button class="secondary" onclick="showMem()">👥</button>
@@ -169,7 +194,6 @@
         let active = null;
         let cache = { u: {}, g: {} };
 
-        // СЛУШАТЕЛЬ СЕССИИ
         authSystem.onAuthStateChanged(user => {
             if (user) {
                 myID = user.uid;
@@ -193,7 +217,6 @@
             }
         });
 
-        // ПЕРЕКЛЮЧАТЕЛЬ ВКЛАДОК (ВХОД / РЕГИСТРАЦИЯ)
         function switchAuth(mode) {
             if(mode === 'reg') {
                 document.getElementById('login-view').style.display = 'none';
@@ -204,7 +227,6 @@
             }
         }
 
-        // КНОПКА ГЛАЗИКА (ПРИВЯЗАНА К ID ПОЛЯ)
         function togglePass(inputId, btn) {
             const pInput = document.getElementById(inputId);
             if (pInput.type === 'password') {
@@ -216,64 +238,54 @@
             }
         }
 
-        // ФУНКЦИЯ ВХОДА
         function login() {
             const e = document.getElementById('uEmail').value.trim().toLowerCase();
             const p = document.getElementById('uPass').value.trim();
-
             if (!e || !p) return alert("Заполни почту и пароль, бро! 📋");
 
-            authSystem.signInWithEmailAndPassword(e, p)
-            .catch(err => {
-                if (err.code === 'auth/wrong-password') {
-                    alert("Неверный пароль! ❌ Проверь раскладку или Caps Lock.");
-                } else if (err.code === 'auth/user-not-found') {
-                    alert("Пользователь не найден! 🛑 Нажмите на ссылку ниже, чтобы зарегистрироваться.");
-                } else if (err.code === 'auth/invalid-email') {
-                    alert("Неверный формат почты! ✉️");
-                } else {
-                    alert("Ошибка входа: " + err.message);
-                }
+            authSystem.signInWithEmailAndPassword(e, p).catch(err => {
+                if (err.code === 'auth/wrong-password') alert("Неверный пароль! ❌");
+                else if (err.code === 'auth/user-not-found') alert("Пользователь не найден! 🛑");
+                else alert("Ошибка: " + err.message);
             });
         }
 
-        // ФУНКЦИЯ РЕГИСТРАЦИИ (СОЗДАНИЕ ПАРОЛЯ И ПРОФИЛЯ)
         function register() {
             const e = document.getElementById('regEmail').value.trim().toLowerCase();
             const p = document.getElementById('regPass').value.trim();
             const n = document.getElementById('uNick').value.trim();
+            if (!e || !p || !n) return alert("Заполни все поля! 📋");
 
-            if (!e || !p || !n) return alert("Для регистрации заполни все поля и придумай пароль! 📋");
-
-            authSystem.createUserWithEmailAndPassword(e, p)
-            .then(cred => {
+            authSystem.createUserWithEmailAndPassword(e, p).then(cred => {
                 db.ref("users/" + cred.user.uid).set({
                     nickname: n,
                     avatar: "https://api.dicebear.com/7.x/pixel-art/svg?seed=" + n,
                     email: e,
                     bio: "Я новый пользователь VChat!"
                 });
-            })
-            .catch(err => {
-                if (err.code === 'auth/email-already-in-use') {
-                    alert("Этот Email уже занят! ✉️ Вернись на вкладку Входа.");
-                } else if (err.code === 'auth/weak-password') {
-                    alert("Слишком короткий пароль! Пакет безопасности требует минимум 6 символов. 🔐");
-                } else if (err.code === 'auth/invalid-email') {
-                    alert("Некорректная почта! 🔎");
-                } else {
-                    alert("Ошибка регистрации: " + err.message);
-                }
-            });
+            }).catch(err => alert("Ошибка: " + err.message));
         }
 
-        function logOut() {
-            if(confirm("Выйти из аккаунта?")) {
-                authSystem.signOut().then(() => location.reload());
+        function logOut() { if(confirm("Выйти из аккаунта?")) authSystem.signOut().then(() => location.reload()); }
+
+        // ОТКРЫТИЕ ПОДРОБНОЙ КАРТОЧКИ ПОЛЬЗОВАТЕЛЯ (КАК В ТЕЛЕГЕ)
+        function openUserCard(uid) {
+            const u = cache.u[uid];
+            if(!u) return;
+            document.getElementById('pCardAv').src = u.avatar || "https://api.dicebear.com/7.x/identicon/svg?seed="+uid;
+            document.getElementById('pCardNick').innerText = u.nickname;
+            document.getElementById('pCardEmail').innerText = u.email || "Скрыт или не указан";
+            document.getElementById('pCardBio').innerText = u.bio || "Информации «О себе» пока нет.";
+            document.getElementById('user-prof-modal').style.display = 'flex';
+        }
+
+        // Вызов карточки при тапе на шапку ЛС чата
+        function openUserCardFromHeader() {
+            if(active && active.type === 'USER') {
+                openUserCard(active.id);
             }
         }
 
-        // РЕНДЕР ЧАТОВ
         function render() {
             const list = document.getElementById('chatList');
             const q = document.getElementById('srch').value.toLowerCase();
@@ -303,6 +315,15 @@
             document.getElementById('msgBox').innerHTML = "";
             document.getElementById('hBtns').style.display = type === 'GROUP' ? 'flex' : 'none';
             
+            const hAv = document.getElementById('hAv');
+            if(type === 'USER' && cache.u[id]) {
+                hAv.src = cache.u[id].avatar || "https://api.dicebear.com/7.x/identicon/svg?seed="+id;
+                hAv.style.display = 'block';
+                document.getElementById('hDesc').innerText = cache.u[id]?.bio || "Пользователь";
+            } else {
+                hAv.style.display = 'none';
+            }
+
             let currentRole = null;
             if (type === 'GROUP') {
                 const g = cache.g[id];
@@ -310,8 +331,6 @@
                 currentRole = g.roles ? g.roles[myID] : null;
                 document.getElementById('admBtn').style.display = (currentRole === 'owner' || currentRole === 'admin') ? 'block' : 'none';
                 document.getElementById('leaveBtn').style.display = (currentRole && currentRole !== 'owner') ? 'block' : 'none';
-            } else {
-                document.getElementById('hDesc').innerText = cache.u[id]?.bio || "Пользователь";
             }
 
             const path = type === 'USER' ? (myID < id ? myID+"_"+id : id+"_"+myID) : id;
@@ -327,7 +346,7 @@
                     const canDelete = (m.sid === myID) || (type === 'GROUP' && (currentRole === 'owner' || currentRole === 'admin'));
                     const delHtml = canDelete ? `<span class="msg-del" onclick="deleteMessage('${path}', '${mKey}')">🗑️</span>` : "";
 
-                    div.innerHTML = `<div class="msg-name">${m.snick} ${delHtml}</div>${m.txt}`;
+                    div.innerHTML = `<div class="msg-name" style="cursor:pointer;" onclick="openUserCard('${m.sid}')">${m.snick} ${delHtml}</div>${m.txt}`;
                     document.getElementById('msgBox').appendChild(div);
                 });
                 document.getElementById('msgBox').scrollTop = document.getElementById('msgBox').scrollHeight;
@@ -343,11 +362,10 @@
         }
 
         function deleteMessage(path, key) {
-            if(confirm("Удалить это сообщение?")) {
-                db.ref("msgs/" + path + "/" + key).remove();
-            }
+            if(confirm("Удалить это сообщение?")) db.ref("msgs/" + path + "/" + key).remove();
         }
 
+        // СПИСОК УЧАСТНИКОВ (Клик по нику открывает профиль)
         function showMem() {
             const g = cache.g[active.id];
             const list = document.getElementById('memList');
@@ -369,22 +387,17 @@
                 }
 
                 list.innerHTML += `<div class="mem-row">
-                    <div><b>${u ? u.nickname : 'Юзер'}</b> <span class="role-badge">${r}</span></div>
+                    <div style="cursor:pointer;" onclick="closeM('members-modal'); openUserCard('${uid}')">
+                        <b>${u ? u.nickname : 'Юзер'}</b> <span class="role-badge">${r}</span>
+                    </div>
                     <div>${actionsHtml}</div>
                 </div>`;
             }
             document.getElementById('members-modal').style.display='flex';
         }
 
-        function changeRole(uid, newRole) {
-            db.ref("groups/" + active.id + "/roles/" + uid).set(newRole).then(() => showMem());
-        }
-
-        function kickUser(uid) {
-            if(confirm("Выгнать этого пользователя?")) {
-                db.ref("groups/" + active.id + "/roles/" + uid).remove().then(() => showMem());
-            }
-        }
+        function changeRole(uid, newRole) { db.ref("groups/" + active.id + "/roles/" + uid).set(newRole).then(() => showMem()); }
+        function kickUser(uid) { if(confirm("Выгнать этого пользователя?")) db.ref("groups/" + active.id + "/roles/" + uid).remove().then(() => showMem()); }
 
         function openMe() {
             const d = cache.u[myID];
@@ -427,7 +440,6 @@
             }
         }
 
-        // Системные хелперы
         function leaveG() { if(confirm("Выйти из этой группы?")) { db.ref("groups/"+active.id+"/roles/"+myID).remove(); location.reload(); } }
         function closeM(id) { document.getElementById(id).style.display = 'none'; }
         function clearChat() { if(confirm("Стереть вообще все сообщения в этом чате?")) db.ref("msgs/"+active.id).remove(); }
