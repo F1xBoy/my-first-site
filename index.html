@@ -3,35 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat 4.0 | User Profiles UI</title>
+    <title>VChat 4.2 | Smooth UI Edition</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; background: #0e1621; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         * { box-sizing: border-box; }
 
-        /* Модалки */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-card { background: #17212b; padding: 25px; border-radius: 12px; width: 380px; border: 1px solid #2b5278; }
+        /* ПЛАВНЫЕ АНИМАЦИИ ДЛЯ МОДАЛОК */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes msgIn {
+            from { transform: translateY(8px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Модалки с анимацией проявления */
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000;
+            animation: fadeIn 0.2s ease-out forwards;
+        }
+        .modal-card { 
+            background: #17212b; padding: 25px; border-radius: 12px; width: 380px; border: 1px solid #2b5278;
+            animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
         
-        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #2b5278; background: #242f3d; color: white; outline: none; }
-        button { width: 100%; padding: 10px; background: #2b5278; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 5px; }
+        /* Плавные переходы для интерактивных элементов */
+        input, textarea { 
+            width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #2b5278; 
+            background: #242f3d; color: white; outline: none;
+            transition: border-color 0.2s ease, background-color 0.2s ease;
+        }
+        input:focus, textarea:focus { border-color: #58a6ff; background: #1c2936; }
+
+        button { 
+            width: 100%; padding: 10px; background: #2b5278; color: white; border: none; border-radius: 8px; 
+            cursor: pointer; font-weight: bold; margin-top: 5px;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
         button:hover { background: #33618a; }
+        button:active { transform: scale(0.98); }
         button.danger { background: #a32a2a; }
+        button.danger:hover { background: #c23b3b; }
         button.secondary { background: #313d4b; padding: 5px 10px; font-size: 12px; width: auto; }
+        button.secondary:hover { background: #415163; }
         .btn-success { background: #238636; margin-top: 10px; }
         .btn-success:hover { background: #2ea043; }
 
-        .auth-switch-link { font-size: 13px; color: #58a6ff; text-align: center; margin-top: 15px; cursor: pointer; text-decoration: underline; }
+        .auth-switch-link { font-size: 13px; color: #58a6ff; text-align: center; margin-top: 15px; cursor: pointer; text-decoration: underline; transition: color 0.2s ease; }
         .auth-switch-link:hover { color: #79c0ff; }
+
+        /* Вкладки авторизации тоже переключаются плавно */
+        #login-view, #reg-view { animation: fadeIn 0.25s ease-out forwards; }
 
         /* Интерфейс */
         .tg-container { display: none; height: 100vh; width: 100vw; flex-direction: row; }
         .tg-sidebar { width: 280px; background: #17212b; border-right: 1px solid #0e1621; display: flex; flex-direction: column; }
         
         .profile-header { padding: 15px; background: #1c2936; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #0e1621; }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid #58a6ff; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid #58a6ff; transition: transform 0.2s ease; }
+        .avatar:hover { transform: scale(1.05); }
         
         .chat-list { flex: 1; overflow-y: auto; }
-        .chat-item { display: flex; align-items: center; padding: 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .chat-item { 
+            display: flex; align-items: center; padding: 12px; cursor: pointer; 
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            transition: background-color 0.2s ease;
+        }
         .chat-item:hover { background: #242f3d; }
         .chat-item img { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; }
 
@@ -39,7 +82,11 @@
         .header { padding: 10px 20px; background: #17212b; display: flex; align-items: center; justify-content: space-between; height: 65px; border-bottom: 1px solid #0e1621; }
         .messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         
-        .msg { max-width: 75%; padding: 8px 12px; border-radius: 10px; font-size: 14px; word-wrap: break-word; position: relative; }
+        /* Плавное вылетание сообщений */
+        .msg { 
+            max-width: 75%; padding: 8px 12px; border-radius: 10px; font-size: 14px; word-wrap: break-word; position: relative;
+            animation: msgIn 0.2s ease-out forwards;
+        }
         .msg:hover .msg-del { display: inline-block; }
         .msg.me { align-self: flex-end; background: #2b5278; }
         .msg.he { align-self: flex-start; background: #182533; }
@@ -50,7 +97,7 @@
         .role-badge { font-size: 9px; background: #58a6ff; color: #000; padding: 1px 4px; border-radius: 3px; margin-left: 5px; }
         .mem-row { display: flex; align-items: center; justify-content: space-between; padding: 8px; border-bottom: 1px solid #242f3d; }
         
-        /* Профиль Юзера Карточка */
+        /* Карточка профиля */
         .p-card-av { width: 80px; height: 80px; border-radius: 50%; border: 2px solid #58a6ff; display: block; margin: 0 auto 15px auto; object-fit: cover; }
         .p-info-block { background: #242f3d; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 14px; border: 1px solid #2b5278; }
         .p-info-label { font-size: 10px; color: #58a6ff; text-transform: uppercase; font-weight: bold; margin-bottom: 3px; }
@@ -268,7 +315,6 @@
 
         function logOut() { if(confirm("Выйти из аккаунта?")) authSystem.signOut().then(() => location.reload()); }
 
-        // ОТКРЫТИЕ ПОДРОБНОЙ КАРТОЧКИ ПОЛЬЗОВАТЕЛЯ (КАК В ТЕЛЕГЕ)
         function openUserCard(uid) {
             const u = cache.u[uid];
             if(!u) return;
@@ -279,7 +325,6 @@
             document.getElementById('user-prof-modal').style.display = 'flex';
         }
 
-        // Вызов карточки при тапе на шапку ЛС чата
         function openUserCardFromHeader() {
             if(active && active.type === 'USER') {
                 openUserCard(active.id);
@@ -365,7 +410,6 @@
             if(confirm("Удалить это сообщение?")) db.ref("msgs/" + path + "/" + key).remove();
         }
 
-        // СПИСОК УЧАСТНИКОВ (Клик по нику открывает профиль)
         function showMem() {
             const g = cache.g[active.id];
             const list = document.getElementById('memList');
@@ -399,6 +443,7 @@
         function changeRole(uid, newRole) { db.ref("groups/" + active.id + "/roles/" + uid).set(newRole).then(() => showMem()); }
         function kickUser(uid) { if(confirm("Выгнать этого пользователя?")) db.ref("groups/" + active.id + "/roles/" + uid).remove().then(() => showMem()); }
 
+        // Открытие настроек своего профиля
         function openMe() {
             const d = cache.u[myID];
             if(!d) return;
