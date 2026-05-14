@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat 3.0 | Secure & Pro</title>
+    <title>VChat 3.5 | Pro Auth & UI</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; background: #0e1621; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         * { box-sizing: border-box; }
@@ -17,7 +17,8 @@
         button:hover { background: #33618a; }
         button.danger { background: #a32a2a; }
         button.secondary { background: #313d4b; padding: 5px 10px; font-size: 12px; width: auto; }
-        .btn-mini { padding: 2px 6px; font-size: 10px; background: #a32a2a; border-radius: 4px; margin-left: 5px; cursor: pointer; display: inline-block;}
+        .btn-success { background: #238636; margin-top: 10px; }
+        .btn-success:hover { background: #2ea043; }
 
         /* Интерфейс */
         .tg-container { display: none; height: 100vh; width: 100vw; flex-direction: row; }
@@ -51,12 +52,23 @@
 
     <div id="login-scr" class="modal-overlay" style="display: flex;">
         <div class="modal-card">
-            <h2 style="color:#58a6ff; margin-top:0; text-align: center;">VChat 3.0 Secure</h2>
-            <p style="font-size: 11px; color: #aaa; text-align: center;">Вход по паролю. Если вы первый раз — введите Никнейм для создания аккаунта.</p>
+            <h2 style="color:#58a6ff; margin-top:0; text-align: center;">VChat 3.5</h2>
+            
             <input type="email" id="uEmail" placeholder="Твой Email">
-            <input type="password" id="uPass" placeholder="Пароль">
-            <input type="text" id="uNick" placeholder="Никнейм (только для новых!)">
-            <button onclick="auth()">Войти / Зарегистрироваться</button>
+            
+            <div style="display: flex; gap: 5px; align-items: center; margin: 8px 0;">
+                <input type="password" id="uPass" placeholder="Пароль" style="margin: 0; flex: 1;">
+                <button id="toggleP" onclick="togglePass()" style="width: 45px; margin: 0; padding: 11px 0; background: #242f3d; border: 1px solid #2b5278;">👁️</button>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid #2b5278; margin: 15px 0;">
+            
+            <button onclick="login()">Войти в аккаунт</button>
+            
+            <p style="font-size: 11px; color: #888; text-align: center; margin: 15px 0 5px 0;">Впервые тут? Введи ник ниже и жми Создать:</p>
+            <input type="text" id="uNick" placeholder="Никнейм (только для регистрации)">
+            
+            <button class="btn-success" onclick="register()">Создать новый аккаунт</button>
         </div>
     </div>
 
@@ -147,14 +159,13 @@
         let active = null;
         let cache = { u: {}, g: {} };
 
-        // СЛЕЖКА ЗА СЕССИЕЙ (ВХОД / ВЫХОД)
+        // СЛУШАТЕЛЬ СЕССИИ
         authSystem.onAuthStateChanged(user => {
             if (user) {
                 myID = user.uid;
                 document.getElementById('login-scr').style.display = 'none';
                 document.getElementById('app').style.display = 'flex';
                 
-                // Грузим профиль юзера
                 db.ref("users/" + myID).on("value", s => {
                     const d = s.val();
                     if(d) {
@@ -163,7 +174,6 @@
                     }
                 });
 
-                // Запуск прослушивания базы
                 db.ref("users").on("value", s => { cache.u = s.val() || {}; render(); });
                 db.ref("groups").on("value", s => { cache.g = s.val() || {}; render(); });
             } else {
@@ -173,32 +183,67 @@
             }
         });
 
-        // ВХОД С ПРОВЕРКОЙ ПАРОЛЯ И НАДЕЖНОЙ РЕГИСТРАЦИЕЙ
-        function auth() {
+        // ФУНКЦИЯ ВИДЕТЬ / НЕ ВИДЕТЬ ПАРОЛЬ
+        function togglePass() {
+            const pInput = document.getElementById('uPass');
+            const pBtn = document.getElementById('toggleP');
+            if (pInput.type === 'password') {
+                pInput.type = 'text';
+                pBtn.innerText = '🔒'; // Иконка меняется, типа "кликни чтобы запереть обратно"
+            } else {
+                pInput.type = 'password';
+                pBtn.innerText = '👁️';
+            }
+        }
+
+        // ЧИСТЫЙ ВХОД (С ЧЕЛОВЕЧЕСКИМИ ОШИБКАМИ)
+        function login() {
+            const e = document.getElementById('uEmail').value.trim().toLowerCase();
+            const p = document.getElementById('uPass').value.trim();
+
+            if (!e || !p) return alert("Заполни почту и пароль, бро! 📋");
+
+            authSystem.signInWithEmailAndPassword(e, p)
+            .catch(err => {
+                // Разбираем коды ошибок Firebase на нормальный русский язык
+                if (err.code === 'auth/wrong-password') {
+                    alert("Неверный пароль, бро! ❌ Проверь раскладку клавиатуры или Caps Lock.");
+                } else if (err.code === 'auth/user-not-found') {
+                    alert("Пользователь с таким Email не зарегистрирован! 🛑 Проверь почту или создай новый аккаунт ниже.");
+                } else if (err.code === 'auth/invalid-email') {
+                    alert("Формат Email неверный! Пример: bro@mail.com ✉️");
+                } else {
+                    alert("Ошибка входа: " + err.message);
+                }
+            });
+        }
+
+        // ЧИСТАЯ РЕГИСТРАЦИЯ
+        function register() {
             const e = document.getElementById('uEmail').value.trim().toLowerCase();
             const p = document.getElementById('uPass').value.trim();
             const n = document.getElementById('uNick').value.trim();
 
-            if (!e || !p) return alert("Введите почту и пароль, бро!");
+            if (!e || !p || !n) return alert("Для регистрации заполните ВСЕ три поля (включая Никнейм)! 📋");
 
-            // Сначала пробуем просто войти
-            authSystem.signInWithEmailAndPassword(e, p)
-            .catch(error => {
-                // Если юзера нет в системе — создаем новый защищенный аккаунт
-                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-                    if(!n) return alert("Неверный пароль! Или, если ты впервые, укажи Никнейм для реги.");
-                    
-                    authSystem.createUserWithEmailAndPassword(e, p)
-                    .then(cred => {
-                        db.ref("users/" + cred.user.uid).set({
-                            nickname: n,
-                            avatar: "https://api.dicebear.com/7.x/pixel-art/svg?seed=" + n,
-                            email: e,
-                            bio: "Я новый пользователь VChat!"
-                        });
-                    }).catch(err => alert("Ошибка создания аккаунта: " + err.message));
+            authSystem.createUserWithEmailAndPassword(e, p)
+            .then(cred => {
+                db.ref("users/" + cred.user.uid).set({
+                    nickname: n,
+                    avatar: "https://api.dicebear.com/7.x/pixel-art/svg?seed=" + n,
+                    email: e,
+                    bio: "Я новый пользователь VChat!"
+                });
+            })
+            .catch(err => {
+                if (err.code === 'auth/email-already-in-use') {
+                    alert("Этот Email уже занят! ✉️ Используй другой или просто войди по нему.");
+                } else if (err.code === 'auth/weak-password') {
+                    alert("Слишком слабый пароль, бро! 🔐 Нужно минимум 6 символов.");
+                } else if (err.code === 'auth/invalid-email') {
+                    alert("Некорректный формат почты! 🔎");
                 } else {
-                    alert("Ошибка: " + error.message);
+                    alert("Ошибка регистрации: " + err.message);
                 }
             });
         }
@@ -209,7 +254,7 @@
             }
         }
 
-        // РЕНДЕР СПИСКА ЧАТОВ
+        // РЕНДЕР
         function render() {
             const list = document.getElementById('chatList');
             const q = document.getElementById('srch').value.toLowerCase();
@@ -233,7 +278,6 @@
             cont.appendChild(d);
         }
 
-        // ВЫБОР ЧАТА И ПОДГРУЗКА СООБЩЕНИЙ С КНОПКОЙ УДАЛЕНИЯ
         function select(id, name, type) {
             active = { id, name, type };
             document.getElementById('hTitle').innerText = name;
@@ -261,7 +305,6 @@
                     const div = document.createElement('div');
                     div.className = 'msg ' + (m.sid === myID ? 'me' : 'he');
                     
-                    // Кнопка удаления сообщения доступна автору ИЛИ админу/овнеру группы
                     const canDelete = (m.sid === myID) || (type === 'GROUP' && (currentRole === 'owner' || currentRole === 'admin'));
                     const delHtml = canDelete ? `<span class="msg-del" onclick="deleteMessage('${path}', '${mKey}')">🗑️</span>` : "";
 
@@ -280,14 +323,12 @@
             document.getElementById('msgInp').value = "";
         }
 
-        // УДАЛЕНИЕ КОНКРЕТНОГО СООБЩЕНИЯ
         function deleteMessage(path, key) {
             if(confirm("Удалить это сообщение?")) {
                 db.ref("msgs/" + path + "/" + key).remove();
             }
         }
 
-        // УПРАВЛЕНИЕ УЧАСТНИКАМИ (ПОВЫШЕНИЕ И КИК)
         function showMem() {
             const g = cache.g[active.id];
             const list = document.getElementById('memList');
@@ -299,7 +340,6 @@
                 const r = g.roles[uid];
                 
                 let actionsHtml = "";
-                // Овнер или админ может кикать мемберов, овнер может повышать до админа
                 if (uid !== myID && r !== 'owner') {
                     if (myRole === 'owner' && r === 'member') {
                         actionsHtml += `<button class="secondary" style="background:#238636; margin-right:5px;" onclick="changeRole('${uid}', 'admin')">Admin</button>`;
@@ -327,7 +367,6 @@
             }
         }
 
-        // ОСТАЛЬНЫЕ ФУНКЦИИ ПРОФИЛЯ И ГРУПП
         function openMe() {
             const d = cache.u[myID];
             if(!d) return;
@@ -373,6 +412,7 @@
             if(confirm("Выйти из этой группы?")) { db.ref("groups/"+active.id+"/roles/"+myID).remove(); location.reload(); }
         }
 
+        // Системные хелперы
         function closeM(id) { document.getElementById(id).style.display = 'none'; }
         function clearChat() { if(confirm("Стереть вообще все сообщения в этом чате?")) db.ref("msgs/"+active.id).remove(); }
         function killG() { if(confirm("Удалить группу навсегда?")) { db.ref("groups/"+active.id).remove(); db.ref("msgs/"+active.id).remove(); location.reload(); } }
