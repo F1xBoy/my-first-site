@@ -265,11 +265,13 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     
     <script>
-        const cfg = {
-            apiKey: "AIzaSyCg30e6q0vgQifYTXgl7ERe7aC-ZrLaOiY",
-            databaseURL: "https://vchat-12103-default-rtdb.firebaseio.com",
-            projectId: "vchat-12103"
-        };
+    const cfg = {
+        apiKey: "AIzaSyCg30e6q0vgQifYTXgl7ERe7aC-ZrLaOiY",
+        databaseURL: "https://vchat-12103-default-rtdb.firebaseio.com",
+        projectId: "vchat-12103",
+        authDomain: "vchat-12103.firebaseapp.com"
+};
+        firebase.initializeApp(cfg);
         firebase.initializeApp(cfg);
         const db = firebase.database();
         const authSystem = firebase.auth();
