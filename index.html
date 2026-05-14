@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat 5.1</title>
+    <title>VChat 5.2</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; background: #0e1621; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         * { box-sizing: border-box; }
@@ -20,14 +20,13 @@
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; animation: fadeIn 0.2s ease-out forwards; }
         .modal-card { background: #17212b; padding: 25px; border-radius: 12px; width: 380px; border: 1px solid #2b5278; animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         
-        /* Классы для анимации закрытия через JS */
         .modal-overlay.closing { animation: fadeOut 0.2s ease-in forwards; }
         .modal-card.closing { animation: slideDown 0.2s ease-in forwards; }
 
         input, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #2b5278; background: #242f3d; color: white; outline: none; transition: border-color 0.2s ease, background-color 0.2s ease; }
         input:focus, textarea:focus { border-color: #58a6ff; background: #1c2936; }
 
-        button { width: 100%; padding: 10px; background: #2b5278; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 5px; transition: background-color 0.2s ease, transform 0.1s ease; }
+        button { width: 100%; padding: 10px; background: #2b5278; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 5px; transition: background-color 0.2s ease, transform 0.1s ease; display: flex; align-items: center; justify-content: center; gap: 8px; }
         button:hover { background: #33618a; }
         button:active { transform: scale(0.98); }
         button.danger { background: #a32a2a; }
@@ -36,14 +35,22 @@
         button.secondary:hover { background: #415163; }
         .btn-success { background: #238636; margin-top: 10px; }
 
-        /* КАСТОМНЫЙ КРУГЛЫЙ ВЫБОР ФАЙЛОВ (DROPDOWN) */
+        /* КНОПКИ СОЦСЕТЕЙ */
+        .oauth-providers { display: flex; flex-direction: column; gap: 8px; margin-top: 15px; border-top: 1px solid #2b5278; padding-top: 15px; }
+        .btn-oauth { background: #ffffff; color: #000000; font-weight: 600; font-size: 14px; }
+        .btn-oauth:hover { background: #e6e6e6; }
+        .btn-oauth.apple { background: #000000; color: #ffffff; border: 1px solid #2b5278; }
+        .btn-oauth.apple:hover { background: #141414; }
+        .oauth-icon { width: 18px; height: 18px; object-fit: contain; }
+
+        /* КАСТОМНЫЙ DROPDOWN */
         .custom-select-wrapper { position: relative; width: 100%; margin: 8px 0; user-select: none; }
         .custom-select-trigger { padding: 12px; background: #242f3d; border: 1px solid #2b5278; border-radius: 8px; color: white; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: border-color 0.2s; }
         .custom-select-trigger:hover { border-color: #58a6ff; }
         .custom-select-trigger::after { content: '▼'; font-size: 10px; color: #58a6ff; transition: transform 0.2s ease; }
         .custom-select-wrapper.open .custom-select-trigger::after { transform: rotate(180deg); }
         
-        .custom-options { position: absolute; top: 100%; left: 0; right: 0; background: #17212b; border: 1px solid #2b5278; border-radius: 8px; margin-top: 4px; overflow: hidden; z-index: 10; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease; text-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+        .custom-options { position: absolute; top: 100%; left: 0; right: 0; background: #17212b; border: 1px solid #2b5278; border-radius: 8px; margin-top: 4px; overflow: hidden; z-index: 10; opacity: 0; transform: translateY(-10px); pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
         .custom-select-wrapper.open .custom-options { opacity: 1; transform: translateY(0); pointer-events: auto; }
         .custom-option { padding: 12px; cursor: pointer; transition: background 0.2s; color: #fff; }
         .custom-option:hover { background: #242f3d; color: #58a6ff; }
@@ -69,7 +76,7 @@
         .header { padding: 10px 20px; background: #17212b; display: flex; align-items: center; justify-content: space-between; height: 65px; border-bottom: 1px solid #0e1621; }
         .messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         
-        /* Сообщения и Медиа-блоки */
+        /* Сообщения */
         .msg { max-width: 75%; padding: 8px 12px; border-radius: 10px; font-size: 14px; word-wrap: break-word; position: relative; animation: msgIn 0.2s ease-out forwards; }
         .msg:hover .msg-del { display: inline-block; }
         .msg.me { align-self: flex-end; background: #2b5278; }
@@ -77,7 +84,7 @@
         .msg-name { font-size: 10px; color: #58a6ff; font-weight: bold; margin-bottom: 4px; }
         .msg-del { display: none; color: #ff6b6b; cursor: pointer; margin-left: 8px; font-size: 11px; float: right; }
 
-        /* Стили контента */
+        /* Медиа контент */
         .msg-media-img { max-width: 100%; max-height: 250px; border-radius: 8px; margin-top: 5px; display: block; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); }
         .msg-media-video { max-width: 100%; max-height: 250px; border-radius: 8px; margin-top: 5px; display: block; }
         .msg-media-doc { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; margin-top: 5px; text-decoration: none; color: #58a6ff; border: 1px solid #2b5278; }
@@ -104,7 +111,19 @@
                     <button onclick="togglePass('uPass', this)" style="width: 45px; margin: 0; padding: 11px 0; background: #242f3d; border: 1px solid #2b5278;">👁️</button>
                 </div>
                 <button onclick="login()" style="margin-top: 10px;">Войти в аккаунт</button>
-                <div class="auth-switch-link" onclick="switchAuth('reg')">Нет аккаунта? Зарегистрируйтесь здесь</div>
+                
+                <div class="oauth-providers">
+                    <button class="btn-oauth" onclick="loginWithGoogle()">
+                        <img class="oauth-icon" src="https://lh3.googleusercontent.com/COxitRowHAwHOfX9wVv67IF3coCHreEIY94wN7ql8me083VCDUTJaOHwM-3BfW_c3V4" alt="">
+                        Войти через Google
+                    </button>
+                    <button class="btn-oauth apple" onclick="loginWithApple()">
+                        <img class="oauth-icon" src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" style="filter: invert(1);" alt="">
+                        Войти через Apple ID
+                    </button>
+                </div>
+
+                <div class="auth-switch-link" onclick="switchAuth('reg')">Нет аккаунта? Зарегистрироваться</div>
             </div>
 
             <div id="reg-view" style="display: none;">
@@ -115,7 +134,7 @@
                     <input type="password" id="regPass" placeholder="Придумай Пароль" style="margin: 0; flex: 1;">
                     <button onclick="togglePass('regPass', this)" style="width: 45px; margin: 0; padding: 11px 0; background: #242f3d; border: 1px solid #2b5278;">👁️</button>
                 </div>
-                <button class="btn-success" onclick="register()">Создать новый аккаунт</button>
+                <button class="btn-success" onclick="register()">Создать аккаунт</button>
                 <div class="auth-switch-link" onclick="switchAuth('login')">Уже есть аккаунт? Войти</div>
             </div>
         </div>
@@ -258,7 +277,7 @@
         let myID = "";
         let active = null;
         let cache = { u: {}, g: {} };
-        let selectedMediaType = "img_url"; // Храним выбранный тип здесь
+        let selectedMediaType = "img_url";
 
         authSystem.onAuthStateChanged(user => {
             if (user) {
@@ -268,7 +287,15 @@
                 
                 db.ref("users/" + myID).on("value", s => {
                     const d = s.val();
-                    if(d) {
+                    if(!d) {
+                        // Если зашли через OAuth впервые, генерируем базовый профиль
+                        db.ref("users/" + myID).set({
+                            nickname: user.displayName || "User_" + myID.substring(0,5),
+                            avatar: user.photoURL || "https://api.dicebear.com/7.x/pixel-art/svg?seed=" + myID,
+                            email: user.email || "",
+                            bio: "Я вошел через соцсеть в VChat!"
+                        });
+                    } else {
                         document.getElementById('myName').innerText = d.nickname;
                         document.getElementById('myAvImg').src = d.avatar || "https://api.dicebear.com/7.x/pixel-art/svg?seed="+d.nickname;
                     }
@@ -281,6 +308,21 @@
                 document.getElementById('app').style.display = 'none';
             }
         });
+
+        // ЛОГИКА ДЛЯ ВХОДА ЧЕРЕЗ GOOGLE И APPLE
+        function loginWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            authSystem.signInWithPopup(provider).catch(err => {
+                alert("Ошибка Google входа: " + err.message);
+            });
+        }
+
+        function loginWithApple() {
+            const provider = new firebase.auth.OAuthProvider('apple.com');
+            authSystem.signInWithPopup(provider).catch(err => {
+                alert("Ошибка Apple входа: " + err.message + "\n\n(Бро, для Apple ID нужен платный аккаунт разработчика в консоли Firebase!)");
+            });
+        }
 
         function switchAuth(mode) {
             if(mode === 'reg') {
@@ -317,26 +359,16 @@
 
         function logOut() { if(confirm("Выйти из аккаунта?")) authSystem.signOut().then(() => location.reload()); }
 
-        // ЛОГИКА ДЛЯ КАСТОМНОГО ДРОПДАУНА
-        function toggleDropdown() {
-            document.getElementById('mediaDropdown').classList.toggle('open');
-        }
+        function toggleDropdown() { document.getElementById('mediaDropdown').classList.toggle('open'); }
 
         function selectOption(el) {
             const val = el.getAttribute('data-value');
             selectedMediaType = val;
-            
-            // Меняем текст на триггере
             document.querySelector('.custom-select-trigger').innerText = el.innerText;
-            
-            // Убираем подсветку со старого и добавляем на новый
             document.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('selected'));
             el.classList.add('selected');
-            
-            // Закрываем меню
             document.getElementById('mediaDropdown').classList.remove('open');
             
-            // Переключаем отображение инпутов
             if(val === 'img_file') {
                 document.getElementById('mediaUrlBlock').style.display = 'none';
                 document.getElementById('mediaFileBlock').style.display = 'block';
@@ -346,12 +378,9 @@
             }
         }
 
-        // Закрытие дропдауна при клике мимо него
         window.addEventListener('click', function(e) {
             const dropdown = document.getElementById('mediaDropdown');
-            if (dropdown && !dropdown.contains(e.target)) {
-                dropdown.classList.remove('open');
-            }
+            if (dropdown && !dropdown.contains(e.target)) { dropdown.classList.remove('open'); }
         });
 
         function openMediaModal() {
@@ -359,11 +388,8 @@
             document.getElementById('mediaUrlInp').value = "";
             document.getElementById('mediaFileInp').value = "";
             document.getElementById('mediaCaption').value = "";
-            
-            // Сбрасываем селект на дефолт
             const defaultOpt = document.querySelector('.custom-option[data-value="img_url"]');
             if(defaultOpt) selectOption(defaultOpt);
-
             document.getElementById('media-modal').style.display = 'flex';
         }
 
@@ -382,8 +408,7 @@
 
             if(type === 'img_file') {
                 const file = document.getElementById('mediaFileInp').files[0];
-                if(!file) return alert("Выбери картинку на устройстве!");
-                
+                if(!file) return alert("Выбери картинку!");
                 const reader = new FileReader();
                 reader.onloadend = function() {
                     msgData.mediaUrl = reader.result;
@@ -393,7 +418,7 @@
                 reader.readAsDataURL(file);
             } else {
                 const url = document.getElementById('mediaUrlInp').value.trim();
-                if(!url) return alert("Вставь ссылку на файл!");
+                if(!url) return alert("Вставь ссылку!");
                 msgData.mediaUrl = url;
                 db.ref("msgs/" + path).push().set(msgData);
                 closeM('media-modal');
@@ -402,28 +427,22 @@
 
         function getMediaHtml(m) {
             if(!m.isMedia) return m.txt;
-            
             let contentHtml = "";
             if(m.mediaType === 'img' || m.mediaType === 'img_url') {
-                contentHtml = `<img class="msg-media-img" src="${m.mediaUrl}" alt="Картинка" onerror="this.src='https://placehold.co/300x200?text=Ошибка+загрузки+картинки'">`;
+                contentHtml = `<img class="msg-media-img" src="${m.mediaUrl}" onerror="this.src='https://placehold.co/300x200?text=Ошибка+загрузки'">`;
             } else if(m.mediaType === 'video') {
                 contentHtml = `<video class="msg-media-video" src="${m.mediaUrl}" controls preload="metadata"></video>`;
             } else if(m.mediaType === 'doc') {
                 contentHtml = `<a class="msg-media-doc" href="${m.mediaUrl}" target="_blank">📄 Скачать документ / Файл</a>`;
             }
-            
             return contentHtml + (m.txt ? `<div style="margin-top:5px;">${m.txt}</div>` : "");
         }
 
-        // КРАСИВОЕ АНИМИРОВАННОЕ ЗАКРЫТИЕ МОДАЛОК
         function closeM(id) {
             const overlay = document.getElementById(id);
             const card = overlay.querySelector('.modal-card');
-            
             overlay.classList.add('closing');
             card.classList.add('closing');
-            
-            // Ждем окончания css-анимации (200мс), удаляем классы и тушим дисплей
             setTimeout(() => {
                 overlay.style.display = 'none';
                 overlay.classList.remove('closing');
@@ -496,10 +515,8 @@
                     const mKey = child.key;
                     const div = document.createElement('div');
                     div.className = 'msg ' + (m.sid === myID ? 'me' : 'he');
-                    
                     const canDelete = (m.sid === myID) || (type === 'GROUP' && (currentRole === 'owner' || currentRole === 'admin'));
                     const delHtml = canDelete ? `<span class="msg-del" onclick="deleteMessage('${path}', '${mKey}')">🗑️</span>` : "";
-
                     div.innerHTML = `<div class="msg-name" style="cursor:pointer;" onclick="openUserCard('${m.sid}')">${m.snick} ${delHtml}</div>
                                      ${getMediaHtml(m)}`;
                     document.getElementById('msgBox').appendChild(div);
