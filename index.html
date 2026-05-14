@@ -3,49 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat 4.2 | Smooth UI Edition</title>
+    <title>VChat 5.0</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; background: #0e1621; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         * { box-sizing: border-box; }
 
-        /* ПЛАВНЫЕ АНИМАЦИИ ДЛЯ МОДАЛОК */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        @keyframes msgIn {
-            from { transform: translateY(8px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
+        /* АНИМАЦИИ */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes msgIn { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        /* Модалки с анимацией проявления */
-        .modal-overlay { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000;
-            animation: fadeIn 0.2s ease-out forwards;
-        }
-        .modal-card { 
-            background: #17212b; padding: 25px; border-radius: 12px; width: 380px; border: 1px solid #2b5278;
-            animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; animation: fadeIn 0.2s ease-out forwards; }
+        .modal-card { background: #17212b; padding: 25px; border-radius: 12px; width: 380px; border: 1px solid #2b5278; animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         
-        /* Плавные переходы для интерактивных элементов */
-        input, textarea { 
-            width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #2b5278; 
-            background: #242f3d; color: white; outline: none;
-            transition: border-color 0.2s ease, background-color 0.2s ease;
-        }
-        input:focus, textarea:focus { border-color: #58a6ff; background: #1c2936; }
+        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #2b5278; background: #242f3d; color: white; outline: none; transition: border-color 0.2s ease, background-color 0.2s ease; }
+        input:focus, textarea:focus, select:focus { border-color: #58a6ff; background: #1c2936; }
 
-        button { 
-            width: 100%; padding: 10px; background: #2b5278; color: white; border: none; border-radius: 8px; 
-            cursor: pointer; font-weight: bold; margin-top: 5px;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-        }
+        button { width: 100%; padding: 10px; background: #2b5278; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 5px; transition: background-color 0.2s ease, transform 0.1s ease; }
         button:hover { background: #33618a; }
         button:active { transform: scale(0.98); }
         button.danger { background: #a32a2a; }
@@ -53,12 +27,8 @@
         button.secondary { background: #313d4b; padding: 5px 10px; font-size: 12px; width: auto; }
         button.secondary:hover { background: #415163; }
         .btn-success { background: #238636; margin-top: 10px; }
-        .btn-success:hover { background: #2ea043; }
 
-        .auth-switch-link { font-size: 13px; color: #58a6ff; text-align: center; margin-top: 15px; cursor: pointer; text-decoration: underline; transition: color 0.2s ease; }
-        .auth-switch-link:hover { color: #79c0ff; }
-
-        /* Вкладки авторизации тоже переключаются плавно */
+        .auth-switch-link { font-size: 13px; color: #58a6ff; text-align: center; margin-top: 15px; cursor: pointer; text-decoration: underline; }
         #login-view, #reg-view { animation: fadeIn 0.25s ease-out forwards; }
 
         /* Интерфейс */
@@ -70,11 +40,7 @@
         .avatar:hover { transform: scale(1.05); }
         
         .chat-list { flex: 1; overflow-y: auto; }
-        .chat-item { 
-            display: flex; align-items: center; padding: 12px; cursor: pointer; 
-            border-bottom: 1px solid rgba(255,255,255,0.03);
-            transition: background-color 0.2s ease;
-        }
+        .chat-item { display: flex; align-items: center; padding: 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03); transition: background-color 0.2s ease; }
         .chat-item:hover { background: #242f3d; }
         .chat-item img { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; }
 
@@ -82,22 +48,24 @@
         .header { padding: 10px 20px; background: #17212b; display: flex; align-items: center; justify-content: space-between; height: 65px; border-bottom: 1px solid #0e1621; }
         .messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         
-        /* Плавное вылетание сообщений */
-        .msg { 
-            max-width: 75%; padding: 8px 12px; border-radius: 10px; font-size: 14px; word-wrap: break-word; position: relative;
-            animation: msgIn 0.2s ease-out forwards;
-        }
+        /* Сообщения и Медиа-блоки */
+        .msg { max-width: 75%; padding: 8px 12px; border-radius: 10px; font-size: 14px; word-wrap: break-word; position: relative; animation: msgIn 0.2s ease-out forwards; }
         .msg:hover .msg-del { display: inline-block; }
         .msg.me { align-self: flex-end; background: #2b5278; }
         .msg.he { align-self: flex-start; background: #182533; }
-        .msg-name { font-size: 10px; color: #58a6ff; font-weight: bold; margin-bottom: 2px; }
+        .msg-name { font-size: 10px; color: #58a6ff; font-weight: bold; margin-bottom: 4px; }
         .msg-del { display: none; color: #ff6b6b; cursor: pointer; margin-left: 8px; font-size: 11px; float: right; }
 
-        .input-bar { padding: 15px; background: #17212b; display: flex; gap: 10px; }
+        /* Стили контента */
+        .msg-media-img { max-width: 100%; max-height: 250px; border-radius: 8px; margin-top: 5px; display: block; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); }
+        .msg-media-video { max-width: 100%; max-height: 250px; border-radius: 8px; margin-top: 5px; display: block; }
+        .msg-media-doc { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; margin-top: 5px; text-decoration: none; color: #58a6ff; border: 1px solid #2b5278; }
+        .msg-media-doc:hover { background: rgba(0,0,0,0.3); color: #79c0ff; }
+
+        .input-bar { padding: 15px; background: #17212b; display: flex; gap: 10px; align-items: center; }
         .role-badge { font-size: 9px; background: #58a6ff; color: #000; padding: 1px 4px; border-radius: 3px; margin-left: 5px; }
         .mem-row { display: flex; align-items: center; justify-content: space-between; padding: 8px; border-bottom: 1px solid #242f3d; }
         
-        /* Карточка профиля */
         .p-card-av { width: 80px; height: 80px; border-radius: 50%; border: 2px solid #58a6ff; display: block; margin: 0 auto 15px auto; object-fit: cover; }
         .p-info-block { background: #242f3d; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 14px; border: 1px solid #2b5278; }
         .p-info-label { font-size: 10px; color: #58a6ff; text-transform: uppercase; font-weight: bold; margin-bottom: 3px; }
@@ -132,6 +100,33 @@
         </div>
     </div>
 
+    <div id="media-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h3 style="margin-top:0; color:#58a6ff;">Отправить файл 📎</h3>
+            
+            <label class="p-info-label">Тип файла</label>
+            <select id="mediaType" onchange="switchMediaSource()">
+                <option value="img_url">Картинка (по ссылке URL)</option>
+                <option value="img_file">Картинка (с устройства)</option>
+                <option value="video">Видео (по ссылке URL)</option>
+                <option value="doc">Документ (по ссылке URL)</option>
+            </select>
+
+            <div id="mediaUrlBlock">
+                <input type="text" id="mediaUrlInp" placeholder="Вставьте URL-ссылку на файл...">
+            </div>
+
+            <div id="mediaFileBlock" style="display: none;">
+                <input type="file" id="mediaFileInp" accept="image/*">
+            </div>
+
+            <input type="text" id="mediaCaption" placeholder="Добавить описание (необязательно)...">
+
+            <button class="btn-success" onclick="sendMedia()">Отправить в чат</button>
+            <button class="secondary" style="width:100%; margin-top:8px;" onclick="closeM('media-modal')">Отмена</button>
+        </div>
+    </div>
+
     <div id="my-prof-modal" class="modal-overlay">
         <div class="modal-card">
             <h3>Мой профиль</h3>
@@ -148,17 +143,14 @@
         <div class="modal-card">
             <img id="pCardAv" class="p-card-av" src="">
             <h3 id="pCardNick" style="text-align: center; margin: 0 0 15px 0; color: #58a6ff;">Никнейм</h3>
-            
             <div class="p-info-block">
-                <div class="p-info-label">Email (нужен для приглашения в группы)</div>
+                <div class="p-info-label">Email</div>
                 <div id="pCardEmail" style="user-select: all; font-weight: bold; color: #fff;">email@mail.com</div>
             </div>
-
             <div class="p-info-block">
                 <div class="p-info-label">О себе</div>
                 <div id="pCardBio" style="color: #aaa; font-style: italic;">Информации нет</div>
             </div>
-
             <button class="secondary" style="width:100%; margin-top:10px;" onclick="closeM('user-prof-modal')">Закрыть</button>
         </div>
     </div>
@@ -216,9 +208,11 @@
                 </div>
             </header>
             <div id="msgBox" class="messages"></div>
+            
             <div class="input-bar">
-                <input type="text" id="msgInp" placeholder="Написать..." onkeydown="if(event.key==='Enter') sendMsg()">
-                <button onclick="sendMsg()" style="width:60px">➤</button>
+                <button onclick="openMediaModal()" style="width:42px; background:#313d4b; font-size:18px; margin:0;">📎</button>
+                <input type="text" id="msgInp" placeholder="Написать..." onkeydown="if(event.key==='Enter') sendMsg()" style="margin:0;">
+                <button onclick="sendMsg()" style="width:55px; margin:0;">➤</button>
             </div>
         </main>
     </div>
@@ -254,7 +248,6 @@
                         document.getElementById('myAvImg').src = d.avatar || "https://api.dicebear.com/7.x/pixel-art/svg?seed="+d.nickname;
                     }
                 });
-
                 db.ref("users").on("value", s => { cache.u = s.val() || {}; render(); });
                 db.ref("groups").on("value", s => { cache.g = s.val() || {}; render(); });
             } else {
@@ -276,66 +269,114 @@
 
         function togglePass(inputId, btn) {
             const pInput = document.getElementById(inputId);
-            if (pInput.type === 'password') {
-                pInput.type = 'text';
-                btn.innerText = '🔒';
-            } else {
-                pInput.type = 'password';
-                btn.innerText = '👁️';
-            }
+            pInput.type = pInput.type === 'password' ? 'text' : 'password';
+            btn.innerText = pInput.type === 'password' ? '👁️' : '🔒';
         }
 
         function login() {
             const e = document.getElementById('uEmail').value.trim().toLowerCase();
             const p = document.getElementById('uPass').value.trim();
-            if (!e || !p) return alert("Заполни почту и пароль, бро! 📋");
-
-            authSystem.signInWithEmailAndPassword(e, p).catch(err => {
-                if (err.code === 'auth/wrong-password') alert("Неверный пароль! ❌");
-                else if (err.code === 'auth/user-not-found') alert("Пользователь не найден! 🛑");
-                else alert("Ошибка: " + err.message);
-            });
+            if (!e || !p) return alert("Заполни поля, бро!");
+            authSystem.signInWithEmailAndPassword(e, p).catch(err => alert("Ошибка: " + err.message));
         }
 
         function register() {
             const e = document.getElementById('regEmail').value.trim().toLowerCase();
             const p = document.getElementById('regPass').value.trim();
             const n = document.getElementById('uNick').value.trim();
-            if (!e || !p || !n) return alert("Заполни все поля! 📋");
-
+            if (!e || !p || !n) return alert("Заполни поля!");
             authSystem.createUserWithEmailAndPassword(e, p).then(cred => {
-                db.ref("users/" + cred.user.uid).set({
-                    nickname: n,
-                    avatar: "https://api.dicebear.com/7.x/pixel-art/svg?seed=" + n,
-                    email: e,
-                    bio: "Я новый пользователь VChat!"
-                });
+                db.ref("users/" + cred.user.uid).set({ nickname: n, avatar: "https://api.dicebear.com/7.x/pixel-art/svg?seed=" + n, email: e, bio: "Я новый пользователь VChat!" });
             }).catch(err => alert("Ошибка: " + err.message));
         }
 
         function logOut() { if(confirm("Выйти из аккаунта?")) authSystem.signOut().then(() => location.reload()); }
+
+        // МЕДИА ФУНКЦИОНАЛ
+        function openMediaModal() {
+            if(!active) return alert("Сначала выбери чат, бро! 💬");
+            document.getElementById('mediaUrlInp').value = "";
+            document.getElementById('mediaFileInp').value = "";
+            document.getElementById('mediaCaption').value = "";
+            document.getElementById('media-modal').style.display = 'flex';
+        }
+
+        function switchMediaSource() {
+            const type = document.getElementById('mediaType').value;
+            if(type === 'img_file') {
+                document.getElementById('mediaUrlBlock').style.display = 'none';
+                document.getElementById('mediaFileBlock').style.display = 'block';
+            } else {
+                document.getElementById('mediaUrlBlock').style.display = 'block';
+                document.getElementById('mediaFileBlock').style.display = 'none';
+            }
+        }
+
+        function sendMedia() {
+            const type = document.getElementById('mediaType').value;
+            const caption = document.getElementById('mediaCaption').value.trim();
+            const path = active.type === 'USER' ? (myID < active.id ? myID+"_"+active.id : active.id+"_"+myID) : active.id;
+            
+            const msgData = {
+                sid: myID,
+                snick: document.getElementById('myName').innerText,
+                txt: caption,
+                isMedia: true,
+                mediaType: type === 'img_file' ? 'img' : type 
+            };
+
+            if(type === 'img_file') {
+                const file = document.getElementById('mediaFileInp').files[0];
+                if(!file) return alert("Выбери картинку на устройстве!");
+                
+                const reader = new FileReader();
+                reader.onloadend = function() {
+                    msgData.mediaUrl = reader.result; // Конвертируем в Base64-строку
+                    db.ref("msgs/" + path).push().set(msgData);
+                    closeM('media-modal');
+                }
+                reader.readAsDataURL(file);
+            } else {
+                const url = document.getElementById('mediaUrlInp').value.trim();
+                if(!url) return alert("Вставь ссылку на файл!");
+                msgData.mediaUrl = url;
+                db.ref("msgs/" + path).push().set(msgData);
+                closeM('media-modal');
+            }
+        }
+
+        // РЕНДЕРИНГ МЕДИА ВНУТРИ СООБЩЕНИЙ
+        function getMediaHtml(m) {
+            if(!m.isMedia) return m.txt;
+            
+            let contentHtml = "";
+            if(m.mediaType === 'img' || m.mediaType === 'img_url') {
+                contentHtml = `<img class="msg-media-img" src="${m.mediaUrl}" alt="Картинка" onerror="this.src='https://placehold.co/300x200?text=Ошибка+загрузки+картинки'">`;
+            } else if(m.mediaType === 'video') {
+                contentHtml = `<video class="msg-media-video" src="${m.mediaUrl}" controls preload="metadata"></video>`;
+            } else if(m.mediaType === 'doc') {
+                contentHtml = `<a class="msg-media-doc" href="${m.mediaUrl}" target="_blank">📄 Скачать документ / Файл</a>`;
+            }
+            
+            return contentHtml + (m.txt ? `<div style="margin-top:5px;">${m.txt}</div>` : "");
+        }
 
         function openUserCard(uid) {
             const u = cache.u[uid];
             if(!u) return;
             document.getElementById('pCardAv').src = u.avatar || "https://api.dicebear.com/7.x/identicon/svg?seed="+uid;
             document.getElementById('pCardNick').innerText = u.nickname;
-            document.getElementById('pCardEmail').innerText = u.email || "Скрыт или не указан";
-            document.getElementById('pCardBio').innerText = u.bio || "Информации «О себе» пока нет.";
+            document.getElementById('pCardEmail').innerText = u.email || "Скрыт";
+            document.getElementById('pCardBio').innerText = u.bio || "Информации нет.";
             document.getElementById('user-prof-modal').style.display = 'flex';
         }
 
-        function openUserCardFromHeader() {
-            if(active && active.type === 'USER') {
-                openUserCard(active.id);
-            }
-        }
+        function openUserCardFromHeader() { if(active && active.type === 'USER') openUserCard(active.id); }
 
         function render() {
             const list = document.getElementById('chatList');
             const q = document.getElementById('srch').value.toLowerCase();
             list.innerHTML = "";
-
             for (let id in cache.g) {
                 const g = cache.g[id];
                 if (g.roles && g.roles[myID] && g.name.toLowerCase().includes(q)) addLi(list, g.name, g.avatar, id, 'GROUP');
@@ -365,9 +406,7 @@
                 hAv.src = cache.u[id].avatar || "https://api.dicebear.com/7.x/identicon/svg?seed="+id;
                 hAv.style.display = 'block';
                 document.getElementById('hDesc').innerText = cache.u[id]?.bio || "Пользователь";
-            } else {
-                hAv.style.display = 'none';
-            }
+            } else { hAv.style.display = 'none'; }
 
             let currentRole = null;
             if (type === 'GROUP') {
@@ -391,7 +430,9 @@
                     const canDelete = (m.sid === myID) || (type === 'GROUP' && (currentRole === 'owner' || currentRole === 'admin'));
                     const delHtml = canDelete ? `<span class="msg-del" onclick="deleteMessage('${path}', '${mKey}')">🗑️</span>` : "";
 
-                    div.innerHTML = `<div class="msg-name" style="cursor:pointer;" onclick="openUserCard('${m.sid}')">${m.snick} ${delHtml}</div>${m.txt}`;
+                    // Сюда рендерим текст ИЛИ медиа-контент
+                    div.innerHTML = `<div class="msg-name" style="cursor:pointer;" onclick="openUserCard('${m.sid}')">${m.snick} ${delHtml}</div>
+                                     ${getMediaHtml(m)}`;
                     document.getElementById('msgBox').appendChild(div);
                 });
                 document.getElementById('msgBox').scrollTop = document.getElementById('msgBox').scrollHeight;
@@ -402,13 +443,11 @@
             const t = document.getElementById('msgInp').value.trim();
             if (!t || !active) return;
             const path = active.type === 'USER' ? (myID < active.id ? myID+"_"+active.id : active.id+"_"+myID) : active.id;
-            db.ref("msgs/" + path).push().set({ sid: myID, snick: document.getElementById('myName').innerText, txt: t });
+            db.ref("msgs/" + path).push().set({ sid: myID, snick: document.getElementById('myName').innerText, txt: t, isMedia: false });
             document.getElementById('msgInp').value = "";
         }
 
-        function deleteMessage(path, key) {
-            if(confirm("Удалить это сообщение?")) db.ref("msgs/" + path + "/" + key).remove();
-        }
+        function deleteMessage(path, key) { if(confirm("Удалить?")) db.ref("msgs/" + path + "/" + key).remove(); }
 
         function showMem() {
             const g = cache.g[active.id];
@@ -419,21 +458,13 @@
             for(let uid in g.roles) {
                 const u = cache.u[uid];
                 const r = g.roles[uid];
-                
                 let actionsHtml = "";
                 if (uid !== myID && r !== 'owner') {
-                    if (myRole === 'owner' && r === 'member') {
-                        actionsHtml += `<button class="secondary" style="background:#238636; margin-right:5px;" onclick="changeRole('${uid}', 'admin')">Admin</button>`;
-                    }
-                    if (myRole === 'owner' || (myRole === 'admin' && r === 'member')) {
-                        actionsHtml += `<button class="danger" style="padding:2px 8px; font-size:11px; width:auto;" onclick="kickUser('${uid}')">Kick</button>`;
-                    }
+                    if (myRole === 'owner' && r === 'member') actionsHtml += `<button class="secondary" style="background:#238636; margin-right:5px;" onclick="changeRole('${uid}', 'admin')">Admin</button>`;
+                    if (myRole === 'owner' || (myRole === 'admin' && r === 'member')) actionsHtml += `<button class="danger" style="padding:2px 8px; font-size:11px; width:auto;" onclick="kickUser('${uid}')">Kick</button>`;
                 }
-
                 list.innerHTML += `<div class="mem-row">
-                    <div style="cursor:pointer;" onclick="closeM('members-modal'); openUserCard('${uid}')">
-                        <b>${u ? u.nickname : 'Юзер'}</b> <span class="role-badge">${r}</span>
-                    </div>
+                    <div style="cursor:pointer;" onclick="closeM('members-modal'); openUserCard('${uid}')"><b>${u ? u.nickname : 'Юзер'}</b> <span class="role-badge">${r}</span></div>
                     <div>${actionsHtml}</div>
                 </div>`;
             }
@@ -441,9 +472,8 @@
         }
 
         function changeRole(uid, newRole) { db.ref("groups/" + active.id + "/roles/" + uid).set(newRole).then(() => showMem()); }
-        function kickUser(uid) { if(confirm("Выгнать этого пользователя?")) db.ref("groups/" + active.id + "/roles/" + uid).remove().then(() => showMem()); }
+        function kickUser(uid) { if(confirm("Выгнать?")) db.ref("groups/" + active.id + "/roles/" + uid).remove().then(() => showMem()); }
 
-        // Открытие настроек своего профиля
         function openMe() {
             const d = cache.u[myID];
             if(!d) return;
@@ -452,43 +482,31 @@
             document.getElementById('myBioNew').value = d.bio || "";
             document.getElementById('my-prof-modal').style.display='flex';
         }
-
         function updateMe() {
             db.ref("users/"+myID).update({ nickname: document.getElementById('myNickNew').value, avatar: document.getElementById('myAvNew').value, bio: document.getElementById('myBioNew').value });
             closeM('my-prof-modal');
         }
-
         function openAdm() {
             const g = cache.g[active.id];
             document.getElementById('gNameNew').value = g.name;
             document.getElementById('gDescNew').value = g.desc || "";
             document.getElementById('admin-modal').style.display='flex';
         }
-
-        function updateG() {
-            db.ref("groups/"+active.id).update({ name: document.getElementById('gNameNew').value, desc: document.getElementById('gDescNew').value });
-            alert("Настройки сохранены!");
-        }
-
+        function updateG() { db.ref("groups/"+active.id).update({ name: document.getElementById('gNameNew').value, desc: document.getElementById('gDescNew').value }); alert("Сохранено!"); }
         function invite() {
             const inp = document.getElementById('addEmail').value.trim().toLowerCase();
             let fid = null;
             for(let id in cache.u) { if(cache.u[id].email === inp) { fid = id; break; } }
-            if(fid) { db.ref("groups/"+active.id+"/roles/"+fid).set('member'); alert("Добавлен!"); } else { alert("Пользователь с таким Email не найден"); }
+            if(fid) { db.ref("groups/"+active.id+"/roles/"+fid).set('member'); alert("Добавлен!"); } else { alert("Не найден"); }
         }
-
         function newG() {
             const n = prompt("Название новой группы:");
-            if(n) {
-                const id = "grp_"+Date.now();
-                db.ref("groups/"+id).set({ name: n, owner: myID, roles: { [myID]: 'owner' }, desc: "Добро пожаловать в новую группу!" });
-            }
+            if(n) { const id = "grp_"+Date.now(); db.ref("groups/"+id).set({ name: n, owner: myID, roles: { [myID]: 'owner' }, desc: "Добро пожаловать!" }); }
         }
-
-        function leaveG() { if(confirm("Выйти из этой группы?")) { db.ref("groups/"+active.id+"/roles/"+myID).remove(); location.reload(); } }
+        function leaveG() { if(confirm("Выйти?")) { db.ref("groups/"+active.id+"/roles/"+myID).remove(); location.reload(); } }
         function closeM(id) { document.getElementById(id).style.display = 'none'; }
-        function clearChat() { if(confirm("Стереть вообще все сообщения в этом чате?")) db.ref("msgs/"+active.id).remove(); }
-        function killG() { if(confirm("Удалить группу навсегда?")) { db.ref("groups/"+active.id).remove(); db.ref("msgs/"+active.id).remove(); location.reload(); } }
+        function clearChat() { if(confirm("Очистить?")) db.ref("msgs/"+active.id).remove(); }
+        function killG() { if(confirm("Удалить группу?")) { db.ref("groups/"+active.id).remove(); db.ref("msgs/"+active.id).remove(); location.reload(); } }
     </script>
 </body>
 </html>
