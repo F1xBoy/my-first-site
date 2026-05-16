@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat 5.3</title>
+    <title>VChat 5.4</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; background: #0e1621; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         * { box-sizing: border-box; }
@@ -32,13 +32,12 @@
         button.secondary:hover { background: #415163; }
         .btn-success { background: #238636; margin-top: 10px; }
 
-        /* КНОПКА GOOGLE */
         .oauth-providers { display: flex; flex-direction: column; gap: 8px; margin-top: 15px; border-top: 1px solid #2b5278; padding-top: 15px; }
         .btn-oauth { background: #ffffff; color: #000000; font-weight: 600; font-size: 14px; }
         .btn-oauth:hover { background: #e6e6e6; }
         .oauth-icon { width: 18px; height: 18px; object-fit: contain; }
 
-        /* КАСТОМНЫЙ DROPDOWN */
+        /* КАСТОМНЫЕ DROPDOWN-МЕНЮ */
         .custom-select-wrapper { position: relative; width: 100%; margin: 8px 0; user-select: none; }
         .custom-select-trigger { padding: 12px; background: #242f3d; border: 1px solid #2b5278; border-radius: 8px; color: white; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: border-color 0.2s; }
         .custom-select-trigger:hover { border-color: #58a6ff; }
@@ -78,9 +77,9 @@
         .msg-del { display: none; color: #ff6b6b; cursor: pointer; margin-left: 8px; font-size: 11px; float: right; }
 
         .msg-media-img { max-width: 100%; max-height: 250px; border-radius: 8px; margin-top: 5px; display: block; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); }
-        .msg-media-video { max-width: 100%; max-height: 250px; border-radius: 8px; margin-top: 5px; display: block; }
-        .msg-media-doc { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; margin-top: 5px; text-decoration: none; color: #58a6ff; border: 1px solid #2b5278; }
-        .msg-media-doc:hover { background: rgba(0,0,0,0.3); color: #79c0ff; }
+        .msg-media-video { max-width: 100%; max-height: 250px; border-radius: 8px; margin-top: 5px; display: block; background: #000; }
+        .msg-media-doc { display: flex; align-items: center; gap: 10px; background: #242f3d; padding: 10px; border-radius: 8px; margin-top: 5px; text-decoration: none; color: #58a6ff; border: 1px solid #2b5278; font-size: 13px; font-weight: bold; transition: background 0.2s ease; }
+        .msg-media-doc:hover { background: #313d4b; color: #79c0ff; }
 
         .input-bar { padding: 15px; background: #17212b; display: flex; gap: 10px; align-items: center; }
         .role-badge { font-size: 9px; background: #58a6ff; color: #000; padding: 1px 4px; border-radius: 3px; margin-left: 5px; }
@@ -132,26 +131,34 @@
         <div class="modal-card">
             <h3 style="margin-top:0; color:#58a6ff;">Отправить файл 📎</h3>
             
-            <label class="p-info-label">Тип файла</label>
-            <div class="custom-select-wrapper" id="mediaDropdown">
-                <div class="custom-select-trigger" onclick="toggleDropdown()">Картинка (по ссылке URL)</div>
+            <label class="p-info-label">Откуда загрузить?</label>
+            <div class="custom-select-wrapper" id="dd-source">
+                <div class="custom-select-trigger" onclick="toggleDD('dd-source')" id="trigger-source">С устройства</div>
                 <div class="custom-options">
-                    <div class="custom-option selected" data-value="img_url" onclick="selectOption(this)">Картинка (по ссылке URL)</div>
-                    <div class="custom-option" data-value="img_file" onclick="selectOption(this)">Картинка (с устройства)</div>
-                    <div class="custom-option" data-value="video" onclick="selectOption(this)">Видео (по ссылке URL)</div>
-                    <div class="custom-option" data-value="doc" onclick="selectOption(this)">Документ (по ссылке URL)</div>
+                    <div class="custom-option selected" data-value="device" onclick="selectSource(this)">С устройства</div>
+                    <div class="custom-option" data-value="url" onclick="selectSource(this)">По ссылке</div>
                 </div>
             </div>
 
-            <div id="mediaUrlBlock">
-                <input type="text" id="mediaUrlInp" placeholder="Вставьте URL-ссылку на файл...">
+            <div id="mediaFileBlock" style="margin-top: 10px;">
+                <label class="p-info-label">Выбери любой файл (до 4 МБ)</label>
+                <input type="file" id="mediaFileInp" accept="*/*">
             </div>
 
-            <div id="mediaFileBlock" style="display: none;">
-                <input type="file" id="mediaFileInp" accept="image/*">
+            <div id="mediaUrlBlock" style="display: none; margin-top: 10px;">
+                <label class="p-info-label">Что по ссылке?</label>
+                <div class="custom-select-wrapper" id="dd-type">
+                    <div class="custom-select-trigger" onclick="toggleDD('dd-type')" id="trigger-type">Картинка</div>
+                    <div class="custom-options">
+                        <div class="custom-option selected" data-value="img" onclick="selectUrlType(this)">Картинка</div>
+                        <div class="custom-option" data-value="video" onclick="selectUrlType(this)">Видео</div>
+                        <div class="custom-option" data-value="doc" onclick="selectUrlType(this)">Документ</div>
+                    </div>
+                </div>
+                <input type="text" id="mediaUrlInp" placeholder="Вставьте ссылку...">
             </div>
 
-            <input type="text" id="mediaCaption" placeholder="Добавить описание (необязательно)...">
+            <input type="text" id="mediaCaption" placeholder="Добавить описание (необязательно)..." style="margin-top: 15px;">
 
             <button class="btn-success" onclick="sendMedia()">Отправить в чат</button>
             <button class="secondary" style="width:100%; margin-top:8px;" onclick="closeM('media-modal')">Отмена</button>
@@ -257,7 +264,7 @@
             apiKey: "AIzaSyCg30e6q0vgQifYTXgl7ERe7aC-ZrLaOiY",
             databaseURL: "https://vchat-12103-default-rtdb.firebaseio.com",
             projectId: "vchat-12103",
-            authDomain: "vchat-12103.firebaseapp.com"
+            authDomain: "vchat-12103.firebaseapp.com" // Оставляем этот
         };
         firebase.initializeApp(cfg);
         const db = firebase.database();
@@ -266,7 +273,10 @@
         let myID = "";
         let active = null;
         let cache = { u: {}, g: {} };
-        let selectedMediaType = "img_url";
+        
+        // ПЕРЕМЕННЫЕ ДЛЯ МЕДИА
+        let mediaSource = "device";
+        let mediaUrlType = "img";
 
         authSystem.onAuthStateChanged(user => {
             if (user) {
@@ -339,17 +349,23 @@
 
         function logOut() { if(confirm("Выйти из аккаунта?")) authSystem.signOut().then(() => location.reload()); }
 
-        function toggleDropdown() { document.getElementById('mediaDropdown').classList.toggle('open'); }
+        // УПРАВЛЕНИЕ МЕНЮШКАМИ ДЛЯ СКРЕПКИ
+        function toggleDD(id) { document.getElementById(id).classList.toggle('open'); }
+        
+        window.addEventListener('click', function(e) {
+            document.querySelectorAll('.custom-select-wrapper').forEach(dw => {
+                if (!dw.contains(e.target)) { dw.classList.remove('open'); }
+            });
+        });
 
-        function selectOption(el) {
-            const val = el.getAttribute('data-value');
-            selectedMediaType = val;
-            document.querySelector('.custom-select-trigger').innerText = el.innerText;
-            document.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('selected'));
+        function selectSource(el) {
+            mediaSource = el.getAttribute('data-value');
+            document.getElementById('trigger-source').innerText = el.innerText;
+            document.querySelectorAll('#dd-source .custom-option').forEach(opt => opt.classList.remove('selected'));
             el.classList.add('selected');
-            document.getElementById('mediaDropdown').classList.remove('open');
+            document.getElementById('dd-source').classList.remove('open');
             
-            if(val === 'img_file') {
+            if(mediaSource === 'device') {
                 document.getElementById('mediaUrlBlock').style.display = 'none';
                 document.getElementById('mediaFileBlock').style.display = 'block';
             } else {
@@ -358,40 +374,53 @@
             }
         }
 
-        window.addEventListener('click', function(e) {
-            const dropdown = document.getElementById('mediaDropdown');
-            if (dropdown && !dropdown.contains(e.target)) { dropdown.classList.remove('open'); }
-        });
+        function selectUrlType(el) {
+            mediaUrlType = el.getAttribute('data-value');
+            document.getElementById('trigger-type').innerText = el.innerText;
+            document.querySelectorAll('#dd-type .custom-option').forEach(opt => opt.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('dd-type').classList.remove('open');
+        }
 
         function openMediaModal() {
             if(!active) return alert("Сначала выбери чат, бро! 💬");
             document.getElementById('mediaUrlInp').value = "";
             document.getElementById('mediaFileInp').value = "";
             document.getElementById('mediaCaption').value = "";
-            const defaultOpt = document.querySelector('.custom-option[data-value="img_url"]');
-            if(defaultOpt) selectOption(defaultOpt);
+            
+            const defSource = document.querySelector('#dd-source .custom-option[data-value="device"]');
+            if(defSource) selectSource(defSource);
+
             document.getElementById('media-modal').style.display = 'flex';
         }
 
         function sendMedia() {
-            const type = selectedMediaType;
             const caption = document.getElementById('mediaCaption').value.trim();
             const path = active.type === 'USER' ? (myID < active.id ? myID+"_"+active.id : active.id+"_"+myID) : active.id;
             
-            const msgData = {
-                sid: myID,
-                snick: document.getElementById('myName').innerText,
-                txt: caption,
-                isMedia: true,
-                mediaType: type === 'img_file' ? 'img' : type 
-            };
-
-            if(type === 'img_file') {
+            if (mediaSource === 'device') {
                 const file = document.getElementById('mediaFileInp').files[0];
-                if(!file) return alert("Выбери картинку!");
+                if(!file) return alert("Выбери файл!");
+                
+                // Защита от огромных файлов, чтобы база не легла
+                if (file.size > 4 * 1024 * 1024) return alert("Бро, файл слишком большой! Выбирай до 4 МБ, иначе база зависнет.");
+
+                // Умное автоопределение типа файла
+                let detectedType = 'doc';
+                if (file.type.startsWith('image/')) detectedType = 'img';
+                else if (file.type.startsWith('video/')) detectedType = 'video';
+
                 const reader = new FileReader();
                 reader.onloadend = function() {
-                    msgData.mediaUrl = reader.result;
+                    const msgData = {
+                        sid: myID,
+                        snick: document.getElementById('myName').innerText,
+                        txt: caption,
+                        isMedia: true,
+                        mediaType: detectedType,
+                        mediaUrl: reader.result,
+                        fileName: file.name
+                    };
                     db.ref("msgs/" + path).push().set(msgData);
                     closeM('media-modal');
                 }
@@ -399,7 +428,16 @@
             } else {
                 const url = document.getElementById('mediaUrlInp').value.trim();
                 if(!url) return alert("Вставь ссылку!");
-                msgData.mediaUrl = url;
+                
+                const msgData = {
+                    sid: myID,
+                    snick: document.getElementById('myName').innerText,
+                    txt: caption,
+                    isMedia: true,
+                    mediaType: mediaUrlType,
+                    mediaUrl: url,
+                    fileName: "Файл по ссылке"
+                };
                 db.ref("msgs/" + path).push().set(msgData);
                 closeM('media-modal');
             }
@@ -413,7 +451,8 @@
             } else if(m.mediaType === 'video') {
                 contentHtml = `<video class="msg-media-video" src="${m.mediaUrl}" controls preload="metadata"></video>`;
             } else if(m.mediaType === 'doc') {
-                contentHtml = `<a class="msg-media-doc" href="${m.mediaUrl}" target="_blank">📄 Скачать документ / Файл</a>`;
+                const docName = m.fileName || "Скачать документ";
+                contentHtml = `<a class="msg-media-doc" href="${m.mediaUrl}" download="${docName}" target="_blank">📄 ${docName}</a>`;
             }
             return contentHtml + (m.txt ? `<div style="margin-top:5px;">${m.txt}</div>` : "");
         }
