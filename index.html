@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat 5.7 (PIN Protected)</title>
+    <title>VChat 5.8 (Custom PIN)</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; background: #0e1621; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         * { box-sizing: border-box; }
@@ -100,7 +100,7 @@
                 <input type="text" id="uNick" placeholder="Придумай Никнейм">
                 <input type="email" id="regEmail" placeholder="Твой Настоящий Email">
                 <input type="password" id="regPass" placeholder="Придумай Пароль">
-                <input type="text" id="regPin" placeholder="Придумай 4-значный ПИН-код" maxlength="4" style="text-align:center; font-weight:bold; letter-spacing:3px;">
+                <input type="text" id="regPin" placeholder="4-значный ПИН для защиты (необязательно)" maxlength="4" style="text-align:center; font-size:13px;">
                 <button class="btn-success" onclick="register()">Создать аккаунт</button>
                 <div class="auth-switch-link" onclick="switchAuth('login')">Уже есть аккаунт? Войти</div>
             </div>
@@ -118,13 +118,6 @@
                 <input type="password" id="authPinInp" placeholder="••••" maxlength="4" style="text-align:center; font-size:26px; letter-spacing:10px; width:160px; display:block; margin:15px auto;" onkeydown="if(event.key==='Enter') verifyPin()">
                 <button class="btn-success" onclick="verifyPin()">Войти в чат ➤</button>
                 <button class="secondary" style="width:100%; margin-top:8px;" onclick="logOut()">Выйти из аккаунта</button>
-            </div>
-
-            <div id="pin-setup-view" style="display: none; text-align: center;">
-                <h2 style="color:#2ea043; margin-top:0;">Придумай ПИН 🛡️</h2>
-                <p style="font-size: 13px; color: #aaa;">Так как ты зашел впервые через Google, создай 4-значный ПИН для защиты своего аккаунта.</p>
-                <input type="text" id="setupPinInp" placeholder="1234" maxlength="4" style="text-align:center; font-size:24px; letter-spacing:10px; width:160px; display:block; margin:15px auto;">
-                <button class="btn-success" onclick="setupPin()">Установить ПИН и войти</button>
             </div>
 
         </div>
@@ -161,9 +154,14 @@
             <button class="btn-success" style="margin-bottom: 15px;" onclick="updateMe()">Сохранить инфо</button>
 
             <div class="settings-section">
-                <span class="p-info-label">🔒 Безопасность</span>
-                <input type="password" id="newPassInp" placeholder="Новый пароль" style="margin-bottom:5px;">
-                <button class="secondary" style="width:100%; background: #2b5278;" onclick="changePassword()">Изменить пароль</button>
+                <span class="p-info-label">🔒 Безопасность и ПИН-код</span>
+                <input type="text" id="changePinInp" placeholder="Новый ПИН (4 цифры) или пусто, чтобы удалить" maxlength="4" style="text-align:center; font-weight:bold;">
+                <div style="display: flex; gap: 5px;">
+                    <button class="secondary" style="flex:1; background: #2b5278;" onclick="updatePinCode()">Обновить ПИН</button>
+                    <button class="danger" style="flex:1; margin-top:5px; padding:10px; font-size:12px;" onclick="deletePinCode()">Удалить ПИН</button>
+                </div>
+                <input type="password" id="newPassInp" placeholder="Новый пароль аккаунта" style="margin-top:10px; margin-bottom:5px;">
+                <button class="secondary" style="width:100%; background: #313d4b;" onclick="changePassword()">Изменить пароль</button>
             </div>
 
             <div class="settings-section">
@@ -196,7 +194,6 @@
             <input type="text" id="gNameNew" placeholder="Название">
             <textarea id="gDescNew" placeholder="Описание..." rows="2"></textarea>
             <button class="btn-success" onclick="updateG()">Сохранить изменения</button>
-            
             <hr style="border:0; border-top:1px solid #2b5278; margin:15px 0;">
             <label class="p-info-label">Добавить участника</label>
             <div style="display:flex; gap:5px;">
@@ -291,9 +288,8 @@
         let uploadedProfileAv = null;
         let uploadedGroupAv = null;
 
-        // Переключатель окон внутри модалки авторизации
         function showView(viewId) {
-            const views = ['login-view', 'reg-view', 'verify-view', 'pin-view', 'pin-setup-view'];
+            const views = ['login-view', 'reg-view', 'verify-view', 'pin-view'];
             views.forEach(v => {
                 const el = document.getElementById(v);
                 if(el) el.style.display = (v === viewId) ? 'block' : 'none';
@@ -302,7 +298,6 @@
 
         authSystem.onAuthStateChanged(user => {
             if (user) {
-                // 1. Чек на верификацию почты (только для связки email/пароль)
                 if (!user.emailVerified && user.providerData[0].providerId === 'password') {
                     document.getElementById('login-scr').style.display = 'flex';
                     showView('verify-view');
@@ -312,38 +307,31 @@
 
                 myID = user.uid;
                 
-                // 2. Читаем данные юзера из Realtime Database
                 db.ref("users/" + myID).on("value", s => {
                     const d = s.val();
                     if(!d) {
-                        // Если зашли через Google впервые и в БД нет записи
+                        // Первичная генерация данных без принудительного ПИНа
                         db.ref("users/" + myID).set({
                             nickname: user.displayName || "User_" + myID.substring(0,5),
                             avatar: user.photoURL || "https://api.dicebear.com/7.x/pixel-art/svg?seed=" + myID,
                             email: user.email || "",
-                            bio: "Я в VChat!"
+                            bio: "Я в VChat!",
+                            pin: "" // По умолчанию пустой
                         });
-                        document.getElementById('login-scr').style.display = 'flex';
-                        showView('pin-setup-view');
-                        document.getElementById('app').style.display = 'none';
+                        document.getElementById('login-scr').style.display = 'none';
+                        document.getElementById('app').style.display = 'flex';
                     } else {
                         document.getElementById('myName').innerText = d.nickname;
                         document.getElementById('myAvImg').src = d.avatar || "https://api.dicebear.com/7.x/pixel-art/svg?seed="+d.nickname;
                         
-                        // 3. КОНТРОЛЬ ПИН-КОДА (2FA ЗАЩИТА)
-                        if (!d.pin) {
-                            // Если ПИН почему-то не задан (например, старый юзер или Google-вход)
-                            document.getElementById('login-scr').style.display = 'flex';
-                            showView('pin-setup-view');
-                            document.getElementById('app').style.display = 'none';
-                        } else if (sessionStorage.getItem('vchat_pin_passed_' + myID) !== 'true') {
-                            // ПИН есть, но сессия еще не разблокирована в текущей вкладке
+                        // ПРОВЕРКА: Если ПИН установлен в БД И сессия еще не разблокирована
+                        if (d.pin && d.pin.trim() !== "" && sessionStorage.getItem('vchat_pin_passed_' + myID) !== 'true') {
                             document.getElementById('login-scr').style.display = 'flex';
                             showView('pin-view');
                             document.getElementById('app').style.display = 'none';
                             document.getElementById('authPinInp').focus();
                         } else {
-                            // Полный доступ разрешен
+                            // Если ПИНа нет или он уже введен
                             document.getElementById('login-scr').style.display = 'none';
                             document.getElementById('app').style.display = 'flex';
                         }
@@ -361,7 +349,6 @@
             }
         });
 
-        // Функция проверки введенного ПИН-кода
         function verifyPin() {
             const inputPin = document.getElementById('authPinInp').value.trim();
             if(!myID) return;
@@ -374,24 +361,34 @@
                     document.getElementById('login-scr').style.display = 'none';
                     document.getElementById('app').style.display = 'flex';
                 } else {
-                    alert("Неверный ПИН-код, доступ заблокирован! ❌");
+                    alert("Неверный ПИН-код! ❌");
                     document.getElementById('authPinInp').value = "";
                 }
             });
         }
 
-        // Функция создания ПИН-кода (если зашел через Google)
-        function setupPin() {
-            const newPin = document.getElementById('setupPinInp').value.trim();
-            if (newPin.length !== 4 || isNaN(newPin)) return alert("ПИН-код должен состоять ровно из 4 цифр!");
+        // Изменение ПИН-кода из панели настроек
+        function updatePinCode() {
+            const newPin = document.getElementById('changePinInp').value.trim();
+            if (newPin !== "" && (newPin.length !== 4 || isNaN(newPin))) {
+                return alert("ПИН-код должен состоять ровно из 4 цифр!");
+            }
 
             db.ref("users/" + myID).update({ pin: newPin }).then(() => {
-                alert("ПИН-код успешно сохранен! Аккаунт защищен. 🛡️");
-                sessionStorage.setItem('vchat_pin_passed_' + myID, 'true');
-                document.getElementById('setupPinInp').value = "";
-                document.getElementById('login-scr').style.display = 'none';
-                document.getElementById('app').style.display = 'flex';
+                alert(newPin === "" ? "ПИН-код успешно удален! 👍" : "ПИН-код успешно обновлен! 🛡️");
+                if (newPin !== "") sessionStorage.setItem('vchat_pin_passed_' + myID, 'true');
+                document.getElementById('changePinInp').value = "";
             });
+        }
+
+        // Быстрое удаление ПИН-кода
+        function deletePinCode() {
+            if(confirm("Уверены, что хотите отключить защиту ПИН-кодом?")) {
+                db.ref("users/" + myID).update({ pin: "" }).then(() => {
+                    alert("Защита отключена!");
+                    document.getElementById('changePinInp').value = "";
+                });
+            }
         }
 
         function loginWithGoogle() {
@@ -416,19 +413,19 @@
             const n = document.getElementById('uNick').value.trim();
             const pin = document.getElementById('regPin').value.trim();
 
-            if (!e || !p || !n || !pin) return alert("Заполни все поля!");
-            if (pin.length !== 4 || isNaN(pin)) return alert("ПИН-код должен состоять ровно из 4 цифр!");
+            if (!e || !p || !n) return alert("Заполни обязательные поля!");
+            if (pin && (pin.length !== 4 || isNaN(pin))) return alert("Если ставишь ПИН, то делай его из 4 цифр!");
 
             authSystem.createUserWithEmailAndPassword(e, p).then(cred => {
                 cred.user.sendEmailVerification().then(() => {
-                    alert("Бро, отправил ссылку для подтверждения на почту! Проверь ящик.");
+                    alert("Ссылка для подтверждения отправлена на почту!");
                 });
                 db.ref("users/" + cred.user.uid).set({ 
                     nickname: n, 
                     avatar: "https://api.dicebear.com/7.x/pixel-art/svg?seed=" + n, 
                     email: e, 
                     bio: "Новичок в VChat!",
-                    pin: pin 
+                    pin: pin || "" 
                 });
             }).catch(err => alert("Ошибка регистрации: " + err.message));
         }
@@ -437,12 +434,8 @@
             const user = authSystem.currentUser;
             if(user) {
                 user.reload().then(() => {
-                    if(user.emailVerified) {
-                        alert("Почта подтверждена! 🔥");
-                        location.reload();
-                    } else {
-                        alert("Ты еще не кликнул по ссылке в письме!");
-                    }
+                    if(user.emailVerified) { alert("Почта подтверждена! 🔥"); location.reload(); } 
+                    else { alert("Ты еще не кликнул по ссылке в письме!"); }
                 });
             }
         }
@@ -542,27 +535,23 @@
             authSystem.currentUser.updatePassword(newPass).then(() => {
                 alert("Пароль успешно обновлен! 🔒");
                 document.getElementById('newPassInp').value = "";
-            }).catch(err => alert("Ошибка безопасности: " + err.message));
+            }).catch(err => alert("Ошибка: " + err.message));
         }
 
         function clearAppCache() {
             if (confirm("Уверен, что хочешь очистить кэш приложения?")) {
-                localStorage.clear();
-                sessionStorage.clear();
-                alert("Кэш приложения успешно очищен! Перезагружаю...");
-                location.reload();
+                localStorage.clear(); sessionStorage.clear(); location.reload();
             }
         }
 
         function openMe() {
-            const d = cache.u[myID];
-            if(!d) return;
+            const d = cache.u[myID]; if(!d) return;
             document.getElementById('myNickNew').value = d.nickname;
             document.getElementById('myAvNew').value = d.avatar || "";
             document.getElementById('myBioNew').value = d.bio || "";
             document.getElementById('myAvPreview').src = d.avatar || "https://api.dicebear.com/7.x/pixel-art/svg?seed="+myID;
-            uploadedProfileAv = null;
-            detectDevice();
+            document.getElementById('changePinInp').value = "";
+            uploadedProfileAv = null; detectDevice();
             document.getElementById('my-prof-modal').style.display='flex';
         }
 
