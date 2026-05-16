@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat 5.8</title>
+    <title>VChat 6.1 (Google Verified)</title>
+    <meta name="google-site-verification" content="bnrGuCFyUfxc7XB3jmiLYsr6mbgod0QWt2PHqIXGSrg" />
+    
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
     <style>
         body, html { margin: 0; padding: 0; height: 100%; background: #0e1621; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         * { box-sizing: border-box; }
@@ -310,13 +314,12 @@
                 db.ref("users/" + myID).on("value", s => {
                     const d = s.val();
                     if(!d) {
-                        // Первичная генерация данных без принудительного ПИНа
                         db.ref("users/" + myID).set({
                             nickname: user.displayName || "User_" + myID.substring(0,5),
                             avatar: user.photoURL || "https://api.dicebear.com/7.x/pixel-art/svg?seed=" + myID,
                             email: user.email || "",
                             bio: "Я в VChat!",
-                            pin: "" // По умолчанию пустой
+                            pin: "" 
                         });
                         document.getElementById('login-scr').style.display = 'none';
                         document.getElementById('app').style.display = 'flex';
@@ -324,14 +327,12 @@
                         document.getElementById('myName').innerText = d.nickname;
                         document.getElementById('myAvImg').src = d.avatar || "https://api.dicebear.com/7.x/pixel-art/svg?seed="+d.nickname;
                         
-                        // ПРОВЕРКА: Если ПИН установлен в БД И сессия еще не разблокирована
                         if (d.pin && d.pin.trim() !== "" && sessionStorage.getItem('vchat_pin_passed_' + myID) !== 'true') {
                             document.getElementById('login-scr').style.display = 'flex';
                             showView('pin-view');
                             document.getElementById('app').style.display = 'none';
                             document.getElementById('authPinInp').focus();
                         } else {
-                            // Если ПИНа нет или он уже введен
                             document.getElementById('login-scr').style.display = 'none';
                             document.getElementById('app').style.display = 'flex';
                         }
@@ -367,7 +368,6 @@
             });
         }
 
-        // Изменение ПИН-кода из панели настроек
         function updatePinCode() {
             const newPin = document.getElementById('changePinInp').value.trim();
             if (newPin !== "" && (newPin.length !== 4 || isNaN(newPin))) {
@@ -381,7 +381,6 @@
             });
         }
 
-        // Быстрое удаление ПИН-кода
         function deletePinCode() {
             if(confirm("Уверены, что хотите отключить защиту ПИН-кодом?")) {
                 db.ref("users/" + myID).update({ pin: "" }).then(() => {
