@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat 7.0 — Animation Update</title>
+    <title>VChat 7.1 — Logic Fix</title>
     <meta name="google-site-verification" content="bnrGuCFyUfxc7XB3jmiLYsr6mbgod0QWt2PHqIXGSrg" />
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     
@@ -27,7 +27,6 @@
         body, html { margin: 0; padding: 0; height: 100%; background: var(--bg-main); color: var(--text-main); font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         * { box-sizing: border-box; }
 
-        /* АНИМАЦИИ */
         @keyframes themeRotate { 0% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.2) rotate(180deg); } 100% { transform: scale(1) rotate(360deg); } }
         .theme-spin { animation: themeRotate 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         
@@ -97,7 +96,6 @@
         .fwd-list-item { padding: 10px; border-bottom: 1px solid var(--border-color); cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.2s; }
         .fwd-list-item:hover { background: var(--bg-hover); transform: scale(1.02); }
 
-        /* Системная утилита для кнопок управления */
         .sys-control-bar { display: flex; background: var(--bg-hover); border-bottom: 1px solid var(--border-color); padding: 5px 10px; gap: 8px; justify-content: space-around; }
         .sys-btn { background: transparent; color: var(--text-muted); border: none; padding: 5px; margin: 0; width: auto; font-size: 14px; font-weight: normal; border-radius: 6px; }
         .sys-btn:hover { color: var(--accent); background: rgba(88, 166, 255, 0.1); transform: scale(1.05); }
@@ -162,7 +160,10 @@
             <textarea id="myBioNew" rows="2" placeholder="Расскажи о себе..."></textarea>
             <button class="success" onclick="updateMe()">Сохранить профиль</button>
             <hr style="border:0; border-top:1px solid var(--border-color); margin:15px 0;">
-            <button class="secondary" style="width:100%; margin-top:15px;" onclick="closeM('my-prof-modal')">Закрыть</button>
+            
+            <button class="warning" style="width:100%; margin-bottom:8px;" onclick="closeM('my-prof-modal'); document.getElementById('devices-modal').style.display='flex'">💻 Мои Устройства (Сессии)</button>
+            
+            <button class="secondary" style="width:100%;" onclick="closeM('my-prof-modal')">Закрыть</button>
             <button class="danger" style="margin-top:8px;" onclick="logOut()">Выйти из аккаунта</button>
         </div>
     </div>
@@ -221,7 +222,6 @@
             <div class="sys-control-bar">
                 <button class="sys-btn" onclick="document.getElementById('create-group-modal').style.display='flex'" title="Создать группу">➕ Группа</button>
                 <button class="sys-btn" onclick="initTabsModal()" title="Настроить вкладки">⚙️ Вкладки</button>
-                <button class="sys-btn" onclick="document.getElementById('devices-modal').style.display='flex'" title="Мои устройства">💻 Сессии</button>
             </div>
 
             <div style="padding:10px; display:flex; gap:5px;">
@@ -284,7 +284,6 @@
             localStorage.setItem('theme', isLight ? 'light' : 'dark'); btn.innerText = isLight ? '🌞' : '🌙';
         }
 
-        // АВТОРИЗАЦИЯ
         authSystem.onAuthStateChanged(user => {
             if (user) {
                 myID = user.uid;
@@ -318,7 +317,6 @@
         function verifyPin() { const p = document.getElementById('authPinInp').value; db.ref("users/"+myID+"/pin").once("value", s => { if(s.val()===p) { sessionStorage.setItem('vchat_pin_pass','true'); document.getElementById('login-scr').style.display='none'; document.getElementById('app').style.display='flex'; } else alert("Неверный ПИН!"); }); }
         function logOut() { authSystem.signOut().then(()=>location.reload()); }
 
-        // ПРОФИЛЬ И КОНТАКТЫ
         function openMe() {
             const d = cache.u[myID]; if(!d) return;
             document.getElementById('myNickNew').value = d.nickname; document.getElementById('myAvNew').value = d.avatar || ""; document.getElementById('myBioNew').value = d.bio || ""; document.getElementById('myAvPreview').src = d.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${myID}`;
@@ -332,7 +330,6 @@
             return { name: baseUser.nickname, avatar: baseUser.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${uid}`, isContact: false };
         }
 
-        // КНОПКА СОЗДАНИЯ ГРУППЫ (ЛОГИКА)
         function executeCreateGroup() {
             const name = document.getElementById('newGroupName').value.trim();
             const av = document.getElementById('newGroupAv').value.trim();
@@ -349,7 +346,6 @@
             });
         }
 
-        // НАСТРОЙКИ ВКЛАДОК (ЛОГИКА)
         function initTabsModal() {
             const list = document.getElementById('tabs-edit-list'); list.innerHTML = "";
             tabsConfig.forEach((t, index) => {
@@ -373,7 +369,6 @@
             renderTabs();
         }
 
-        // РЕНДЕР ТАБОВ И ФИЛЬТРАЦИЯ (ИСПРАВЛЕНА ЛОГИКА ГРУПП)
         function renderTabs() {
             const container = document.getElementById('tabsContainer'); if(!container) return; container.innerHTML = '';
             tabsConfig.forEach(t => {
@@ -387,31 +382,33 @@
             if (isPinned) { db.ref(`users/${myID}/pins/${id}`).remove(); } else { db.ref(`users/${myID}/pins/${id}`).set(true); }
         }
 
+        // ИСПРАВЛЕННАЯ ФУНКЦИЯ РЕНДЕРА И ФИЛЬТРАЦИИ ВКЛАДОК
         function render() {
             const list = document.getElementById('chatList'); if(!list) return;
             const q = document.getElementById('srch').value.toLowerCase(); list.innerHTML = "";
             let items = [];
 
-            // 1. Фильтруем и выводим группы
-            if (currentTab === 'groups' || currentTab === 'chats') {
-                for (let id in cache.g) {
-                    const g = cache.g[id]; 
-                    if (g.roles && g.roles[myID] && g.name.toLowerCase().includes(q)) {
+            // 1. Сбор и фильтрация ГРУПП
+            for (let id in cache.g) {
+                const g = cache.g[id]; 
+                if (g.name.toLowerCase().includes(q)) {
+                    // Группы выводятся в Общем, Группах и только те, в которых состоишь — в Чатах
+                    if (currentTab === 'global' || currentTab === 'groups' || (currentTab === 'chats' && g.roles && g.roles[myID])) {
                         items.push({ id, name: g.name, avatar: g.avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${id}`, type: 'GROUP' });
                     }
                 }
             }
             
-            // 2. Фильтруем и выводим пользователей
+            // 2. Сбор и фильтрация ПОЛЬЗОВАТЕЛЕЙ (Личных чатов)
             for (let id in cache.u) {
                 if (id === myID) continue;
                 const dData = getUserDisplayData(id);
                 if (cache.blocked[id] && currentTab !== 'global' && !q) continue; 
 
                 if (dData.name.toLowerCase().includes(q) || cache.u[id].nickname.toLowerCase().includes(q)) {
+                    if (currentTab === 'groups') continue; // Во вкладке "Группы" юзеров быть не должно
                     if (currentTab === 'contacts' && !dData.isContact) continue; 
-                    if (currentTab === 'groups') continue; // Во вкладке Группы пользователей быть не должно
-                    if (currentTab === 'chats' && (!cache.myChats || !cache.myChats[id])) continue; // Только активные чаты
+                    if (currentTab === 'chats' && (!cache.myChats || !cache.myChats[id])) continue; // В "Чатах" только активные ЛИЧНЫЕ диалоги
                     
                     let suffix = cache.blocked[id] ? " (БЛОК)" : (dData.isContact ? " 📒" : "");
                     items.push({ id, name: dData.name + suffix, avatar: dData.avatar, type: 'USER' });
@@ -473,7 +470,6 @@
             });
         }
 
-        // КАРТОЧКИ ПОЛЬЗОВАТЕЛЕЙ
         function openUserCardFromHeader() {
             if(!active || active.type !== 'USER') return;
             viewingUserId = active.id; const dData = getUserDisplayData(viewingUserId); const baseUser = cache.u[viewingUserId];
@@ -498,7 +494,6 @@
         function toggleContactSettings() { document.getElementById('contactSettings').style.display = document.getElementById('isContact').checked ? 'block' : 'none'; }
         function saveContact() { db.ref(`users/${myID}/contacts/${viewingUserId}`).set({ locName: document.getElementById('contactLocName').value.trim(), locAv: document.getElementById('contactLocAv').value.trim() }).then(() => { alert("Обновлено!"); render(); closeM('user-prof-modal'); }); }
 
-        // ИНПУТЫ И ДЕЙСТВИЯ С СООБЩЕНИЯМИ
         function checkEnter(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); } }
         function cancelAction() { editMsgId = null; replyMsgData = null; document.getElementById('action-bar').style.display = 'none'; const inp = document.getElementById('msgInp'); if(editMsgId) inp.value = ""; inp.style.height = '45px'; }
         function copyMsg(key) { navigator.clipboard.writeText(currentMessages[key].txt); alert("Скопировано! 📋"); }
