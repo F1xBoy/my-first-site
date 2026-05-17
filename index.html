@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat 7.1 — Logic Fix</title>
+    <title>VChat 7.2</title>
     <meta name="google-site-verification" content="bnrGuCFyUfxc7XB3jmiLYsr6mbgod0QWt2PHqIXGSrg" />
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     
@@ -96,7 +96,7 @@
         .fwd-list-item { padding: 10px; border-bottom: 1px solid var(--border-color); cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.2s; }
         .fwd-list-item:hover { background: var(--bg-hover); transform: scale(1.02); }
 
-        .sys-control-bar { display: flex; background: var(--bg-hover); border-bottom: 1px solid var(--border-color); padding: 5px 10px; gap: 8px; justify-content: space-around; }
+        .sys-control-bar { display: none; background: var(--bg-hover); border-bottom: 1px solid var(--border-color); padding: 5px 10px; gap: 8px; justify-content: space-around; }
         .sys-btn { background: transparent; color: var(--text-muted); border: none; padding: 5px; margin: 0; width: auto; font-size: 14px; font-weight: normal; border-radius: 6px; }
         .sys-btn:hover { color: var(--accent); background: rgba(88, 166, 255, 0.1); transform: scale(1.05); }
     </style>
@@ -148,6 +148,26 @@
         </div>
     </div>
 
+    <div id="group-manage-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h3 style="margin-top:0; color:var(--accent);" id="gManageTitle">Управление Группой</h3>
+            <div id="groupAdminPanel" style="display:none;">
+                <label class="p-info-label">Название группы</label>
+                <input type="text" id="editGroupName">
+                <label class="p-info-label">Аватарка группы (URL)</label>
+                <input type="text" id="editGroupAv">
+                <button class="success" onclick="updateGroupSettings()">Сохранить настройки</button>
+                <hr style="border:0; border-top:1px solid var(--border-color); margin:15px 0;">
+                <button class="danger" onclick="deleteGroupPermanently()">🗑️ Удалить группу навсегда</button>
+            </div>
+            <div id="groupUserPanel" style="display:none;">
+                <p style="font-size:14px; text-align:center;">Вы состоите в этой группе.</p>
+                <button class="danger" onclick="leaveGroup()">🚪 Выйти из группы</button>
+            </div>
+            <button class="secondary" style="width:100%; margin-top:15px;" onclick="closeM('group-manage-modal')">Закрыть</button>
+        </div>
+    </div>
+
     <div id="my-prof-modal" class="modal-overlay">
         <div class="modal-card">
             <h3 style="margin-top:0; color:var(--accent);">Мой Аккаунт</h3>
@@ -162,7 +182,7 @@
             <hr style="border:0; border-top:1px solid var(--border-color); margin:15px 0;">
             
             <button class="warning" style="width:100%; margin-bottom:8px;" onclick="closeM('my-prof-modal'); document.getElementById('devices-modal').style.display='flex'">💻 Мои Устройства (Сессии)</button>
-            
+            <button class="secondary" style="width:100%; margin-bottom:8px;" onclick="closeM('my-prof-modal'); initTabsModal();">⚙️ Настройка вкладок</button>
             <button class="secondary" style="width:100%;" onclick="closeM('my-prof-modal')">Закрыть</button>
             <button class="danger" style="margin-top:8px;" onclick="logOut()">Выйти из аккаунта</button>
         </div>
@@ -219,9 +239,8 @@
                 <button class="secondary" style="border-radius:50%; width:35px; height:35px; padding:0; font-size:16px;" onclick="toggleTheme()" id="themeBtn">🌙</button>
             </div>
             
-            <div class="sys-control-bar">
-                <button class="sys-btn" onclick="document.getElementById('create-group-modal').style.display='flex'" title="Создать группу">➕ Группа</button>
-                <button class="sys-btn" onclick="initTabsModal()" title="Настроить вкладки">⚙️ Вкладки</button>
+            <div class="sys-control-bar" id="groupControlBar">
+                <button class="sys-btn" onclick="document.getElementById('create-group-modal').style.display='flex'" style="width:100%; font-weight:bold;">➕ Создать новую группу</button>
             </div>
 
             <div style="padding:10px; display:flex; gap:5px;">
@@ -233,7 +252,7 @@
 
         <main class="tg-main" style="position:relative;">
             <header class="header">
-                <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="openUserCardFromHeader()">
+                <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="openChatContextInfo()">
                     <img id="hAv" src="" style="width:35px; height:35px; border-radius:50%; display:none; object-fit: cover;">
                     <div><b id="hTitle">Выберите чат</b><br><small id="hDesc" style="color:var(--text-muted);font-size:11px"></small></div>
                 </div>
@@ -382,33 +401,36 @@
             if (isPinned) { db.ref(`users/${myID}/pins/${id}`).remove(); } else { db.ref(`users/${myID}/pins/${id}`).set(true); }
         }
 
-        // ИСПРАВЛЕННАЯ ФУНКЦИЯ РЕНДЕРА И ФИЛЬТРАЦИИ ВКЛАДОК
+        // ИСПРАВЛЕННЫЙ ОКОНЧАТЕЛЬНЫЙ РЕНДЕР: КНОПКИ ГРУПП ТОЛЬКО В ГРУППАХ, ГРУППЫ УБРАНЫ ИЗ ЧАТОВ СОВСЕМ
         function render() {
             const list = document.getElementById('chatList'); if(!list) return;
             const q = document.getElementById('srch').value.toLowerCase(); list.innerHTML = "";
             let items = [];
 
-            // 1. Сбор и фильтрация ГРУПП
+            // Управление отображением панели создания групп (только во вкладке Группы)
+            const gBar = document.getElementById('groupControlBar');
+            if (currentTab === 'groups') { gBar.style.display = 'flex'; } else { gBar.style.display = 'none'; }
+
+            // 1. Сбор ГРУПП (Исключаем из вкладки chats насовсем)
             for (let id in cache.g) {
                 const g = cache.g[id]; 
                 if (g.name.toLowerCase().includes(q)) {
-                    // Группы выводятся в Общем, Группах и только те, в которых состоишь — в Чатах
-                    if (currentTab === 'global' || currentTab === 'groups' || (currentTab === 'chats' && g.roles && g.roles[myID])) {
+                    if (currentTab === 'global' || currentTab === 'groups') {
                         items.push({ id, name: g.name, avatar: g.avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${id}`, type: 'GROUP' });
                     }
                 }
             }
             
-            // 2. Сбор и фильтрация ПОЛЬЗОВАТЕЛЕЙ (Личных чатов)
+            // 2. Сбор ПОЛЬЗОВАТЕЛЕЙ
             for (let id in cache.u) {
                 if (id === myID) continue;
                 const dData = getUserDisplayData(id);
                 if (cache.blocked[id] && currentTab !== 'global' && !q) continue; 
 
                 if (dData.name.toLowerCase().includes(q) || cache.u[id].nickname.toLowerCase().includes(q)) {
-                    if (currentTab === 'groups') continue; // Во вкладке "Группы" юзеров быть не должно
+                    if (currentTab === 'groups') continue; 
                     if (currentTab === 'contacts' && !dData.isContact) continue; 
-                    if (currentTab === 'chats' && (!cache.myChats || !cache.myChats[id])) continue; // В "Чатах" только активные ЛИЧНЫЕ диалоги
+                    if (currentTab === 'chats' && (!cache.myChats || !cache.myChats[id])) continue; 
                     
                     let suffix = cache.blocked[id] ? " (БЛОК)" : (dData.isContact ? " 📒" : "");
                     items.push({ id, name: dData.name + suffix, avatar: dData.avatar, type: 'USER' });
@@ -435,7 +457,7 @@
 
             if(type === 'USER') {
                 const uD = getUserDisplayData(id); hAv.src = uD.avatar; hAv.style.display = 'block'; document.getElementById('hDesc').innerText = uD.isContact ? "Мой Контакт" : "Пользователь";
-            } else { hAv.src = cache.g[id].avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${id}`; hAv.style.display = 'block'; document.getElementById('hDesc').innerText = "Группа"; }
+            } else { hAv.src = cache.g[id].avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${id}`; hAv.style.display = 'block'; document.getElementById('hDesc').innerText = "Группа (Нажмите для управления)"; }
 
             const path = type === 'USER' ? (myID < id ? myID+"_"+id : id+"_"+myID) : id;
             db.ref("msgs/" + path).off();
@@ -470,18 +492,84 @@
             });
         }
 
-        function openUserCardFromHeader() {
-            if(!active || active.type !== 'USER') return;
-            viewingUserId = active.id; const dData = getUserDisplayData(viewingUserId); const baseUser = cache.u[viewingUserId];
-            document.getElementById('pCardAv').src = dData.avatar; document.getElementById('pCardNick').innerText = dData.name;
-            document.getElementById('pCardBio').innerText = baseUser?.bio || "Информация отсутствует";
+        // ЛОГИКА ДЛЯ ВЫЗОВА ОКНА УПРАВЛЕНИЯ (ЛИБО ЮЗЕР ЛИБО ГРУППА)
+        function openChatContextInfo() {
+            if(!active) return;
+            if(active.type === 'USER') {
+                viewingUserId = active.id; const dData = getUserDisplayData(viewingUserId); const baseUser = cache.u[viewingUserId];
+                document.getElementById('pCardAv').src = dData.avatar; document.getElementById('pCardNick').innerText = dData.name;
+                document.getElementById('pCardBio').innerText = baseUser?.bio || "Информация отсутствует";
+                
+                const isC = cache.contacts[viewingUserId]; document.getElementById('isContact').checked = !!isC; document.getElementById('contactSettings').style.display = isC ? 'block' : 'none';
+                if(isC) { document.getElementById('contactLocName').value = isC.locName || ""; document.getElementById('contactLocAv').value = isC.locAv || ""; }
+                
+                const isB = cache.blocked[viewingUserId]; const bBtn = document.getElementById('blockBtn');
+                bBtn.innerText = isB ? "✅ Разблокировать" : "🚫 Заблокировать"; bBtn.className = isB ? "success" : "danger";
+                document.getElementById('user-prof-modal').style.display = 'flex';
+            } else {
+                // Открытие панели управления ГРУППОЙ
+                const gId = active.id; const gData = cache.g[gId]; if(!gData) return;
+                document.getElementById('gManageTitle').innerText = `Управление: ${gData.name}`;
+                
+                const isOwner = gData.roles && gData.roles[myID] === 'owner';
+                if(isOwner) {
+                    document.getElementById('groupAdminPanel').style.display = 'block';
+                    document.getElementById('groupUserPanel').style.display = 'none';
+                    document.getElementById('editGroupName').value = gData.name;
+                    document.getElementById('editGroupAv').value = gData.avatar || "";
+                } else {
+                    document.getElementById('groupAdminPanel').style.display = 'none';
+                    document.getElementById('groupUserPanel').style.display = 'block';
+                }
+                document.getElementById('group-manage-modal').style.display = 'flex';
+            }
+        }
+
+        // ФУНКЦИИ УПРАВЛЕНИЯ ГРУППОЙ ДЛЯ СОЗДАТЕЛЯ И УЧАСТНИКА
+        function updateGroupSettings() {
+            if(!active || active.type !== 'GROUP') return;
+            const newN = document.getElementById('editGroupName').value.trim();
+            const newA = document.getElementById('editGroupAv').value.trim();
+            if(!newN) return alert("Название не может быть пустым!");
             
-            const isC = cache.contacts[viewingUserId]; document.getElementById('isContact').checked = !!isC; document.getElementById('contactSettings').style.display = isC ? 'block' : 'none';
-            if(isC) { document.getElementById('contactLocName').value = isC.locName || ""; document.getElementById('contactLocAv').value = isC.locAv || ""; }
-            
-            const isB = cache.blocked[viewingUserId]; const bBtn = document.getElementById('blockBtn');
-            bBtn.innerText = isB ? "✅ Разблокировать" : "🚫 Заблокировать"; bBtn.className = isB ? "success" : "danger";
-            document.getElementById('user-prof-modal').style.display = 'flex';
+            db.ref(`groups/${active.id}`).update({ name: newN, avatar: newA }).then(() => {
+                alert("Данные группы успешно обновлены!");
+                document.getElementById('hTitle').innerText = newN;
+                closeM('group-manage-modal');
+                render();
+            });
+        }
+
+        function deleteGroupPermanently() {
+            if(!active || active.type !== 'GROUP') return;
+            if(confirm("Вы действительно хотите БЕЗВОЗВРАТНО удалить эту группу и все её сообщения?")) {
+                const gId = active.id;
+                db.ref(`msgs/${gId}`).remove();
+                db.ref(`groups/${gId}`).remove().then(() => {
+                    alert("Группа полностью удалена.");
+                    closeM('group-manage-modal');
+                    active = null;
+                    document.getElementById('hTitle').innerText = "Выберите чат";
+                    document.getElementById('hAv').style.display = 'none';
+                    document.getElementById('msgBox').innerHTML = "";
+                    render();
+                });
+            }
+        }
+
+        function leaveGroup() {
+            if(!active || active.type !== 'GROUP') return;
+            if(confirm("Выйти из этой группы?")) {
+                db.ref(`groups/${active.id}/roles/${myID}`).remove().then(() => {
+                    alert("Вы вышли из группы.");
+                    closeM('group-manage-modal');
+                    active = null;
+                    document.getElementById('hTitle').innerText = "Выберите чат";
+                    document.getElementById('hAv').style.display = 'none';
+                    document.getElementById('msgBox').innerHTML = "";
+                    render();
+                });
+            }
         }
 
         function toggleBlock() { 
