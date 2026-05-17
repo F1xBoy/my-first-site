@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat 6.9.1</title>
+    <title>VChat 7.0 — Animation Update</title>
     <meta name="google-site-verification" content="bnrGuCFyUfxc7XB3jmiLYsr6mbgod0QWt2PHqIXGSrg" />
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     
@@ -20,28 +20,30 @@
             --msg-me: #dbeafe; --msg-he: #ffffff; --danger: #ef4444; --success: #16a34a; --warning: #ca8a04;
         }
 
-        body, html, .tg-sidebar, .tg-main, .header, .modal-card, input, textarea, .profile-header, .tab-btn, .chat-item, .device-item, .member-item, .msg {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        body, html, .tg-sidebar, .tg-main, .header, .modal-card, input, textarea, .profile-header, .tab-btn, .chat-item, .msg {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body, html { margin: 0; padding: 0; height: 100%; background: var(--bg-main); color: var(--text-main); font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         * { box-sizing: border-box; }
 
+        /* АНИМАЦИИ */
         @keyframes themeRotate { 0% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.2) rotate(180deg); } 100% { transform: scale(1) rotate(360deg); } }
         .theme-spin { animation: themeRotate 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         
         @keyframes fadeIn { from { opacity: 0; backdrop-filter: blur(0px); } to { opacity: 1; backdrop-filter: blur(8px); } }
-        @keyframes slideUp { from { transform: translateY(30px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
-        @keyframes msgIn { from { transform: translateY(15px) scale(0.98); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px) scale(0.98); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+        @keyframes msgIn { from { transform: translateY(10px) scale(0.96); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+        @keyframes actionBarIn { 0% { transform: scaleY(0); opacity: 0; } 70% { transform: scaleY(1.1); } 100% { transform: scaleY(1); opacity: 1; } }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; animation: fadeIn 0.3s forwards; }
-        .modal-card { background: var(--bg-card); padding: 25px; border-radius: 16px; width: 380px; border: 1px solid var(--border-color); animation: slideUp 0.35s forwards; max-height: 90vh; overflow-y: auto; color: var(--text-main); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; animation: fadeIn 0.2s forwards; }
+        .modal-card { background: var(--bg-card); padding: 25px; border-radius: 16px; width: 380px; border: 1px solid var(--border-color); animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; max-height: 90vh; overflow-y: auto; color: var(--text-main); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
         
         input, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); outline: none; font-family: inherit; }
-        input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2); }
+        input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2); transform: translateY(-1px); }
 
         button { width: 100%; padding: 12px; background: var(--border-color); color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 5px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        button:hover { filter: brightness(1.15); transform: translateY(-1px); }
+        button:hover { filter: brightness(1.15); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
         button:active { transform: translateY(1px) scale(0.98); }
         button.danger { background: var(--danger); }
         button.success { background: var(--success); }
@@ -53,14 +55,16 @@
         
         .profile-header { padding: 15px; background: var(--bg-hover); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); }
         .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid var(--accent); }
+        .avatar:hover { transform: scale(1.05); }
         
         .tabs { display: flex; background: var(--bg-card); border-bottom: 1px solid var(--border-color); overflow-x: auto; min-height: 44px; }
         .tab-btn { flex: 1; padding: 12px 5px; text-align: center; cursor: pointer; font-size: 12px; font-weight: bold; color: var(--text-muted); border-bottom: 3px solid transparent; user-select: none; white-space: nowrap; }
+        .tab-btn:hover { color: var(--text-main); background: var(--bg-hover); }
         .tab-btn.active { color: var(--accent); border-bottom: 3px solid var(--accent); }
 
         .chat-list { flex: 1; overflow-y: auto; }
         .chat-item { display: flex; align-items: center; padding: 12px; cursor: pointer; border-bottom: 1px solid var(--bg-main); position: relative; }
-        .chat-item:hover { background: var(--bg-hover); }
+        .chat-item:hover { background: var(--bg-hover); transform: translateX(4px); }
         .chat-item img { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; object-fit: cover; }
         .pin-btn { background: transparent; border: none; width: auto; padding: 5px; margin: 0; color: var(--text-muted); opacity: 0; position: absolute; right: 10px; top: 18px; }
         .chat-item:hover .pin-btn, .chat-item.pinned .pin-btn { opacity: 1; }
@@ -70,28 +74,33 @@
         .header { padding: 10px 20px; background: var(--bg-card); display: flex; align-items: center; justify-content: space-between; height: 65px; border-bottom: 1px solid var(--border-color); }
         .messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         
-        .msg { max-width: 75%; padding: 10px 14px; border-radius: 14px; font-size: 14px; position: relative; animation: msgIn 0.3s forwards; }
-        .msg.me { align-self: flex-end; background: var(--msg-me); color: var(--text-main); border-bottom-right-radius: 4px; }
-        .msg.he { align-self: flex-start; background: var(--msg-he); color: var(--text-main); border: 1px solid var(--border-color); border-bottom-left-radius: 4px; }
+        .msg { max-width: 75%; padding: 10px 14px; border-radius: 14px; font-size: 14px; position: relative; animation: msgIn 0.25s cubic-bezier(0.1, 1, 0.1, 1) forwards; }
+        .msg.me { align-self: flex-end; background: var(--msg-me); color: var(--text-main); border-bottom-right-radius: 4px; transform-origin: right bottom; }
+        .msg.he { align-self: flex-start; background: var(--msg-he); color: var(--text-main); border: 1px solid var(--border-color); border-bottom-left-radius: 4px; transform-origin: left bottom; }
         
         .msg-txt { white-space: pre-wrap; word-wrap: break-word; word-break: break-word; }
         .msg-name { font-size: 10px; color: var(--accent); font-weight: bold; margin-bottom: 4px; }
         
-        .msg-tools { display: none; gap: 12px; margin-top: 8px; font-size: 14px; background: rgba(0,0,0,0.2); padding: 4px 8px; border-radius: 8px; width: fit-content; }
+        .msg-tools { display: none; gap: 12px; margin-top: 8px; font-size: 14px; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 8px; width: fit-content; animation: fadeIn 0.2s; }
         .msg:hover .msg-tools { display: flex; }
         .msg-tool-btn { cursor: pointer; opacity: 0.8; transition: 0.2s; }
-        .msg-tool-btn:hover { opacity: 1; transform: scale(1.2); }
+        .msg-tool-btn:hover { opacity: 1; transform: scale(1.25); }
 
         .reply-block { border-left: 3px solid var(--accent); padding-left: 8px; margin-bottom: 6px; font-size: 12px; opacity: 0.85; background: rgba(0,0,0,0.1); padding-top: 4px; padding-bottom: 4px; border-radius: 0 6px 6px 0; }
         
-        #action-bar { display: none; padding: 10px 15px; background: var(--bg-hover); border-top: 1px solid var(--border-color); font-size: 13px; align-items: center; justify-content: space-between; border-left: 4px solid var(--accent); }
+        #action-bar { display: none; padding: 10px 15px; background: var(--bg-hover); border-top: 1px solid var(--border-color); font-size: 13px; align-items: center; justify-content: space-between; border-left: 4px solid var(--accent); transform-origin: bottom; animation: actionBarIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
         .input-bar { padding: 10px 15px; background: var(--bg-card); display: flex; gap: 10px; align-items: flex-end; border-top: 1px solid var(--border-color); }
         .p-info-label { font-size: 10px; color: var(--accent); text-transform: uppercase; font-weight: bold; margin-top: 10px; margin-bottom: 3px; display: block; }
         
         .block-overlay { position: absolute; bottom: 0; left: 0; width: 100%; height: calc(100% - 65px); background: rgba(14, 22, 33, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; color: #fff; z-index: 10; display: none; }
-        .fwd-list-item { padding: 10px; border-bottom: 1px solid var(--border-color); cursor: pointer; display: flex; align-items: center; gap: 10px; }
-        .fwd-list-item:hover { background: var(--bg-hover); }
+        .fwd-list-item { padding: 10px; border-bottom: 1px solid var(--border-color); cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.2s; }
+        .fwd-list-item:hover { background: var(--bg-hover); transform: scale(1.02); }
+
+        /* Системная утилита для кнопок управления */
+        .sys-control-bar { display: flex; background: var(--bg-hover); border-bottom: 1px solid var(--border-color); padding: 5px 10px; gap: 8px; justify-content: space-around; }
+        .sys-btn { background: transparent; color: var(--text-muted); border: none; padding: 5px; margin: 0; width: auto; font-size: 14px; font-weight: normal; border-radius: 6px; }
+        .sys-btn:hover { color: var(--accent); background: rgba(88, 166, 255, 0.1); transform: scale(1.05); }
     </style>
 </head>
 <body>
@@ -117,6 +126,27 @@
             <h2 style="color:var(--accent); margin-top:0;">Защита аккаунта 🔒</h2>
             <input type="password" id="authPinInp" placeholder="••••" maxlength="4" style="text-align:center; font-size:26px; letter-spacing:10px; width:160px; margin:15px auto;" onkeydown="if(event.key==='Enter') verifyPin()">
             <button class="success" onclick="verifyPin()">Войти ➤</button>
+        </div>
+    </div>
+
+    <div id="devices-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h3 style="margin-top:0; color:var(--accent);">Подключенные устройства 💻</h3>
+            <div style="background: var(--bg-main); padding: 12px; border-radius: 8px; border:1px solid var(--border-color); font-size: 13px; margin-bottom: 10px;">
+                <b style="color:var(--success);">Текущая сессия:</b> VChat Web-Client (Active)
+            </div>
+            <p style="font-size:12px; color:var(--text-muted);">Будущие сессии и другие ваши браузеры будут отображаться в этом списке.</p>
+            <button class="secondary" style="width:100%; margin-top:15px;" onclick="closeM('devices-modal')">Закрыть</button>
+        </div>
+    </div>
+
+    <div id="create-group-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h3 style="margin-top:0; color:var(--accent);">Создать группу 👥</h3>
+            <input type="text" id="newGroupName" placeholder="Название группы">
+            <input type="text" id="newGroupAv" placeholder="Ссылка на аватарку группы">
+            <button class="success" onclick="executeCreateGroup()">Создать новую группу</button>
+            <button class="secondary" style="width:100%; margin-top:8px;" onclick="closeM('create-group-modal')">Отмена</button>
         </div>
     </div>
 
@@ -162,6 +192,7 @@
     <div id="tabs-settings-modal" class="modal-overlay">
         <div class="modal-card">
             <h3 style="margin-top:0; color:var(--accent);">Настройка вкладок ⚙️</h3>
+            <p style="font-size:11px; color:var(--text-muted); margin-bottom:15px;">Измените названия системных вкладок под себя:</p>
             <div id="tabs-edit-list"></div>
             <button class="success" onclick="saveTabsConfig()" style="margin-top: 15px;">Сохранить изменения</button>
             <button class="secondary" style="width:100%; margin-top:8px;" onclick="closeM('tabs-settings-modal')">Закрыть</button>
@@ -186,6 +217,13 @@
                 </div>
                 <button class="secondary" style="border-radius:50%; width:35px; height:35px; padding:0; font-size:16px;" onclick="toggleTheme()" id="themeBtn">🌙</button>
             </div>
+            
+            <div class="sys-control-bar">
+                <button class="sys-btn" onclick="document.getElementById('create-group-modal').style.display='flex'" title="Создать группу">➕ Группа</button>
+                <button class="sys-btn" onclick="initTabsModal()" title="Настроить вкладки">⚙️ Вкладки</button>
+                <button class="sys-btn" onclick="document.getElementById('devices-modal').style.display='flex'" title="Мои устройства">💻 Сессии</button>
+            </div>
+
             <div style="padding:10px; display:flex; gap:5px;">
                 <input type="text" id="srch" placeholder="Поиск..." oninput="render()" style="margin:0; flex:1;">
             </div>
@@ -246,7 +284,7 @@
             localStorage.setItem('theme', isLight ? 'light' : 'dark'); btn.innerText = isLight ? '🌞' : '🌙';
         }
 
-        // АВТОРИЗАЦИЯ И ДАННЫЕ
+        // АВТОРИЗАЦИЯ
         authSystem.onAuthStateChanged(user => {
             if (user) {
                 myID = user.uid;
@@ -275,13 +313,12 @@
             }
         });
 
-        // ФУНКЦИИ ВХОДА
         function login() { authSystem.signInWithEmailAndPassword(document.getElementById('uEmail').value, document.getElementById('uPass').value).catch(err=>alert(err.message)); }
         function register() { authSystem.createUserWithEmailAndPassword(document.getElementById('regEmail').value, document.getElementById('regPass').value).then(c => { db.ref("users/"+c.user.uid).set({ nickname: document.getElementById('uNick').value, avatar:"", bio: "Я в VChat!", pin: document.getElementById('regPin').value||"" }); }).catch(err=>alert(err.message)); }
         function verifyPin() { const p = document.getElementById('authPinInp').value; db.ref("users/"+myID+"/pin").once("value", s => { if(s.val()===p) { sessionStorage.setItem('vchat_pin_pass','true'); document.getElementById('login-scr').style.display='none'; document.getElementById('app').style.display='flex'; } else alert("Неверный ПИН!"); }); }
         function logOut() { authSystem.signOut().then(()=>location.reload()); }
 
-        // ПРОФИЛЬ
+        // ПРОФИЛЬ И КОНТАКТЫ
         function openMe() {
             const d = cache.u[myID]; if(!d) return;
             document.getElementById('myNickNew').value = d.nickname; document.getElementById('myAvNew').value = d.avatar || ""; document.getElementById('myBioNew').value = d.bio || ""; document.getElementById('myAvPreview').src = d.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${myID}`;
@@ -295,7 +332,48 @@
             return { name: baseUser.nickname, avatar: baseUser.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${uid}`, isContact: false };
         }
 
-        // РЕНДЕР И ЛОГИКА
+        // КНОПКА СОЗДАНИЯ ГРУППЫ (ЛОГИКА)
+        function executeCreateGroup() {
+            const name = document.getElementById('newGroupName').value.trim();
+            const av = document.getElementById('newGroupAv').value.trim();
+            if(!name) return alert("Введите название группы!");
+            
+            const gRef = db.ref("groups").push();
+            const roles = {}; roles[myID] = "owner";
+            
+            gRef.set({ name: name, avatar: av, roles: roles }).then(() => {
+                alert("Группа успешно создана! 🎉");
+                document.getElementById('newGroupName').value = "";
+                document.getElementById('newGroupAv').value = "";
+                closeM('create-group-modal');
+            });
+        }
+
+        // НАСТРОЙКИ ВКЛАДОК (ЛОГИКА)
+        function initTabsModal() {
+            const list = document.getElementById('tabs-edit-list'); list.innerHTML = "";
+            tabsConfig.forEach((t, index) => {
+                list.innerHTML += `
+                    <div style="margin-bottom:10px;">
+                        <label style="font-size:12px; font-weight:bold; color:var(--accent);">Вкладка ${index+1}</label>
+                        <input type="text" id="tabInp_${t.id}" value="${t.name}">
+                    </div>
+                `;
+            });
+            document.getElementById('tabs-settings-modal').style.display = 'flex';
+        }
+        function saveTabsConfig() {
+            tabsConfig.forEach(t => {
+                const val = document.getElementById(`tabInp_${t.id}`).value.trim();
+                if(val) t.name = val;
+            });
+            localStorage.setItem('vchat_tabs_cfg', JSON.stringify(tabsConfig));
+            alert("Конфигурация вкладок изменена!");
+            closeM('tabs-settings-modal');
+            renderTabs();
+        }
+
+        // РЕНДЕР ТАБОВ И ФИЛЬТРАЦИЯ (ИСПРАВЛЕНА ЛОГИКА ГРУПП)
         function renderTabs() {
             const container = document.getElementById('tabsContainer'); if(!container) return; container.innerHTML = '';
             tabsConfig.forEach(t => {
@@ -314,13 +392,17 @@
             const q = document.getElementById('srch').value.toLowerCase(); list.innerHTML = "";
             let items = [];
 
+            // 1. Фильтруем и выводим группы
             if (currentTab === 'groups' || currentTab === 'chats') {
                 for (let id in cache.g) {
                     const g = cache.g[id]; 
-                    if (g.roles && g.roles[myID] && g.name.toLowerCase().includes(q)) items.push({ id, name: g.name, avatar: g.avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${id}`, type: 'GROUP' });
+                    if (g.roles && g.roles[myID] && g.name.toLowerCase().includes(q)) {
+                        items.push({ id, name: g.name, avatar: g.avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${id}`, type: 'GROUP' });
+                    }
                 }
             }
             
+            // 2. Фильтруем и выводим пользователей
             for (let id in cache.u) {
                 if (id === myID) continue;
                 const dData = getUserDisplayData(id);
@@ -328,16 +410,15 @@
 
                 if (dData.name.toLowerCase().includes(q) || cache.u[id].nickname.toLowerCase().includes(q)) {
                     if (currentTab === 'contacts' && !dData.isContact) continue; 
-                    if (currentTab === 'groups') continue; 
-                    if (currentTab === 'chats' && (!cache.myChats || !cache.myChats[id])) continue;
+                    if (currentTab === 'groups') continue; // Во вкладке Группы пользователей быть не должно
+                    if (currentTab === 'chats' && (!cache.myChats || !cache.myChats[id])) continue; // Только активные чаты
+                    
                     let suffix = cache.blocked[id] ? " (БЛОК)" : (dData.isContact ? " 📒" : "");
                     items.push({ id, name: dData.name + suffix, avatar: dData.avatar, type: 'USER' });
                 }
             }
 
-            items.sort((a, b) => {
-                const aPinned = cache.pins && cache.pins[a.id] ? 1 : 0; const bPinned = cache.pins && cache.pins[b.id] ? 1 : 0; return bPinned - aPinned;
-            });
+            items.sort((a, b) => (cache.pins && cache.pins[b.id] ? 1 : 0) - (cache.pins && cache.pins[a.id] ? 1 : 0));
 
             items.forEach(item => {
                 const isPinned = cache.pins && cache.pins[item.id];
@@ -392,7 +473,7 @@
             });
         }
 
-        // ОТКРЫТИЕ КАРТОЧКИ ПОЛЬЗОВАТЕЛЯ И БЛОКИРОВКА
+        // КАРТОЧКИ ПОЛЬЗОВАТЕЛЕЙ
         function openUserCardFromHeader() {
             if(!active || active.type !== 'USER') return;
             viewingUserId = active.id; const dData = getUserDisplayData(viewingUserId); const baseUser = cache.u[viewingUserId];
@@ -417,7 +498,7 @@
         function toggleContactSettings() { document.getElementById('contactSettings').style.display = document.getElementById('isContact').checked ? 'block' : 'none'; }
         function saveContact() { db.ref(`users/${myID}/contacts/${viewingUserId}`).set({ locName: document.getElementById('contactLocName').value.trim(), locAv: document.getElementById('contactLocAv').value.trim() }).then(() => { alert("Обновлено!"); render(); closeM('user-prof-modal'); }); }
 
-        // ОТПРАВКА, РЕДАКТИРОВАНИЕ, ОТВЕТ
+        // ИНПУТЫ И ДЕЙСТВИЯ С СООБЩЕНИЯМИ
         function checkEnter(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); } }
         function cancelAction() { editMsgId = null; replyMsgData = null; document.getElementById('action-bar').style.display = 'none'; const inp = document.getElementById('msgInp'); if(editMsgId) inp.value = ""; inp.style.height = '45px'; }
         function copyMsg(key) { navigator.clipboard.writeText(currentMessages[key].txt); alert("Скопировано! 📋"); }
