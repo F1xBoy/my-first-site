@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat 6.5</title>
+    <title>VChat 6.6</title>
     <meta name="google-site-verification" content="bnrGuCFyUfxc7XB3jmiLYsr6mbgod0QWt2PHqIXGSrg" />
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     
@@ -46,6 +46,7 @@
         button.success { background: var(--success); }
         button.warning { background: var(--warning); color: #000; }
         button.secondary { background: var(--bg-input); color: var(--text-main); padding: 6px 12px; font-size: 13px; width: auto; border: 1px solid var(--border-color); }
+        button:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
 
         .tg-container { display: none; height: 100vh; width: 100vw; flex-direction: row; }
         .tg-sidebar { width: 320px; background: var(--bg-card); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; }
@@ -53,8 +54,8 @@
         .profile-header { padding: 15px; background: var(--bg-hover); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); }
         .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid var(--accent); }
         
-        .tabs { display: flex; background: var(--bg-card); border-bottom: 1px solid var(--border-color); }
-        .tab-btn { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-size: 12px; font-weight: bold; color: var(--text-muted); transition: 0.2s; border-bottom: 3px solid transparent; user-select: none; }
+        .tabs { display: flex; background: var(--bg-card); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-btn { flex: 1; padding: 12px 5px; text-align: center; cursor: pointer; font-size: 12px; font-weight: bold; color: var(--text-muted); transition: 0.2s; border-bottom: 3px solid transparent; user-select: none; white-space: nowrap; }
         .tab-btn.active { color: var(--accent); border-bottom: 3px solid var(--accent); }
 
         .chat-list { flex: 1; overflow-y: auto; }
@@ -83,6 +84,7 @@
         .role-member { background: var(--text-muted); color: #fff; }
 
         .block-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); display:flex; justify-content:center; align-items:center; color:#fff; font-weight:bold; z-index:10; display:none; }
+        .tab-setting-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; background: var(--bg-input); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); }
     </style>
 </head>
 <body>
@@ -133,6 +135,18 @@
 
             <button class="secondary" style="width:100%; margin-top:15px;" onclick="closeM('my-prof-modal')">Закрыть</button>
             <button class="danger" style="margin-top:8px;" onclick="logOut()">Выйти из аккаунта</button>
+        </div>
+    </div>
+
+    <div id="tabs-settings-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h3 style="margin-top:0; color:var(--accent);">Настройка вкладок ⚙️</h3>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">Переименовывай вкладки как хочешь и меняй их порядок кнопками.</p>
+            
+            <div id="tabs-edit-list"></div>
+            
+            <button class="success" onclick="saveTabsConfig()" style="margin-top: 15px;">Сохранить изменения</button>
+            <button class="secondary" style="width:100%; margin-top:8px;" onclick="closeM('tabs-settings-modal')">Закрыть</button>
         </div>
     </div>
 
@@ -207,16 +221,12 @@
             </div>
             
             <div style="padding:10px; display:flex; gap:5px;">
-                <input type="text" id="srch" placeholder="Поиск..." oninput="render()" style="margin:0">
-                <button class="success" onclick="newG()" style="width:40px; margin:0; font-size:18px;">+</button>
+                <input type="text" id="srch" placeholder="Поиск..." oninput="render()" style="margin:0; flex:1;">
+                <button class="success" onclick="newG()" style="width:38px; margin:0; font-size:18px; padding:0;">+</button>
+                <button class="secondary" onclick="openTabsSettings()" style="width:38px; margin:0; font-size:16px; padding:0; background:var(--bg-input);">⚙️</button>
             </div>
 
-            <div class="tabs">
-                <div class="tab-btn active" onclick="setTab('chats', this)">Чаты</div>
-                <div class="tab-btn" onclick="setTab('global', this)">Общее</div>
-                <div class="tab-btn" onclick="setTab('groups', this)">Группы</div>
-                <div class="tab-btn" onclick="setTab('contacts', this)">Контакты</div>
-            </div>
+            <div class="tabs" id="tabsContainer"></div>
 
             <div class="chat-list" id="chatList"></div>
         </aside>
@@ -251,8 +261,18 @@
         const cfg = { apiKey: "AIzaSyCg30e6q0vgQifYTXgl7ERe7aC-ZrLaOiY", databaseURL: "https://vchat-12103-default-rtdb.firebaseio.com", projectId: "vchat-12103", authDomain: "vchat-12103.firebaseapp.com" };
         firebase.initializeApp(cfg); const db = firebase.database(); const authSystem = firebase.auth();
 
-        let myID = ""; let active = null; let currentTab = 'chats'; let sessionId = "";
+        let myID = ""; let active = null; let sessionId = "";
         let cache = { u: {}, g: {}, contacts: {}, blocked: {}, myChats: {} };
+
+        // ИНИЦИАЛИЗАЦИЯ ДИНАМИЧЕСКИХ ВКЛАДОК
+        const defaultTabs = [
+            { id: 'chats', name: 'Чаты' },
+            { id: 'global', name: 'Общее' },
+            { id: 'groups', name: 'Группы' },
+            { id: 'contacts', name: 'Контакты' }
+        ];
+        let tabsConfig = JSON.parse(localStorage.getItem('vchat_tabs_cfg')) || defaultTabs;
+        let currentTab = tabsConfig[0].id; // По умолчанию активна первая вкладка из конфига
 
         if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); document.getElementById('themeBtn').innerText = '🌞'; }
         
@@ -275,7 +295,7 @@
                         document.getElementById('myName').innerText = d.nickname;
                         document.getElementById('myAvImg').src = d.avatar || "https://api.dicebear.com/7.x/identicon/svg?seed="+myID;
                         cache.contacts = d.contacts || {}; cache.blocked = d.blocked || {};
-                        cache.myChats = d.chats || {}; // Подгружаем активные чаты юзера
+                        cache.myChats = d.chats || {};
 
                         if (d.pin && d.pin.trim() !== "" && sessionStorage.getItem('vchat_pin_pass') !== 'true') {
                             document.getElementById('login-scr').style.display = 'flex'; document.getElementById('login-view').style.display = 'none';
@@ -285,8 +305,8 @@
                         }
                     }
                 });
-                db.ref("users").on("value", s => { cache.u = s.val() || {}; render(); });
-                db.ref("groups").on("value", s => { cache.g = s.val() || {}; render(); if(document.getElementById('group-prof-modal').style.display === 'flex' && active?.type === 'GROUP') openGroupCard(); });
+                db.ref("users").on("value", s => { cache.u = s.val() || {}; renderTabs(); render(); });
+                db.ref("groups").on("value", s => { cache.g = s.val() || {}; renderTabs(); render(); if(document.getElementById('group-prof-modal').style.display === 'flex' && active?.type === 'GROUP') openGroupCard(); });
             } else {
                 myID = ""; sessionStorage.clear(); document.getElementById('login-scr').style.display = 'flex'; document.getElementById('app').style.display = 'none';
             }
@@ -316,10 +336,55 @@
 
         function kickSession(sid) { if(confirm("Выкинуть это устройство из аккаунта?")) db.ref(`users/${myID}/sessions/${sid}`).remove().then(()=> loadDevices()); }
 
-        function setTab(tabName, element) {
-            currentTab = tabName;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            if(element) element.classList.add('active'); render();
+        // ДИНАМИЧЕСКИЙ РЕНДЕР ВКЛАДОК ИЗ КОНФИГА
+        function renderTabs() {
+            const container = document.getElementById('tabsContainer'); container.innerHTML = '';
+            tabsConfig.forEach(t => {
+                const btn = document.createElement('div');
+                btn.className = `tab-btn ${currentTab === t.id ? 'active' : ''}`;
+                btn.innerText = t.name;
+                btn.onclick = () => setTab(t.id);
+                container.appendChild(btn);
+            });
+        }
+
+        function setTab(tabId) {
+            currentTab = tabId; renderTabs(); render();
+        }
+
+        // ЛОГИКА НАСТРОЙКИ ВКЛАДОК (КАСТОМИЗАЦИЯ)
+        function openTabsSettings() {
+            const list = document.getElementById('tabs-edit-list'); list.innerHTML = "";
+            tabsConfig.forEach((t, idx) => {
+                list.innerHTML += `
+                    <div class="tab-setting-row">
+                        <input type="text" id="tab-rename-${t.id}" value="${t.name}" style="margin:0; flex:1; padding:6px 10px;" oninput="syncTabName('${t.id}', this.value)">
+                        <button class="secondary" style="width:auto; margin:0; padding:5px 8px;" onclick="moveTab(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>▲</button>
+                        <button class="secondary" style="width:auto; margin:0; padding:5px 8px;" onclick="moveTab(${idx}, 1)" ${idx === tabsConfig.length - 1 ? 'disabled' : ''}>▼</button>
+                    </div>
+                `;
+            });
+            document.getElementById('tabs-settings-modal').style.display = 'flex';
+        }
+
+        function syncTabName(id, val) {
+            let t = tabsConfig.find(x => x.id === id); if(t) t.name = val;
+        }
+
+        function moveTab(idx, dir) {
+            // Сохраняем текущие введенные имена перед перемещением в массиве
+            tabsConfig.forEach(t => { const inp = document.getElementById(`tab-rename-${t.id}`); if(inp) t.name = inp.value; });
+            let targetIdx = idx + dir;
+            if(targetIdx >= 0 && targetIdx < tabsConfig.length) {
+                let temp = tabsConfig[idx]; tabsConfig[idx] = tabsConfig[targetIdx]; tabsConfig[targetIdx] = temp;
+                openTabsSettings();
+            }
+        }
+
+        function saveTabsConfig() {
+            tabsConfig.forEach(t => { const inp = document.getElementById(`tab-rename-${t.id}`); if(inp) t.name = inp.value.trim() || t.id; });
+            localStorage.setItem('vchat_tabs_cfg', JSON.stringify(tabsConfig));
+            renderTabs(); render(); closeM('tabs-settings-modal'); alert("Вкладки настроены по твоему фэншую, бро! 👌");
         }
 
         function getUserDisplayData(uid) {
@@ -331,7 +396,7 @@
         function render() {
             const list = document.getElementById('chatList'); const q = document.getElementById('srch').value.toLowerCase(); list.innerHTML = "";
 
-            // РЕНДЕР ГРУПП (Только во вкладках Чаты и Группы)
+            // РЕНДЕР ГРУПП (В зависимости от скрытых ID системной логики)
             if (currentTab === 'groups' || currentTab === 'chats') {
                 for (let id in cache.g) {
                     const g = cache.g[id]; 
@@ -348,10 +413,9 @@
                 if (cache.blocked[id] && currentTab !== 'global' && !q) continue; 
 
                 if (dData.name.toLowerCase().includes(q) || cache.u[id].nickname.toLowerCase().includes(q)) {
-                    // ФИЛЬТРАЦИЯ ПО ВКЛАДКАМ (ФИКС!)
                     if (currentTab === 'contacts' && !dData.isContact) continue; 
                     if (currentTab === 'groups') continue; 
-                    if (currentTab === 'chats' && (!cache.myChats || !cache.myChats[id])) continue; // В Чатах только активные переписки!
+                    if (currentTab === 'chats' && (!cache.myChats || !cache.myChats[id])) continue;
                     
                     let suffix = cache.blocked[id] ? " (БЛОК)" : (dData.isContact ? " 📒" : "");
                     addLi(list, dData.name + suffix, dData.avatar, id, 'USER');
@@ -396,11 +460,8 @@
             const path = active.type === 'USER' ? (myID < active.id ? myID+"_"+active.id : active.id+"_"+myID) : active.id;
             db.ref("msgs/" + path).push().set({ sid: myID, snick: document.getElementById('myName').innerText, txt: t }); 
             
-            // Активируем чат для обоих участников (чтобы он вывелся в табе Чаты)
             db.ref(`users/${myID}/chats/${active.id}`).set(true);
-            if (active.type === 'USER') {
-                db.ref(`users/${active.id}/chats/${myID}`).set(true);
-            }
+            if (active.type === 'USER') { db.ref(`users/${active.id}/chats/${myID}`).set(true); }
             document.getElementById('msgInp').value = "";
         }
 
@@ -422,18 +483,14 @@
             } else if(active.type === 'GROUP') { openGroupCard(); }
         }
 
-        // ЛОГИКА ГРУПП И РОЛЕЙ
         function openGroupCard() {
             const gid = active.id; const g = cache.g[gid]; if(!g) return;
             document.getElementById('gCardAv').src = g.avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${gid}`;
             document.getElementById('gCardNameTitle').innerText = g.name;
 
-            const myRole = g.roles ? g.roles[myID] : null;
-            const isOwner = (myRole === 'owner');
-            const isAdmin = (myRole === 'admin');
-            const canEditSettings = isOwner;
+            const myRole = g.roles ? g.roles[myID] : null; const isOwner = (myRole === 'owner'); const isAdmin = (myRole === 'admin');
 
-            if(canEditSettings) {
+            if(isOwner) {
                 document.getElementById('groupEditView').style.display = 'block'; document.getElementById('groupReadView').style.display = 'none';
                 document.getElementById('groupNameInp').value = g.name; document.getElementById('groupAvInp').value = g.avatar || ""; document.getElementById('groupDescInp').value = g.desc || "";
             } else {
@@ -445,10 +502,8 @@
             const mList = document.getElementById('groupMembersList'); mList.innerHTML = "";
             
             for(let uid in g.roles) {
-                const uRole = g.roles[uid];
-                const uName = (uid === myID) ? "Вы" : (cache.u[uid]?.nickname || "Неизвестный");
+                const uRole = g.roles[uid]; const uName = (uid === myID) ? "Вы" : (cache.u[uid]?.nickname || "Неизвестный");
                 let roleBadge = `<span class="role-badge role-${uRole}">${uRole.toUpperCase()}</span>`;
-                
                 let controls = "";
                 if(uid !== myID) {
                     if (isOwner) {
@@ -458,48 +513,35 @@
                         controls += `<button class="danger" style="padding:2px 5px; font-size:10px; width:auto; margin:0;" onclick="kickMember('${gid}', '${uid}')">Кик</button>`;
                     }
                 }
-
                 mList.innerHTML += `<div class="member-item"><div><b>${uName}</b> ${roleBadge}</div> <div style="display:flex;">${controls}</div></div>`;
             }
             document.getElementById('group-prof-modal').style.display = 'flex';
         }
 
-        function toggleAdmin(gid, uid, currentRole) {
-            const newRole = currentRole === 'admin' ? 'member' : 'admin';
-            db.ref(`groups/${gid}/roles/${uid}`).set(newRole);
-        }
-
-        function kickMember(gid, uid) {
-            if(confirm("Реально выгнать этого юзера?")) db.ref(`groups/${gid}/roles/${uid}`).remove();
-        }
-
+        function toggleAdmin(gid, uid, currentRole) { db.ref(`groups/${gid}/roles/${uid}`).set(currentRole === 'admin' ? 'member' : 'admin'); }
+        function kickMember(gid, uid) { if(confirm("Реально выгнать этого юзера?")) db.ref(`groups/${gid}/roles/${uid}`).remove(); }
         function addMemberPrompt() {
-            const nick = prompt("Введите точный никнейм чела (из вкладки Общее):"); if(!nick) return;
-            let targetId = null;
-            for(let id in cache.u) { if(cache.u[id].nickname.toLowerCase() === nick.toLowerCase()) { targetId = id; break; } }
-            if(!targetId) return alert("Пользователь с таким ником не найден!");
-            if(cache.g[active.id].roles && cache.g[active.id].roles[targetId]) return alert("Он уже в группе, бро!");
-            
-            db.ref(`groups/${active.id}/roles/${targetId}`).set('member'); alert("Добавлен успешно!");
+            const nick = prompt("Введите точный никнейм чела:"); if(!nick) return;
+            let targetId = null; for(let id in cache.u) { if(cache.u[id].nickname.toLowerCase() === nick.toLowerCase()) { targetId = id; break; } }
+            if(!targetId) return alert("Пользователь не найден!");
+            if(cache.g[active.id].roles && cache.g[active.id].roles[targetId]) return alert("Он уже тут!");
+            db.ref(`groups/${active.id}/roles/${targetId}`).set('member'); alert("Добавлен!");
         }
 
         function updateGroup() {
-            const gid = active.id; const newName = document.getElementById('groupNameInp').value.trim();
-            if(!newName) return alert("Группа должна иметь название!");
+            const gid = active.id; const newName = document.getElementById('groupNameInp').value.trim(); if(!newName) return alert("Название группы обязательно!");
             db.ref("groups/" + gid).update({ name: newName, avatar: document.getElementById('groupAvInp').value.trim(), desc: document.getElementById('groupDescInp').value.trim() }).then(() => { alert("Сохранено!"); closeM('group-prof-modal'); select(gid, newName, 'GROUP'); });
         }
 
         function leaveGroup() {
-            const gid = active.id;
-            if(confirm("Реально хочешь ливнуть из этой группы?")) {
-                db.ref(`groups/${gid}/roles/${myID}`).remove().then(() => {
-                    alert("Вы вышли из группы."); closeM('group-prof-modal'); active = null;
+            if(confirm("Реально хочешь ливнуть?")) {
+                db.ref(`groups/${active.id}/roles/${myID}`).remove().then(() => {
+                    alert("Вы вышли."); closeM('group-prof-modal'); active = null;
                     document.getElementById('hTitle').innerText = "Выберите чат"; document.getElementById('hDesc').innerText = ""; document.getElementById('hAv').style.display = 'none'; document.getElementById('msgBox').innerHTML = ""; render();
                 });
             }
         }
 
-        // ОСТАЛЬНЫЕ ФУНКЦИИ
         function openMe() {
             const d = cache.u[myID]; if(!d) return;
             document.getElementById('myNickNew').value = d.nickname; document.getElementById('myAvNew').value = d.avatar || ""; document.getElementById('myBioNew').value = d.bio || ""; document.getElementById('myAvPreview').src = d.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${myID}`;
@@ -508,7 +550,7 @@
         function updateMe() { db.ref("users/"+myID).update({ nickname: document.getElementById('myNickNew').value, avatar: document.getElementById('myAvNew').value, bio: document.getElementById('myBioNew').value }).then(() => { alert("Сохранено!"); closeM('my-prof-modal'); }); }
         function toggleContactSettings() { document.getElementById('contactSettings').style.display = document.getElementById('isContact').checked ? 'block' : 'none'; if (!document.getElementById('isContact').checked) { db.ref(`users/${myID}/contacts/${viewingUserId}`).remove().then(() => { render(); select(active.id, active.name, active.type); }); } }
         function saveContact() { db.ref(`users/${myID}/contacts/${viewingUserId}`).set({ locName: document.getElementById('contactLocName').value.trim(), locAv: document.getElementById('contactLocAv').value.trim() }).then(() => { alert("Контакт обновлен!"); render(); closeM('user-prof-modal'); select(active.id, getUserDisplayData(active.id).name, active.type); }); }
-        function toggleBlock() { const isB = cache.blocked[viewingUserId]; if (isB) { db.ref(`users/${myID}/blocked/${viewingUserId}`).remove().then(() => { render(); closeM('user-prof-modal'); select(active.id, active.name, active.type); }); } else { if(confirm("Уверены, что хотите кинуть его в блок?")) { db.ref(`users/${myID}/blocked/${viewingUserId}`).set(true).then(() => { render(); closeM('user-prof-modal'); select(active.id, active.name, active.type); }); } } }
+        function toggleBlock() { const isB = cache.blocked[viewingUserId]; if (isB) { db.ref(`users/${myID}/blocked/${viewingUserId}`).remove().then(() => { render(); closeM('user-prof-modal'); select(active.id, active.name, active.type); }); } else { if(confirm("Кинуть в блок?")) { db.ref(`users/${myID}/blocked/${viewingUserId}`).set(true).then(() => { render(); closeM('user-prof-modal'); select(active.id, active.name, active.type); }); } } }
         function closeM(id) { document.getElementById(id).style.display = 'none'; }
         
         function login() { authSystem.signInWithEmailAndPassword(document.getElementById('uEmail').value, document.getElementById('uPass').value).catch(err=>alert(err.message)); }
