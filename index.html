@@ -3,62 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat 6.3</title>
+    <title>VChat 6.4</title>
     <meta name="google-site-verification" content="bnrGuCFyUfxc7XB3jmiLYsr6mbgod0QWt2PHqIXGSrg" />
-    
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     
     <style>
-        /* Цветовые переменные для Темной и Светлой темы */
         :root {
-            --bg-main: #0e1621;
-            --bg-card: #17212b;
-            --bg-input: #242f3d;
-            --bg-hover: #1c2936;
-            --text-main: #ffffff;
-            --text-muted: #aaaaaa;
-            --border-color: #2b5278;
-            --accent: #58a6ff;
-            --msg-me: #2b5278;
-            --msg-he: #182533;
-            --danger: #ff6b6b;
-            --success: #2ea043;
+            --bg-main: #0e1621; --bg-card: #17212b; --bg-input: #242f3d; --bg-hover: #1c2936;
+            --text-main: #ffffff; --text-muted: #aaaaaa; --border-color: #2b5278; --accent: #58a6ff;
+            --msg-me: #2b5278; --msg-he: #182533; --danger: #ff6b6b; --success: #2ea043; --warning: #eab308;
         }
 
         body.light-mode {
-            --bg-main: #e2e8f0;
-            --bg-card: #ffffff;
-            --bg-input: #f1f5f9;
-            --bg-hover: #cbd5e1;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border-color: #cbd5e1;
-            --accent: #2563eb;
-            --msg-me: #dbeafe;
-            --msg-he: #ffffff;
-            --danger: #ef4444;
-            --success: #16a34a;
+            --bg-main: #e2e8f0; --bg-card: #ffffff; --bg-input: #f1f5f9; --bg-hover: #cbd5e1;
+            --text-main: #0f172a; --text-muted: #64748b; --border-color: #cbd5e1; --accent: #2563eb;
+            --msg-me: #dbeafe; --msg-he: #ffffff; --danger: #ef4444; --success: #16a34a; --warning: #ca8a04;
         }
 
-        /* Плавная анимация смены темы для ВСЕХ основных элементов */
-        body, html, .tg-sidebar, .tg-main, .header, .modal-card, input, textarea, .profile-header, .tab-btn, .chat-item, .device-item {
-            transition: background 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
-                        background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
-                        color 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
-                        border-color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        body, html, .tg-sidebar, .tg-main, .header, .modal-card, input, textarea, .profile-header, .tab-btn, .chat-item, .device-item, .member-item {
+            transition: background 0.5s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body, html { margin: 0; padding: 0; height: 100%; background: var(--bg-main); color: var(--text-main); font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         * { box-sizing: border-box; }
 
-        /* Крутящаяся анимация для кнопки темы */
-        @keyframes themeRotate {
-            0% { transform: scale(1) rotate(0deg); }
-            50% { transform: scale(1.2) rotate(180deg); }
-            100% { transform: scale(1) rotate(360deg); }
-        }
+        @keyframes themeRotate { 0% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.2) rotate(180deg); } 100% { transform: scale(1) rotate(360deg); } }
         .theme-spin { animation: themeRotate 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes msgIn { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -74,16 +44,17 @@
         button:active { transform: scale(0.98); }
         button.danger { background: var(--danger); }
         button.success { background: var(--success); }
+        button.warning { background: var(--warning); color: #000; }
         button.secondary { background: var(--bg-input); color: var(--text-main); padding: 6px 12px; font-size: 13px; width: auto; border: 1px solid var(--border-color); }
 
         .tg-container { display: none; height: 100vh; width: 100vw; flex-direction: row; }
-        .tg-sidebar { width: 300px; background: var(--bg-card); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; }
+        .tg-sidebar { width: 320px; background: var(--bg-card); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; }
         
         .profile-header { padding: 15px; background: var(--bg-hover); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); }
         .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid var(--accent); }
         
         .tabs { display: flex; background: var(--bg-card); border-bottom: 1px solid var(--border-color); }
-        .tab-btn { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-size: 13px; font-weight: bold; color: var(--text-muted); transition: 0.2s; border-bottom: 3px solid transparent; user-select: none; }
+        .tab-btn { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-size: 12px; font-weight: bold; color: var(--text-muted); transition: 0.2s; border-bottom: 3px solid transparent; user-select: none; }
         .tab-btn.active { color: var(--accent); border-bottom: 3px solid var(--accent); }
 
         .chat-list { flex: 1; overflow-y: auto; }
@@ -103,10 +74,14 @@
         .msg:hover .msg-del { display: inline-block; }
 
         .input-bar { padding: 15px; background: var(--bg-card); display: flex; gap: 10px; align-items: center; border-top: 1px solid var(--border-color); }
-        
         .p-info-label { font-size: 10px; color: var(--accent); text-transform: uppercase; font-weight: bold; margin-top: 10px; margin-bottom: 3px; display: block; }
-        .device-item { background: var(--bg-input); padding: 10px; border-radius: 8px; font-size: 13px; margin-top: 8px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
         
+        .device-item, .member-item { background: var(--bg-input); padding: 10px; border-radius: 8px; font-size: 13px; margin-top: 8px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .role-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-left: 5px; }
+        .role-owner { background: var(--accent); color: #fff; }
+        .role-admin { background: var(--success); color: #fff; }
+        .role-member { background: var(--text-muted); color: #fff; }
+
         .block-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); display:flex; justify-content:center; align-items:center; color:#fff; font-weight:bold; z-index:10; display:none; }
     </style>
 </head>
@@ -176,11 +151,11 @@
                     Добавить в Мои Контакты 📒
                 </label>
                 <div id="contactSettings" style="display:none; margin-top:10px; border-top:1px dashed var(--border-color); padding-top:10px;">
-                    <small style="color:var(--text-muted);">Локальное имя (видишь только ты):</small>
+                    <small style="color:var(--text-muted);">Локальное имя:</small>
                     <input type="text" id="contactLocName" placeholder="Бро / Брат / Кент">
                     <small style="color:var(--text-muted);">Локальная аватарка (URL):</small>
                     <input type="text" id="contactLocAv" placeholder="https://...">
-                    <button class="success" style="padding:6px; font-size:12px;" onclick="saveContact()">Сохранить контакт</button>
+                    <button class="success" style="padding:6px; font-size:12px;" onclick="saveContact()">Сохранить</button>
                 </div>
             </div>
 
@@ -201,14 +176,22 @@
             <div id="groupEditView" style="display:none;">
                 <label class="p-info-label">Название группы</label>
                 <input type="text" id="groupNameInp">
-                <label class="p-info-label">Аватар группы (URL)</label>
+                <label class="p-info-label">Аватар (URL)</label>
                 <input type="text" id="groupAvInp">
-                <label class="p-info-label">Описание группы</label>
+                <label class="p-info-label">Описание</label>
                 <textarea id="groupDescInp" rows="2" placeholder="О чём эта группа..."></textarea>
                 <button class="success" onclick="updateGroup()">Сохранить настройки</button>
             </div>
 
-            <button id="leaveGroupBtn" class="danger" style="margin-top:15px; display:none;" onclick="leaveGroup()">🚪 Выйти из группы</button>
+            <hr style="border:0; border-top:1px solid var(--border-color); margin:15px 0;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span class="p-info-label" style="margin:0;">👥 Участники</span>
+                <button id="addMemberBtn" class="success" style="width:auto; padding:4px 8px; font-size:11px; margin:0; display:none;" onclick="addMemberPrompt()">+ Добавить</button>
+            </div>
+            
+            <div id="groupMembersList" style="max-height: 150px; overflow-y: auto; margin-top: 10px;"></div>
+
+            <button id="leaveGroupBtn" class="danger" style="margin-top:15px;" onclick="leaveGroup()">🚪 Выйти из группы</button>
             <button class="secondary" style="width:100%; margin-top:8px;" onclick="closeM('group-prof-modal')">Закрыть</button>
         </div>
     </div>
@@ -230,6 +213,7 @@
 
             <div class="tabs">
                 <div class="tab-btn active" onclick="setTab('chats', this)">Чаты</div>
+                <div class="tab-btn" onclick="setTab('global', this)">Общее</div>
                 <div class="tab-btn" onclick="setTab('groups', this)">Группы</div>
                 <div class="tab-btn" onclick="setTab('contacts', this)">Контакты</div>
             </div>
@@ -264,40 +248,24 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     
     <script>
-        const cfg = {
-            apiKey: "AIzaSyCg30e6q0vgQifYTXgl7ERe7aC-ZrLaOiY",
-            databaseURL: "https://vchat-12103-default-rtdb.firebaseio.com",
-            projectId: "vchat-12103",
-            authDomain: "vchat-12103.firebaseapp.com"
-        };
-        firebase.initializeApp(cfg);
-        const db = firebase.database();
-        const authSystem = firebase.auth();
+        const cfg = { apiKey: "AIzaSyCg30e6q0vgQifYTXgl7ERe7aC-ZrLaOiY", databaseURL: "https://vchat-12103-default-rtdb.firebaseio.com", projectId: "vchat-12103", authDomain: "vchat-12103.firebaseapp.com" };
+        firebase.initializeApp(cfg); const db = firebase.database(); const authSystem = firebase.auth();
 
-        let myID = "";
-        let active = null;
-        let currentTab = 'chats';
-        let sessionId = "";
+        let myID = ""; let active = null; let currentTab = 'chats'; let sessionId = "";
         let cache = { u: {}, g: {}, contacts: {}, blocked: {} };
 
         if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); document.getElementById('themeBtn').innerText = '🌞'; }
         
         function toggleTheme() {
-            // Анимация кручения кнопки
-            const btn = document.getElementById('themeBtn');
-            btn.classList.add('theme-spin');
-            setTimeout(() => btn.classList.remove('theme-spin'), 500);
-
+            const btn = document.getElementById('themeBtn'); btn.classList.add('theme-spin'); setTimeout(() => btn.classList.remove('theme-spin'), 500);
             document.body.classList.toggle('light-mode');
             const isLight = document.body.classList.contains('light-mode');
-            localStorage.setItem('theme', isLight ? 'light' : 'dark');
-            btn.innerText = isLight ? '🌞' : '🌙';
+            localStorage.setItem('theme', isLight ? 'light' : 'dark'); btn.innerText = isLight ? '🌞' : '🌙';
         }
 
         authSystem.onAuthStateChanged(user => {
             if (user) {
                 myID = user.uid;
-                
                 db.ref("users/" + myID).on("value", s => {
                     const d = s.val();
                     if(!d) {
@@ -306,107 +274,66 @@
                     } else {
                         document.getElementById('myName').innerText = d.nickname;
                         document.getElementById('myAvImg').src = d.avatar || "https://api.dicebear.com/7.x/identicon/svg?seed="+myID;
-                        
-                        cache.contacts = d.contacts || {};
-                        cache.blocked = d.blocked || {};
+                        cache.contacts = d.contacts || {}; cache.blocked = d.blocked || {};
 
                         if (d.pin && d.pin.trim() !== "" && sessionStorage.getItem('vchat_pin_pass') !== 'true') {
-                            document.getElementById('login-scr').style.display = 'flex';
-                            document.getElementById('login-view').style.display = 'none';
-                            document.getElementById('pin-view').style.display = 'block';
-                            document.getElementById('authPinInp').focus();
+                            document.getElementById('login-scr').style.display = 'flex'; document.getElementById('login-view').style.display = 'none';
+                            document.getElementById('pin-view').style.display = 'block'; document.getElementById('authPinInp').focus();
                         } else {
-                            document.getElementById('login-scr').style.display = 'none'; document.getElementById('app').style.display = 'flex';
-                            registerSession();
+                            document.getElementById('login-scr').style.display = 'none'; document.getElementById('app').style.display = 'flex'; registerSession();
                         }
                     }
                 });
-
                 db.ref("users").on("value", s => { cache.u = s.val() || {}; render(); });
-                db.ref("groups").on("value", s => { cache.g = s.val() || {}; render(); });
+                db.ref("groups").on("value", s => { cache.g = s.val() || {}; render(); if(document.getElementById('group-prof-modal').style.display === 'flex' && active?.type === 'GROUP') openGroupCard(); });
             } else {
-                myID = ""; sessionStorage.clear();
-                document.getElementById('login-scr').style.display = 'flex';
-                document.getElementById('app').style.display = 'none';
+                myID = ""; sessionStorage.clear(); document.getElementById('login-scr').style.display = 'flex'; document.getElementById('app').style.display = 'none';
             }
         });
 
         function registerSession() {
             if (sessionId) return;
             sessionId = "sess_" + Date.now() + "_" + Math.floor(Math.random()*1000);
-            
-            let os = "Неизвестное устройство"; let browser = "Неизвестный браузер";
-            let ua = navigator.userAgent;
+            let os = "Неизвестное устройство"; let browser = "Неизвестный браузер"; let ua = navigator.userAgent;
             if (ua.includes("Win")) os = "Windows PC"; else if (ua.includes("Mac") && !ua.includes("iPhone")) os = "macOS"; else if (ua.includes("Android")) os = "Android Смартфон"; else if (ua.includes("iPhone")) os = "iPhone";
             if (ua.includes("Chrome")) browser = "Chrome"; else if (ua.includes("Safari") && !ua.includes("Chrome")) browser = "Safari"; else if (ua.includes("Firefox")) browser = "Firefox";
-
             let sessionRef = db.ref(`users/${myID}/sessions/${sessionId}`);
-            sessionRef.set({ os: os, browser: browser, time: new Date().toLocaleString() });
-            sessionRef.onDisconnect().remove();
-
-            sessionRef.on("value", snap => {
-                if (snap.val() === null && myID) {
-                    alert("Вас кикнули с другого устройства! Сессия завершена.");
-                    authSystem.signOut();
-                }
-            });
+            sessionRef.set({ os: os, browser: browser, time: new Date().toLocaleString() }); sessionRef.onDisconnect().remove();
+            sessionRef.on("value", snap => { if (snap.val() === null && myID) { alert("Вас кикнули с другого устройства! Сессия завершена."); authSystem.signOut(); } });
         }
 
         function loadDevices() {
             const list = document.getElementById('devices-list'); list.innerHTML = "Загрузка...";
             db.ref(`users/${myID}/sessions`).once("value", s => {
-                list.innerHTML = "";
-                const sessions = s.val() || {};
+                list.innerHTML = ""; const sessions = s.val() || {};
                 for(let sid in sessions) {
-                    const data = sessions[sid];
-                    const isMe = (sid === sessionId);
-                    list.innerHTML += `
-                        <div class="device-item">
-                            <div><b>${data.os}</b> <small style="color:var(--accent);">(${data.browser})</small><br>
-                            <small style="color:var(--text-muted); font-size:10px;">Вход: ${data.time}</small></div>
-                            ${isMe ? '<span style="background:var(--success); color:#fff; padding:3px 6px; border-radius:4px; font-size:10px;">Текущий</span>' 
-                                   : `<button class="danger" style="width:auto; padding:5px 10px; font-size:11px; margin:0;" onclick="kickSession('${sid}')">Кикнуть</button>`}
-                        </div>`;
+                    const data = sessions[sid]; const isMe = (sid === sessionId);
+                    list.innerHTML += `<div class="device-item"><div><b>${data.os}</b> <small style="color:var(--accent);">(${data.browser})</small><br><small style="color:var(--text-muted); font-size:10px;">Вход: ${data.time}</small></div>${isMe ? '<span style="background:var(--success); color:#fff; padding:3px 6px; border-radius:4px; font-size:10px;">Текущий</span>' : `<button class="danger" style="width:auto; padding:5px 10px; font-size:11px; margin:0;" onclick="kickSession('${sid}')">Кикнуть</button>`}</div>`;
                 }
             });
         }
 
-        function kickSession(sid) {
-            if(confirm("Выкинуть это устройство из аккаунта?")) {
-                db.ref(`users/${myID}/sessions/${sid}`).remove().then(()=> loadDevices());
-            }
-        }
+        function kickSession(sid) { if(confirm("Выкинуть это устройство из аккаунта?")) db.ref(`users/${myID}/sessions/${sid}`).remove().then(()=> loadDevices()); }
 
         function setTab(tabName, element) {
             currentTab = tabName;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            if(element) element.classList.add('active');
-            render();
+            if(element) element.classList.add('active'); render();
         }
 
         function getUserDisplayData(uid) {
-            const baseUser = cache.u[uid];
-            if (!baseUser) return { name: "Неизвестный", avatar: "" };
-            
-            if (cache.contacts[uid]) {
-                return {
-                    name: cache.contacts[uid].locName || baseUser.nickname,
-                    avatar: cache.contacts[uid].locAv || baseUser.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${uid}`,
-                    isContact: true
-                };
-            }
+            const baseUser = cache.u[uid]; if (!baseUser) return { name: "Неизвестный", avatar: "" };
+            if (cache.contacts[uid]) return { name: cache.contacts[uid].locName || baseUser.nickname, avatar: cache.contacts[uid].locAv || baseUser.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${uid}`, isContact: true };
             return { name: baseUser.nickname, avatar: baseUser.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${uid}`, isContact: false };
         }
 
         function render() {
-            const list = document.getElementById('chatList'); 
-            const q = document.getElementById('srch').value.toLowerCase(); 
-            list.innerHTML = "";
+            const list = document.getElementById('chatList'); const q = document.getElementById('srch').value.toLowerCase(); list.innerHTML = "";
 
             if (currentTab === 'groups' || currentTab === 'chats') {
                 for (let id in cache.g) {
                     const g = cache.g[id]; 
-                    if (g.roles && g.roles[myID] && g.name.toLowerCase().includes(q) && currentTab === 'groups') {
+                    if (g.roles && g.roles[myID] && g.name.toLowerCase().includes(q) && (currentTab === 'groups' || currentTab === 'chats')) {
                         addLi(list, g.name, g.avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${id}`, id, 'GROUP');
                     }
                 }
@@ -415,13 +342,13 @@
             for (let id in cache.u) {
                 if (id === myID) continue;
                 const dData = getUserDisplayData(id);
-                if (cache.blocked[id] && currentTab === 'chats' && !q) continue; 
+                if (cache.blocked[id] && currentTab !== 'global' && !q) continue; 
 
-                if (dData.name.toLowerCase().includes(q)) {
+                if (dData.name.toLowerCase().includes(q) || cache.u[id].nickname.toLowerCase().includes(q)) {
                     if (currentTab === 'contacts' && !dData.isContact) continue; 
                     if (currentTab === 'groups') continue; 
                     
-                    let suffix = cache.blocked[id] ? " (ЗАБЛОКИРОВАН)" : (dData.isContact ? " 📒" : "");
+                    let suffix = cache.blocked[id] ? " (БЛОК)" : (dData.isContact ? " 📒" : "");
                     addLi(list, dData.name + suffix, dData.avatar, id, 'USER');
                 }
             }
@@ -429,27 +356,20 @@
 
         function addLi(cont, name, av, id, type) {
             const d = document.createElement('div'); d.className = 'chat-item'; d.onclick = () => select(id, name, type);
-            d.innerHTML = `<img src="${av}"><div style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"><b>${name}</b><br><small style="color:var(--text-muted);font-size:10px">${type}</small></div>`;
-            cont.appendChild(d);
+            d.innerHTML = `<img src="${av}"><div style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"><b>${name}</b><br><small style="color:var(--text-muted);font-size:10px">${type}</small></div>`; cont.appendChild(d);
         }
 
         function select(id, name, type) {
-            active = { id, name, type }; 
-            document.getElementById('hTitle').innerText = name.replace(" (ЗАБЛОКИРОВАН)", "").replace(" 📒", ""); 
-            document.getElementById('msgBox').innerHTML = "";
-            const hAv = document.getElementById('hAv');
-            
+            active = { id, name, type }; document.getElementById('hTitle').innerText = name.replace(" (БЛОК)", "").replace(" 📒", ""); 
+            document.getElementById('msgBox').innerHTML = ""; const hAv = document.getElementById('hAv');
             const isBlockedByMe = cache.blocked[id];
             document.getElementById('blockOverlay').style.display = (type === 'USER' && isBlockedByMe) ? 'flex' : 'none';
             document.getElementById('msgInp').disabled = (type === 'USER' && isBlockedByMe);
 
             if(type === 'USER') {
-                const uD = getUserDisplayData(id);
-                hAv.src = uD.avatar; hAv.style.display = 'block';
-                document.getElementById('hDesc').innerText = uD.isContact ? "Мой Контакт" : "Пользователь";
+                const uD = getUserDisplayData(id); hAv.src = uD.avatar; hAv.style.display = 'block'; document.getElementById('hDesc').innerText = uD.isContact ? "Мой Контакт" : "Пользователь";
             } else {
-                hAv.src = cache.g[id].avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${id}`; hAv.style.display = 'block';
-                document.getElementById('hDesc').innerText = "Группа";
+                hAv.src = cache.g[id].avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${id}`; hAv.style.display = 'block'; document.getElementById('hDesc').innerText = "Группа";
             }
 
             const path = type === 'USER' ? (myID < id ? myID+"_"+id : id+"_"+myID) : id;
@@ -457,187 +377,136 @@
             db.ref("msgs/" + path).on("value", snapshot => {
                 document.getElementById('msgBox').innerHTML = "";
                 snapshot.forEach(child => {
-                    const m = child.val(); 
-                    const div = document.createElement('div');
-                    div.className = 'msg ' + (m.sid === myID ? 'me' : 'he');
-                    
-                    let displayNick = m.snick;
-                    if (m.sid !== myID && type === 'USER') displayNick = getUserDisplayData(m.sid).name;
-                    
+                    const m = child.val(); const div = document.createElement('div'); div.className = 'msg ' + (m.sid === myID ? 'me' : 'he');
+                    let displayNick = m.snick; if (m.sid !== myID && type === 'USER') displayNick = getUserDisplayData(m.sid).name;
                     div.innerHTML = `<div class="msg-name">${displayNick} ${m.sid === myID ? `<span class="msg-del" onclick="deleteMessage('${path}', '${child.key}')">🗑️</span>` : ""}</div>${m.txt}`;
                     document.getElementById('msgBox').appendChild(div);
-                });
-                document.getElementById('msgBox').scrollTop = document.getElementById('msgBox').scrollHeight;
+                }); document.getElementById('msgBox').scrollTop = document.getElementById('msgBox').scrollHeight;
             });
         }
 
         function sendMsg() {
             const t = document.getElementById('msgInp').value.trim(); if (!t || !active) return;
             if (active.type === 'USER' && cache.blocked[active.id]) return alert("Вы заблокировали этого пользователя!");
-
             const path = active.type === 'USER' ? (myID < active.id ? myID+"_"+active.id : active.id+"_"+myID) : active.id;
-            db.ref("msgs/" + path).push().set({ sid: myID, snick: document.getElementById('myName').innerText, txt: t });
-            document.getElementById('msgInp').value = "";
+            db.ref("msgs/" + path).push().set({ sid: myID, snick: document.getElementById('myName').innerText, txt: t }); document.getElementById('msgInp').value = "";
         }
 
         function deleteMessage(path, key) { if(confirm("Удалить?")) db.ref("msgs/" + path + "/" + key).remove(); }
 
-        // ОБЩИЙ ОБРАБОТЧИК КЛИКА ПО ШАПКЕ ЧАТА (ФИКС!)
         function openUserCardFromHeader() {
             if(!active) return;
-            
             if(active.type === 'USER') {
-                viewingUserId = active.id;
-                const dData = getUserDisplayData(viewingUserId);
-                const baseUser = cache.u[viewingUserId];
-                
-                document.getElementById('pCardAv').src = dData.avatar;
-                document.getElementById('pCardNick').innerText = dData.name;
+                viewingUserId = active.id; const dData = getUserDisplayData(viewingUserId); const baseUser = cache.u[viewingUserId];
+                document.getElementById('pCardAv').src = dData.avatar; document.getElementById('pCardNick').innerText = dData.name;
                 document.getElementById('pCardBio').innerText = baseUser?.bio || "Информация отсутствует";
                 
-                const isC = cache.contacts[viewingUserId];
-                document.getElementById('isContact').checked = !!isC;
-                document.getElementById('contactSettings').style.display = isC ? 'block' : 'none';
-                if(isC) {
-                    document.getElementById('contactLocName').value = isC.locName || "";
-                    document.getElementById('contactLocAv').value = isC.locAv || "";
-                } else {
-                    document.getElementById('contactLocName').value = ""; document.getElementById('contactLocAv').value = "";
-                }
+                const isC = cache.contacts[viewingUserId]; document.getElementById('isContact').checked = !!isC; document.getElementById('contactSettings').style.display = isC ? 'block' : 'none';
+                if(isC) { document.getElementById('contactLocName').value = isC.locName || ""; document.getElementById('contactLocAv').value = isC.locAv || ""; } else { document.getElementById('contactLocName').value = ""; document.getElementById('contactLocAv').value = ""; }
 
-                const isB = cache.blocked[viewingUserId];
-                const bBtn = document.getElementById('blockBtn');
-                bBtn.innerText = isB ? "✅ Разблокировать пользователя" : "🚫 Заблокировать пользователя";
-                bBtn.className = isB ? "success" : "danger";
-
+                const isB = cache.blocked[viewingUserId]; const bBtn = document.getElementById('blockBtn');
+                bBtn.innerText = isB ? "✅ Разблокировать" : "🚫 Заблокировать"; bBtn.className = isB ? "success" : "danger";
                 document.getElementById('user-prof-modal').style.display = 'flex';
-            } 
-            // Клик по группе открывает модалку группы
-            else if(active.type === 'GROUP') {
-                openGroupCard();
-            }
+            } else if(active.type === 'GROUP') { openGroupCard(); }
         }
 
-        // ЛОГИКА УПРАВЛЕНИЯ ГРУППОЙ
+        // ЛОГИКА ГРУПП И РОЛЕЙ
         function openGroupCard() {
-            const gid = active.id;
-            const g = cache.g[gid];
-            if(!g) return;
-
+            const gid = active.id; const g = cache.g[gid]; if(!g) return;
             document.getElementById('gCardAv').src = g.avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${gid}`;
             document.getElementById('gCardNameTitle').innerText = g.name;
 
-            const isOwner = (g.roles && g.roles[myID] === 'owner');
+            const myRole = g.roles ? g.roles[myID] : null;
+            const isOwner = (myRole === 'owner');
+            const isAdmin = (myRole === 'admin');
+            const canEditSettings = isOwner;
 
-            if(isOwner) {
-                document.getElementById('groupEditView').style.display = 'block';
-                document.getElementById('groupReadView').style.display = 'none';
-                document.getElementById('groupNameInp').value = g.name;
-                document.getElementById('groupAvInp').value = g.avatar || "";
-                document.getElementById('groupDescInp').value = g.desc || "";
-                document.getElementById('leaveGroupBtn').style.display = 'none';
+            // Настройки
+            if(canEditSettings) {
+                document.getElementById('groupEditView').style.display = 'block'; document.getElementById('groupReadView').style.display = 'none';
+                document.getElementById('groupNameInp').value = g.name; document.getElementById('groupAvInp').value = g.avatar || ""; document.getElementById('groupDescInp').value = g.desc || "";
             } else {
-                document.getElementById('groupEditView').style.display = 'none';
-                document.getElementById('groupReadView').style.display = 'block';
+                document.getElementById('groupEditView').style.display = 'none'; document.getElementById('groupReadView').style.display = 'block';
                 document.getElementById('gCardDescView').innerText = g.desc || "Описание отсутствует";
-                document.getElementById('leaveGroupBtn').style.display = 'block';
             }
 
+            // Участники
+            document.getElementById('addMemberBtn').style.display = (isOwner || isAdmin) ? 'block' : 'none';
+            const mList = document.getElementById('groupMembersList'); mList.innerHTML = "";
+            
+            for(let uid in g.roles) {
+                const uRole = g.roles[uid];
+                const uName = (uid === myID) ? "Вы" : (cache.u[uid]?.nickname || "Неизвестный");
+                let roleBadge = `<span class="role-badge role-${uRole}">${uRole.toUpperCase()}</span>`;
+                
+                let controls = "";
+                if(uid !== myID) {
+                    if (isOwner) {
+                        controls += `<button class="${uRole === 'admin' ? 'warning' : 'success'}" style="padding:2px 5px; font-size:10px; width:auto; margin:0 5px;" onclick="toggleAdmin('${gid}', '${uid}', '${uRole}')">${uRole === 'admin' ? 'Снять Админа' : 'Дать Админа'}</button>`;
+                        controls += `<button class="danger" style="padding:2px 5px; font-size:10px; width:auto; margin:0;" onclick="kickMember('${gid}', '${uid}')">Кик</button>`;
+                    } else if (isAdmin && uRole === 'member') {
+                        controls += `<button class="danger" style="padding:2px 5px; font-size:10px; width:auto; margin:0;" onclick="kickMember('${gid}', '${uid}')">Кик</button>`;
+                    }
+                }
+
+                mList.innerHTML += `<div class="member-item"><div><b>${uName}</b> ${roleBadge}</div> <div style="display:flex;">${controls}</div></div>`;
+            }
             document.getElementById('group-prof-modal').style.display = 'flex';
         }
 
+        function toggleAdmin(gid, uid, currentRole) {
+            const newRole = currentRole === 'admin' ? 'member' : 'admin';
+            db.ref(`groups/${gid}/roles/${uid}`).set(newRole);
+        }
+
+        function kickMember(gid, uid) {
+            if(confirm("Реально выгнать этого юзера?")) db.ref(`groups/${gid}/roles/${uid}`).remove();
+        }
+
+        function addMemberPrompt() {
+            const nick = prompt("Введите точный никнейм чела (из вкладки Общее):"); if(!nick) return;
+            let targetId = null;
+            for(let id in cache.u) { if(cache.u[id].nickname.toLowerCase() === nick.toLowerCase()) { targetId = id; break; } }
+            if(!targetId) return alert("Пользователь с таким ником не найден!");
+            if(cache.g[active.id].roles && cache.g[active.id].roles[targetId]) return alert("Он уже в группе, бро!");
+            
+            db.ref(`groups/${active.id}/roles/${targetId}`).set('member'); alert("Добавлен успешно!");
+        }
+
         function updateGroup() {
-            const gid = active.id;
-            const newName = document.getElementById('groupNameInp').value.trim();
-            const newAv = document.getElementById('groupAvInp').value.trim();
-            const newDesc = document.getElementById('groupDescInp').value.trim();
-
+            const gid = active.id; const newName = document.getElementById('groupNameInp').value.trim();
             if(!newName) return alert("Группа должна иметь название!");
-
-            db.ref("groups/" + gid).update({
-                name: newName,
-                avatar: newAv,
-                desc: newDesc
-            }).then(() => {
-                alert("Настройки группы сохранены!");
-                closeM('group-prof-modal');
-                select(gid, newName, 'GROUP'); // Обновляем шапку чата
-            });
+            db.ref("groups/" + gid).update({ name: newName, avatar: document.getElementById('groupAvInp').value.trim(), desc: document.getElementById('groupDescInp').value.trim() }).then(() => { alert("Сохранено!"); closeM('group-prof-modal'); select(gid, newName, 'GROUP'); });
         }
 
         function leaveGroup() {
             const gid = active.id;
             if(confirm("Реально хочешь ливнуть из этой группы?")) {
                 db.ref(`groups/${gid}/roles/${myID}`).remove().then(() => {
-                    alert("Вы вышли из группы.");
-                    closeM('group-prof-modal');
-                    active = null;
-                    document.getElementById('hTitle').innerText = "Выберите чат";
-                    document.getElementById('hDesc').innerText = "";
-                    document.getElementById('hAv').style.display = 'none';
-                    document.getElementById('msgBox').innerHTML = "";
-                    render();
+                    alert("Вы вышли из группы."); closeM('group-prof-modal'); active = null;
+                    document.getElementById('hTitle').innerText = "Выберите чат"; document.getElementById('hDesc').innerText = ""; document.getElementById('hAv').style.display = 'none'; document.getElementById('msgBox').innerHTML = ""; render();
                 });
             }
         }
 
+        // ОСТАЛЬНЫЕ ФУНКЦИИ
         function openMe() {
             const d = cache.u[myID]; if(!d) return;
-            document.getElementById('myNickNew').value = d.nickname; 
-            document.getElementById('myAvNew').value = d.avatar || "";
-            document.getElementById('myBioNew').value = d.bio || "";
-            document.getElementById('myAvPreview').src = d.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${myID}`;
-            loadDevices();
-            document.getElementById('my-prof-modal').style.display='flex';
+            document.getElementById('myNickNew').value = d.nickname; document.getElementById('myAvNew').value = d.avatar || ""; document.getElementById('myBioNew').value = d.bio || ""; document.getElementById('myAvPreview').src = d.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${myID}`;
+            loadDevices(); document.getElementById('my-prof-modal').style.display='flex';
         }
-        function updateMe() {
-            db.ref("users/"+myID).update({ 
-                nickname: document.getElementById('myNickNew').value, 
-                avatar: document.getElementById('myAvNew').value,
-                bio: document.getElementById('myBioNew').value
-            }).then(() => { alert("Сохранено!"); closeM('my-prof-modal'); });
-        }
-
-        function toggleContactSettings() {
-            document.getElementById('contactSettings').style.display = document.getElementById('isContact').checked ? 'block' : 'none';
-            if (!document.getElementById('isContact').checked) {
-                db.ref(`users/${myID}/contacts/${viewingUserId}`).remove().then(() => { render(); select(active.id, active.name, active.type); });
-            }
-        }
-
-        function saveContact() {
-            const locN = document.getElementById('contactLocName').value.trim();
-            const locA = document.getElementById('contactLocAv').value.trim();
-            db.ref(`users/${myID}/contacts/${viewingUserId}`).set({ locName: locN, locAv: locA }).then(() => {
-                alert("Контакт обновлен!"); render(); closeM('user-prof-modal'); select(active.id, getUserDisplayData(active.id).name, active.type);
-            });
-        }
-
-        function toggleBlock() {
-            const isB = cache.blocked[viewingUserId];
-            if (isB) {
-                db.ref(`users/${myID}/blocked/${viewingUserId}`).remove().then(() => { render(); closeM('user-prof-modal'); select(active.id, active.name, active.type); });
-            } else {
-                if(confirm("Уверены, что хотите кинуть его в блок? Он не сможет писать, чат будет скрыт.")) {
-                    db.ref(`users/${myID}/blocked/${viewingUserId}`).set(true).then(() => { render(); closeM('user-prof-modal'); select(active.id, active.name, active.type); });
-                }
-            }
-        }
-
+        function updateMe() { db.ref("users/"+myID).update({ nickname: document.getElementById('myNickNew').value, avatar: document.getElementById('myAvNew').value, bio: document.getElementById('myBioNew').value }).then(() => { alert("Сохранено!"); closeM('my-prof-modal'); }); }
+        function toggleContactSettings() { document.getElementById('contactSettings').style.display = document.getElementById('isContact').checked ? 'block' : 'none'; if (!document.getElementById('isContact').checked) { db.ref(`users/${myID}/contacts/${viewingUserId}`).remove().then(() => { render(); select(active.id, active.name, active.type); }); } }
+        function saveContact() { db.ref(`users/${myID}/contacts/${viewingUserId}`).set({ locName: document.getElementById('contactLocName').value.trim(), locAv: document.getElementById('contactLocAv').value.trim() }).then(() => { alert("Контакт обновлен!"); render(); closeM('user-prof-modal'); select(active.id, getUserDisplayData(active.id).name, active.type); }); }
+        function toggleBlock() { const isB = cache.blocked[viewingUserId]; if (isB) { db.ref(`users/${myID}/blocked/${viewingUserId}`).remove().then(() => { render(); closeM('user-prof-modal'); select(active.id, active.name, active.type); }); } else { if(confirm("Уверены, что хотите кинуть его в блок?")) { db.ref(`users/${myID}/blocked/${viewingUserId}`).set(true).then(() => { render(); closeM('user-prof-modal'); select(active.id, active.name, active.type); }); } } }
         function closeM(id) { document.getElementById(id).style.display = 'none'; }
-
-        function login() { const e=document.getElementById('uEmail').value, p=document.getElementById('uPass').value; authSystem.signInWithEmailAndPassword(e, p).catch(err=>alert(err.message)); }
-        function register() {
-            const e=document.getElementById('regEmail').value, p=document.getElementById('regPass').value, n=document.getElementById('uNick').value, pin=document.getElementById('regPin').value;
-            authSystem.createUserWithEmailAndPassword(e, p).then(c => { db.ref("users/"+c.user.uid).set({ nickname: n, avatar:"", bio: "Я в VChat!", pin: pin||"" }); }).catch(err=>alert(err.message));
-        }
-        function verifyPin() {
-            const p = document.getElementById('authPinInp').value;
-            db.ref("users/"+myID+"/pin").once("value", s => { if(s.val()===p) { sessionStorage.setItem('vchat_pin_pass','true'); document.getElementById('login-scr').style.display='none'; document.getElementById('app').style.display='flex'; registerSession(); } else alert("Неверный ПИН!"); });
-        }
+        
+        function login() { authSystem.signInWithEmailAndPassword(document.getElementById('uEmail').value, document.getElementById('uPass').value).catch(err=>alert(err.message)); }
+        function register() { authSystem.createUserWithEmailAndPassword(document.getElementById('regEmail').value, document.getElementById('regPass').value).then(c => { db.ref("users/"+c.user.uid).set({ nickname: document.getElementById('uNick').value, avatar:"", bio: "Я в VChat!", pin: document.getElementById('regPin').value||"" }); }).catch(err=>alert(err.message)); }
+        function verifyPin() { const p = document.getElementById('authPinInp').value; db.ref("users/"+myID+"/pin").once("value", s => { if(s.val()===p) { sessionStorage.setItem('vchat_pin_pass','true'); document.getElementById('login-scr').style.display='none'; document.getElementById('app').style.display='flex'; registerSession(); } else alert("Неверный ПИН!"); }); }
         function loginWithGoogle() { authSystem.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
         function logOut() { authSystem.signOut().then(()=>location.reload()); }
-        function newG() { const n=prompt("Имя группы:"); if(n) db.ref("groups/grp_"+Date.now()).set({name:n, roles:{[myID]:'owner'}, desc:"Добро пожаловать в новую группу!", avatar:""}); }
+        function newG() { const n=prompt("Имя группы:"); if(n) db.ref("groups/grp_"+Date.now()).set({name:n, roles:{[myID]:'owner'}, desc:"Добро пожаловать!", avatar:""}); }
     </script>
 </body>
 </html>
