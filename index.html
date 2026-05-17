@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat 7.2</title>
+    <title>VChat 7.3</title>
     <meta name="google-site-verification" content="bnrGuCFyUfxc7XB3jmiLYsr6mbgod0QWt2PHqIXGSrg" />
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     
@@ -52,7 +52,7 @@
         .tg-container { display: none; height: 100vh; width: 100vw; flex-direction: row; }
         .tg-sidebar { width: 320px; background: var(--bg-card); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; }
         
-        .profile-header { padding: 15px; background: var(--bg-hover); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); }
+        .profile-header { padding: 15px; background: var(--bg-hover); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); gap: 5px; }
         .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid var(--accent); }
         .avatar:hover { transform: scale(1.05); }
         
@@ -96,9 +96,9 @@
         .fwd-list-item { padding: 10px; border-bottom: 1px solid var(--border-color); cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.2s; }
         .fwd-list-item:hover { background: var(--bg-hover); transform: scale(1.02); }
 
-        .sys-control-bar { display: none; background: var(--bg-hover); border-bottom: 1px solid var(--border-color); padding: 5px 10px; gap: 8px; justify-content: space-around; }
-        .sys-btn { background: transparent; color: var(--text-muted); border: none; padding: 5px; margin: 0; width: auto; font-size: 14px; font-weight: normal; border-radius: 6px; }
-        .sys-btn:hover { color: var(--accent); background: rgba(88, 166, 255, 0.1); transform: scale(1.05); }
+        .header-actions-box { display: flex; gap: 5px; }
+        .hdr-icon-btn { background: transparent; border: none; font-size: 16px; padding: 6px; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 6px; color: var(--text-muted); }
+        .hdr-icon-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-main); }
     </style>
 </head>
 <body>
@@ -133,7 +133,7 @@
             <div style="background: var(--bg-main); padding: 12px; border-radius: 8px; border:1px solid var(--border-color); font-size: 13px; margin-bottom: 10px;">
                 <b style="color:var(--success);">Текущая сессия:</b> VChat Web-Client (Active)
             </div>
-            <p style="font-size:12px; color:var(--text-muted);">Будущие сессии и другие ваши браузеры будут отображаться в этом списке.</p>
+            <p style="font-size:12px; color:var(--text-muted);">Все активные сессии вашего профиля отображаются здесь.</p>
             <button class="secondary" style="width:100%; margin-top:15px;" onclick="closeM('devices-modal')">Закрыть</button>
         </div>
     </div>
@@ -143,8 +143,18 @@
             <h3 style="margin-top:0; color:var(--accent);">Создать группу 👥</h3>
             <input type="text" id="newGroupName" placeholder="Название группы">
             <input type="text" id="newGroupAv" placeholder="Ссылка на аватарку группы">
-            <button class="success" onclick="executeCreateGroup()">Создать новую группу</button>
+            <button class="success" onclick="executeCreateGroup()">Создать группу</button>
             <button class="secondary" style="width:100%; margin-top:8px;" onclick="closeM('create-group-modal')">Отмена</button>
+        </div>
+    </div>
+
+    <div id="tabs-settings-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h3 style="margin-top:0; color:var(--accent);">Настройка вкладок ⚙️</h3>
+            <p style="font-size:11px; color:var(--text-muted); margin-bottom:15px;">Измените названия вкладок под себя:</p>
+            <div id="tabs-edit-list"></div>
+            <button class="success" onclick="saveTabsConfig()" style="margin-top: 15px;">Сохранить изменения</button>
+            <button class="secondary" style="width:100%; margin-top:8px;" onclick="closeM('tabs-settings-modal')">Закрыть</button>
         </div>
     </div>
 
@@ -161,7 +171,7 @@
                 <button class="danger" onclick="deleteGroupPermanently()">🗑️ Удалить группу навсегда</button>
             </div>
             <div id="groupUserPanel" style="display:none;">
-                <p style="font-size:14px; text-align:center;">Вы состоите в этой группе.</p>
+                <p style="font-size:14px; text-align:center;">Вы участник этой группы.</p>
                 <button class="danger" onclick="leaveGroup()">🚪 Выйти из группы</button>
             </div>
             <button class="secondary" style="width:100%; margin-top:15px;" onclick="closeM('group-manage-modal')">Закрыть</button>
@@ -181,8 +191,7 @@
             <button class="success" onclick="updateMe()">Сохранить профиль</button>
             <hr style="border:0; border-top:1px solid var(--border-color); margin:15px 0;">
             
-            <button class="warning" style="width:100%; margin-bottom:8px;" onclick="closeM('my-prof-modal'); document.getElementById('devices-modal').style.display='flex'">💻 Мои Устройства (Сессии)</button>
-            <button class="secondary" style="width:100%; margin-bottom:8px;" onclick="closeM('my-prof-modal'); initTabsModal();">⚙️ Настройка вкладок</button>
+            <button class="warning" style="width:100%; margin-bottom:8px;" onclick="closeM('my-prof-modal'); document.getElementById('devices-modal').style.display='flex'">💻 Мои Сессии</button>
             <button class="secondary" style="width:100%;" onclick="closeM('my-prof-modal')">Закрыть</button>
             <button class="danger" style="margin-top:8px;" onclick="logOut()">Выйти из аккаунта</button>
         </div>
@@ -210,16 +219,6 @@
         </div>
     </div>
 
-    <div id="tabs-settings-modal" class="modal-overlay">
-        <div class="modal-card">
-            <h3 style="margin-top:0; color:var(--accent);">Настройка вкладок ⚙️</h3>
-            <p style="font-size:11px; color:var(--text-muted); margin-bottom:15px;">Измените названия системных вкладок под себя:</p>
-            <div id="tabs-edit-list"></div>
-            <button class="success" onclick="saveTabsConfig()" style="margin-top: 15px;">Сохранить изменения</button>
-            <button class="secondary" style="width:100%; margin-top:8px;" onclick="closeM('tabs-settings-modal')">Закрыть</button>
-        </div>
-    </div>
-
     <div id="forward-modal" class="modal-overlay">
         <div class="modal-card">
             <h3 style="margin-top:0; color:var(--accent);">Переслать кому? ➡️</h3>
@@ -232,17 +231,17 @@
     <div id="app" class="tg-container">
         <aside class="tg-sidebar">
             <div class="profile-header">
-                <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="openMe()">
+                <div style="display:flex; align-items:center; gap:10px; cursor:pointer; flex:1;" onclick="openMe()">
                     <img id="myAvImg" class="avatar" src="">
-                    <div id="myName" style="font-weight:bold;">Загрузка...</div>
+                    <div id="myName" style="font-weight:bold; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:120px;">Загрузка...</div>
                 </div>
-                <button class="secondary" style="border-radius:50%; width:35px; height:35px; padding:0; font-size:16px;" onclick="toggleTheme()" id="themeBtn">🌙</button>
+                <div class="header-actions-box">
+                    <button class="hdr-icon-btn" onclick="document.getElementById('create-group-modal').style.display='flex'" title="Создать группу">➕</button>
+                    <button class="hdr-icon-btn" onclick="initTabsModal()" title="Настройка вкладок">⚙️</button>
+                    <button class="hdr-icon-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+                </div>
             </div>
             
-            <div class="sys-control-bar" id="groupControlBar">
-                <button class="sys-btn" onclick="document.getElementById('create-group-modal').style.display='flex'" style="width:100%; font-weight:bold;">➕ Создать новую группу</button>
-            </div>
-
             <div style="padding:10px; display:flex; gap:5px;">
                 <input type="text" id="srch" placeholder="Поиск..." oninput="render()" style="margin:0; flex:1;">
             </div>
@@ -362,6 +361,7 @@
                 document.getElementById('newGroupName').value = "";
                 document.getElementById('newGroupAv').value = "";
                 closeM('create-group-modal');
+                render();
             });
         }
 
@@ -383,7 +383,7 @@
                 if(val) t.name = val;
             });
             localStorage.setItem('vchat_tabs_cfg', JSON.stringify(tabsConfig));
-            alert("Конфигурация вкладок изменена!");
+            alert("Вкладки обновлены!");
             closeM('tabs-settings-modal');
             renderTabs();
         }
@@ -401,17 +401,13 @@
             if (isPinned) { db.ref(`users/${myID}/pins/${id}`).remove(); } else { db.ref(`users/${myID}/pins/${id}`).set(true); }
         }
 
-        // ИСПРАВЛЕННЫЙ ОКОНЧАТЕЛЬНЫЙ РЕНДЕР: КНОПКИ ГРУПП ТОЛЬКО В ГРУППАХ, ГРУППЫ УБРАНЫ ИЗ ЧАТОВ СОВСЕМ
+        // ИСПРАВЛЕННЫЙ ФИЛЬТР: Вкладка "Чаты" теперь выводит все активные личные диалоги
         function render() {
             const list = document.getElementById('chatList'); if(!list) return;
             const q = document.getElementById('srch').value.toLowerCase(); list.innerHTML = "";
             let items = [];
 
-            // Управление отображением панели создания групп (только во вкладке Группы)
-            const gBar = document.getElementById('groupControlBar');
-            if (currentTab === 'groups') { gBar.style.display = 'flex'; } else { gBar.style.display = 'none'; }
-
-            // 1. Сбор ГРУПП (Исключаем из вкладки chats насовсем)
+            // 1. Сбор ГРУПП (Только в глобальном поиске или вкладке Группы)
             for (let id in cache.g) {
                 const g = cache.g[id]; 
                 if (g.name.toLowerCase().includes(q)) {
@@ -421,7 +417,7 @@
                 }
             }
             
-            // 2. Сбор ПОЛЬЗОВАТЕЛЕЙ
+            // 2. Сбор ПОЛЬЗОВАТЕЛЕЙ (Личные чаты)
             for (let id in cache.u) {
                 if (id === myID) continue;
                 const dData = getUserDisplayData(id);
@@ -430,6 +426,7 @@
                 if (dData.name.toLowerCase().includes(q) || cache.u[id].nickname.toLowerCase().includes(q)) {
                     if (currentTab === 'groups') continue; 
                     if (currentTab === 'contacts' && !dData.isContact) continue; 
+                    // Если вкладка Чаты — показываем только тех, кто есть в списке активных диалогов (myChats)
                     if (currentTab === 'chats' && (!cache.myChats || !cache.myChats[id])) continue; 
                     
                     let suffix = cache.blocked[id] ? " (БЛОК)" : (dData.isContact ? " 📒" : "");
@@ -457,7 +454,7 @@
 
             if(type === 'USER') {
                 const uD = getUserDisplayData(id); hAv.src = uD.avatar; hAv.style.display = 'block'; document.getElementById('hDesc').innerText = uD.isContact ? "Мой Контакт" : "Пользователь";
-            } else { hAv.src = cache.g[id].avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${id}`; hAv.style.display = 'block'; document.getElementById('hDesc').innerText = "Группа (Нажмите для управления)"; }
+            } else { hAv.src = cache.g[id].avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${id}`; hAv.style.display = 'block'; document.getElementById('hDesc').innerText = "Группа ⚙️ (Нажми для управления)"; }
 
             const path = type === 'USER' ? (myID < id ? myID+"_"+id : id+"_"+myID) : id;
             db.ref("msgs/" + path).off();
@@ -492,7 +489,6 @@
             });
         }
 
-        // ЛОГИКА ДЛЯ ВЫЗОВА ОКНА УПРАВЛЕНИЯ (ЛИБО ЮЗЕР ЛИБО ГРУППА)
         function openChatContextInfo() {
             if(!active) return;
             if(active.type === 'USER') {
@@ -507,7 +503,6 @@
                 bBtn.innerText = isB ? "✅ Разблокировать" : "🚫 Заблокировать"; bBtn.className = isB ? "success" : "danger";
                 document.getElementById('user-prof-modal').style.display = 'flex';
             } else {
-                // Открытие панели управления ГРУППОЙ
                 const gId = active.id; const gData = cache.g[gId]; if(!gData) return;
                 document.getElementById('gManageTitle').innerText = `Управление: ${gData.name}`;
                 
@@ -525,7 +520,6 @@
             }
         }
 
-        // ФУНКЦИИ УПРАВЛЕНИЯ ГРУППОЙ ДЛЯ СОЗДАТЕЛЯ И УЧАСТНИКА
         function updateGroupSettings() {
             if(!active || active.type !== 'GROUP') return;
             const newN = document.getElementById('editGroupName').value.trim();
@@ -540,19 +534,25 @@
             });
         }
 
+        // СБРОС ИНТЕРФЕЙСА ПРИ УДАЛЕНИИ ИЛИ ВЫХОДЕ ИЗ ГРУППЫ
+        function resetActiveChatState() {
+            closeM('group-manage-modal');
+            active = null;
+            document.getElementById('hTitle').innerText = "Выберите чат";
+            document.getElementById('hDesc').innerText = "";
+            document.getElementById('hAv').style.display = 'none';
+            document.getElementById('msgBox').innerHTML = "";
+            render();
+        }
+
         function deleteGroupPermanently() {
             if(!active || active.type !== 'GROUP') return;
-            if(confirm("Вы действительно хотите БЕЗВОЗВРАТНО удалить эту группу и все её сообщения?")) {
+            if(confirm("Вы действительно хотите БЕЗВОЗВРАТНО удалить эту группу?")) {
                 const gId = active.id;
                 db.ref(`msgs/${gId}`).remove();
                 db.ref(`groups/${gId}`).remove().then(() => {
                     alert("Группа полностью удалена.");
-                    closeM('group-manage-modal');
-                    active = null;
-                    document.getElementById('hTitle').innerText = "Выберите чат";
-                    document.getElementById('hAv').style.display = 'none';
-                    document.getElementById('msgBox').innerHTML = "";
-                    render();
+                    resetActiveChatState();
                 });
             }
         }
@@ -562,12 +562,7 @@
             if(confirm("Выйти из этой группы?")) {
                 db.ref(`groups/${active.id}/roles/${myID}`).remove().then(() => {
                     alert("Вы вышли из группы.");
-                    closeM('group-manage-modal');
-                    active = null;
-                    document.getElementById('hTitle').innerText = "Выберите чат";
-                    document.getElementById('hAv').style.display = 'none';
-                    document.getElementById('msgBox').innerHTML = "";
-                    render();
+                    resetActiveChatState();
                 });
             }
         }
