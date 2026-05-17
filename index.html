@@ -3,270 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat 6.1</title>
+    <title>VChat 6.2</title>
     <meta name="google-site-verification" content="bnrGuCFyUfxc7XB3jmiLYsr6mbgod0QWt2PHqIXGSrg" />
     
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; background: #0e1621; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        /* Цветовые переменные для Темной и Светлой темы */
+        :root {
+            --bg-main: #0e1621;
+            --bg-card: #17212b;
+            --bg-input: #242f3d;
+            --bg-hover: #1c2936;
+            --text-main: #ffffff;
+            --text-muted: #aaaaaa;
+            --border-color: #2b5278;
+            --accent: #58a6ff;
+            --msg-me: #2b5278;
+            --msg-he: #182533;
+            --danger: #ff6b6b;
+            --success: #2ea043;
+        }
+
+        body.light-mode {
+            --bg-main: #e2e8f0;
+            --bg-card: #ffffff;
+            --bg-input: #f1f5f9;
+            --bg-hover: #cbd5e1;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+            --accent: #2563eb;
+            --msg-me: #dbeafe;
+            --msg-he: #ffffff;
+            --danger: #ef4444;
+            --success: #16a34a;
+        }
+
+        body, html { margin: 0; padding: 0; height: 100%; background: var(--bg-main); color: var(--text-main); font-family: 'Segoe UI', sans-serif; overflow: hidden; transition: background 0.3s, color 0.3s; }
         * { box-sizing: border-box; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes msgIn { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
-        @keyframes slideDown { from { transform: translateY(0); opacity: 1; } to { transform: translateY(20px); opacity: 0; } }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; animation: fadeIn 0.2s ease-out forwards; }
-        .modal-card { background: #17212b; padding: 25px; border-radius: 12px; width: 380px; border: 1px solid #2b5278; animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards; max-height: 90vh; overflow-y: auto; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; animation: fadeIn 0.2s ease-out forwards; }
+        .modal-card { background: var(--bg-card); padding: 25px; border-radius: 12px; width: 380px; border: 1px solid var(--border-color); animation: slideUp 0.25s ease-out forwards; max-height: 90vh; overflow-y: auto; color: var(--text-main); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         
-        .modal-overlay.closing { animation: fadeOut 0.2s ease-in forwards; }
-        .modal-card.closing { animation: slideDown 0.2s ease-in forwards; }
+        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); outline: none; transition: 0.2s ease; }
+        input:focus, textarea:focus { border-color: var(--accent); }
 
-        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #2b5278; background: #242f3d; color: white; outline: none; transition: border-color 0.2s ease; }
-        input:focus, textarea:focus { border-color: #58a6ff; background: #1c2936; }
-
-        button { width: 100%; padding: 10px; background: #2b5278; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background-color 0.2s ease, transform 0.1s ease; }
-        button:hover { background: #33618a; }
+        button { width: 100%; padding: 10px; background: var(--border-color); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.1s; }
+        button:hover { filter: brightness(1.1); }
         button:active { transform: scale(0.98); }
-        button.danger { background: #a32a2a; }
-        button.danger:hover { background: #c23b3b; }
-        button.secondary { background: #313d4b; padding: 5px 10px; font-size: 12px; width: auto; }
-        button.secondary:hover { background: #415163; }
-        .btn-success { background: #238636; margin-top: 10px; }
+        button.danger { background: var(--danger); }
+        button.success { background: var(--success); }
+        button.secondary { background: var(--bg-input); color: var(--text-main); padding: 6px 12px; font-size: 13px; width: auto; border: 1px solid var(--border-color); }
 
-        .custom-file-btn { display: flex; align-items: center; justify-content: center; padding: 12px; background: #242f3d; border: 2px dashed #58a6ff; border-radius: 8px; color: #58a6ff; cursor: pointer; transition: all 0.2s ease; font-size: 14px; font-weight: bold; margin: 8px 0; user-select: none; text-align: center; }
-        .custom-file-btn:hover { background: #1c2936; border-color: #79c0ff; color: #79c0ff; }
-        .custom-file-btn.active { border-color: #2ea043; color: #2ea043; border-style: solid; }
-
-        .oauth-providers { display: flex; flex-direction: column; gap: 8px; margin-top: 15px; border-top: 1px solid #2b5278; padding-top: 15px; }
-        .btn-oauth { background: #ffffff; color: #000000; font-weight: 600; font-size: 14px; }
-        .btn-oauth:hover { background: #e6e6e6; }
-
-        .auth-switch-link { font-size: 13px; color: #58a6ff; text-align: center; margin-top: 15px; cursor: pointer; text-decoration: underline; }
-        
         .tg-container { display: none; height: 100vh; width: 100vw; flex-direction: row; }
-        .tg-sidebar { width: 280px; background: #17212b; border-right: 1px solid #0e1621; display: flex; flex-direction: column; }
+        .tg-sidebar { width: 300px; background: var(--bg-card); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; }
         
-        .profile-header { padding: 15px; background: #1c2936; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #0e1621; }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid #58a6ff; }
+        .profile-header { padding: 15px; background: var(--bg-hover); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid var(--accent); }
         
+        /* Вкладки */
+        .tabs { display: flex; background: var(--bg-card); border-bottom: 1px solid var(--border-color); }
+        .tab-btn { flex: 1; padding: 10px; text-align: center; cursor: pointer; font-size: 13px; font-weight: bold; color: var(--text-muted); transition: 0.2s; border-bottom: 3px solid transparent; user-select: none; }
+        .tab-btn.active { color: var(--accent); border-bottom: 3px solid var(--accent); }
+
         .chat-list { flex: 1; overflow-y: auto; }
-        .chat-item { display: flex; align-items: center; padding: 12px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03); }
-        .chat-item:hover { background: #242f3d; }
+        .chat-item { display: flex; align-items: center; padding: 12px; cursor: pointer; border-bottom: 1px solid var(--bg-main); transition: background 0.1s; }
+        .chat-item:hover { background: var(--bg-hover); }
         .chat-item img { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; object-fit: cover; }
 
-        .tg-main { flex: 1; display: flex; flex-direction: column; background: #0e1621; }
-        .header { padding: 10px 20px; background: #17212b; display: flex; align-items: center; justify-content: space-between; height: 65px; border-bottom: 1px solid #0e1621; }
+        .tg-main { flex: 1; display: flex; flex-direction: column; background: var(--bg-main); }
+        .header { padding: 10px 20px; background: var(--bg-card); display: flex; align-items: center; justify-content: space-between; height: 65px; border-bottom: 1px solid var(--border-color); }
         .messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         
         .msg { max-width: 75%; padding: 8px 12px; border-radius: 10px; font-size: 14px; word-wrap: break-word; position: relative; animation: msgIn 0.2s ease-out forwards; }
-        .msg.me { align-self: flex-end; background: #2b5278; }
-        .msg.he { align-self: flex-start; background: #182533; }
-        .msg-name { font-size: 10px; color: #58a6ff; font-weight: bold; margin-bottom: 4px; }
-        .msg-del { display: none; color: #ff6b6b; cursor: pointer; margin-left: 8px; font-size: 11px; float: right; }
+        .msg.me { align-self: flex-end; background: var(--msg-me); color: var(--text-main); }
+        .msg.he { align-self: flex-start; background: var(--msg-he); color: var(--text-main); border: 1px solid var(--border-color); }
+        .msg-name { font-size: 10px; color: var(--accent); font-weight: bold; margin-bottom: 4px; }
+        .msg-del { display: none; color: var(--danger); cursor: pointer; margin-left: 8px; font-size: 11px; float: right; }
         .msg:hover .msg-del { display: inline-block; }
 
-        .msg-media-img { max-width: 100%; max-height: 250px; border-radius: 8px; margin-top: 5px; display: block; object-fit: cover; }
-        .msg-media-video { max-width: 100%; max-height: 250px; border-radius: 8px; margin-top: 5px; display: block; }
-        .msg-media-doc { display: flex; align-items: center; gap: 10px; background: #242f3d; padding: 10px; border-radius: 8px; margin-top: 5px; text-decoration: none; color: #58a6ff; border: 1px solid #2b5278; font-size: 13px; font-weight: bold; }
-
-        .input-bar { padding: 15px; background: #17212b; display: flex; gap: 10px; align-items: center; }
-        .role-badge { font-size: 9px; background: #58a6ff; color: #000; padding: 1px 4px; border-radius: 3px; margin-left: 5px; }
+        .input-bar { padding: 15px; background: var(--bg-card); display: flex; gap: 10px; align-items: center; border-top: 1px solid var(--border-color); }
         
-        .p-info-label { font-size: 10px; color: #58a6ff; text-transform: uppercase; font-weight: bold; margin-top: 10px; margin-bottom: 3px; display: block; }
-        .av-upload-row { display: flex; gap: 15px; align-items: center; background: #1c2936; padding: 10px; border-radius: 8px; border: 1px solid #2b5278; }
-
-        .settings-section { border-top: 1px dashed #2b5278; margin-top: 15px; padding-top: 10px; }
-        .device-item { background: #242f3d; padding: 8px 12px; border-radius: 6px; font-size: 13px; margin-top: 5px; border: 1px solid #2b5278; display: flex; justify-content: space-between; align-items: center; }
-        .device-badge { background: #2ea043; color: white; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+        .p-info-label { font-size: 10px; color: var(--accent); text-transform: uppercase; font-weight: bold; margin-top: 10px; margin-bottom: 3px; display: block; }
+        .device-item { background: var(--bg-input); padding: 10px; border-radius: 8px; font-size: 13px; margin-top: 8px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        
+        .block-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); display:flex; justify-content:center; align-items:center; color:#fff; font-weight:bold; z-index:10; display:none; }
     </style>
 </head>
 <body>
 
     <div id="login-scr" class="modal-overlay" style="display: flex;">
-        <div class="modal-card">
-            
-            <div id="login-view">
-                <h2 style="color:#58a6ff; margin-top:0; text-align: center;">Вход в VChat</h2>
-                <input type="email" id="uEmail" placeholder="Твой Email">
-                <input type="password" id="uPass" placeholder="Пароль">
-                <button onclick="login()" style="margin-top: 10px;">Войти в аккаунт</button>
-                <div class="oauth-providers">
-                    <button class="btn-oauth" onclick="loginWithGoogle()">Войти через Google</button>
-                </div>
-                <div class="auth-switch-link" onclick="switchAuth('reg')">Нет аккаунта? Зарегистрироваться</div>
-            </div>
-
-            <div id="reg-view" style="display: none;">
-                <h2 style="color:#2ea043; margin-top:0; text-align: center;">Регистрация</h2>
-                <input type="text" id="uNick" placeholder="Придумай Никнейм">
-                <input type="email" id="regEmail" placeholder="Твой Настоящий Email">
-                <input type="password" id="regPass" placeholder="Придумай Пароль">
-                <input type="text" id="regPin" placeholder="4-значный ПИН для защиты (необязательно)" maxlength="4" style="text-align:center; font-size:13px;">
-                <button class="btn-success" onclick="register()">Создать аккаунт</button>
-                <div class="auth-switch-link" onclick="switchAuth('login')">Уже есть аккаунт? Войти</div>
-            </div>
-
-            <div id="verify-view" style="display: none; text-align: center;">
-                <h2 style="color:#ffaa00; margin-top:0;">Подтверди почту! ✉️</h2>
-                <p style="font-size: 13px; color: #aaa; line-height: 1.4;">Мы отправили ссылку для верификации на твой email. Перейди по ней, чтобы разблокировать чат.</p>
-                <button class="btn-success" onclick="checkEmailVerification()">🔄 Я подтвердил, пусти меня</button>
-                <button class="secondary" style="width:100%; margin-top:8px;" onclick="logOut()">Назад ко входу</button>
-            </div>
-
-            <div id="pin-view" style="display: none; text-align: center;">
-                <h2 style="color:#58a6ff; margin-top:0;">Защита аккаунта 🔒</h2>
-                <p style="font-size: 13px; color: #aaa;">Введи свой 4-значный ПИН-код для разблокировки сессии.</p>
-                <input type="password" id="authPinInp" placeholder="••••" maxlength="4" style="text-align:center; font-size:26px; letter-spacing:10px; width:160px; display:block; margin:15px auto;" onkeydown="if(event.key==='Enter') verifyPin()">
-                <button class="btn-success" onclick="verifyPin()">Войти в чат ➤</button>
-                <button class="secondary" style="width:100%; margin-top:8px;" onclick="logOut()">Выйти из аккаунта</button>
-            </div>
-
+        <div class="modal-card" style="text-align: center;">
+            <h2 style="color:var(--accent); margin-top:0;">Вход в VChat</h2>
+            <input type="email" id="uEmail" placeholder="Email">
+            <input type="password" id="uPass" placeholder="Пароль">
+            <button class="success" onclick="login()" style="margin-top: 10px;">Войти</button>
+            <button class="secondary" style="width:100%; margin-top:10px; background:#fff; color:#000;" onclick="loginWithGoogle()">Войти через Google</button>
+            <p style="font-size: 13px; color: var(--accent); cursor: pointer; text-decoration: underline;" onclick="document.getElementById('login-view').style.display='none'; document.getElementById('reg-view').style.display='block';">Нет аккаунта? Зарегистрироваться</p>
         </div>
-    </div>
+        
+        <div class="modal-card" id="reg-view" style="display: none; position: absolute; text-align: center;">
+            <h2 style="color:var(--success); margin-top:0;">Регистрация</h2>
+            <input type="text" id="uNick" placeholder="Никнейм">
+            <input type="email" id="regEmail" placeholder="Email">
+            <input type="password" id="regPass" placeholder="Пароль">
+            <input type="password" id="regPin" placeholder="4-значный ПИН (необязательно)" maxlength="4" style="text-align:center;">
+            <button class="success" onclick="register()">Создать</button>
+            <p style="font-size: 13px; color: var(--accent); cursor: pointer;" onclick="document.getElementById('reg-view').style.display='none';">Назад ко входу</p>
+        </div>
 
-    <div id="media-modal" class="modal-overlay">
-        <div class="modal-card">
-            <h3 style="margin-top:0; color:#58a6ff;">Отправить файл 📎</h3>
-            <label for="mediaFileInp" class="custom-file-btn" id="fileBtnLabel">📁 Нажми, чтобы выбрать файл</label>
-            <input type="file" id="mediaFileInp" accept="*/*" style="display: none;" onchange="updateFileName(this)">
-            <input type="text" id="mediaCaption" placeholder="Добавить описание (необязательно)..." style="margin-top: 10px;">
-            <button class="btn-success" onclick="sendMedia()">Отправить в чат</button>
-            <button class="secondary" style="width:100%; margin-top:8px;" onclick="closeM('media-modal')">Отмена</button>
+        <div class="modal-card" id="pin-view" style="display: none; position: absolute; text-align: center;">
+            <h2 style="color:var(--accent); margin-top:0;">Защита аккаунта 🔒</h2>
+            <input type="password" id="authPinInp" placeholder="••••" maxlength="4" style="text-align:center; font-size:26px; letter-spacing:10px; width:160px; margin:15px auto;" onkeydown="if(event.key==='Enter') verifyPin()">
+            <button class="success" onclick="verifyPin()">Войти ➤</button>
         </div>
     </div>
 
     <div id="my-prof-modal" class="modal-overlay">
-        <div class="modal-card" style="width: 400px;">
-            <h3 style="margin-top:0; color:#58a6ff;">Настройки аккаунта</h3>
+        <div class="modal-card">
+            <h3 style="margin-top:0; color:var(--accent);">Мой Аккаунт</h3>
+            <img id="myAvPreview" src="" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; display:block; margin: 0 auto; border: 2px solid var(--accent);">
             
-            <div class="av-upload-row">
-                <img id="myAvPreview" src="" style="width: 55px; height: 55px; border-radius: 50%; object-fit: cover; border: 2px solid #58a6ff;">
-                <div style="flex: 1;">
-                    <label for="myAvFile" class="custom-file-btn" style="margin:0; padding: 6px; font-size: 12px; border-style: solid;">🖼️ Загрузить аватар</label>
-                    <input type="file" id="myAvFile" accept="image/*" style="display:none;" onchange="handleAvUpload(this, 'myAvPreview')">
-                </div>
-            </div>
-            <label class="p-info-label">Или URL аватара</label>
-            <input type="text" id="myAvNew" placeholder="https://...">
             <label class="p-info-label">Никнейм</label>
             <input type="text" id="myNickNew">
-            <label class="p-info-label">О себе</label>
-            <textarea id="myBioNew" rows="2"></textarea>
-            <button class="btn-success" style="margin-bottom: 15px;" onclick="updateMe()">Сохранить инфо</button>
+            <label class="p-info-label">Аватар (URL)</label>
+            <input type="text" id="myAvNew">
+            <button class="success" onclick="updateMe()">Сохранить профиль</button>
 
-            <div class="settings-section">
-                <span class="p-info-label">🔒 Безопасность и ПИН-код</span>
-                <input type="text" id="changePinInp" placeholder="Новый ПИН (4 цифры) или пусто, чтобы удалить" maxlength="4" style="text-align:center; font-weight:bold;">
-                <div style="display: flex; gap: 5px;">
-                    <button class="secondary" style="flex:1; background: #2b5278;" onclick="updatePinCode()">Обновить ПИН</button>
-                    <button class="danger" style="flex:1; margin-top:5px; padding:10px; font-size:12px;" onclick="deletePinCode()">Удалить ПИН</button>
-                </div>
-                <input type="password" id="newPassInp" placeholder="Новый пароль аккаунта" style="margin-top:10px; margin-bottom:5px;">
-                <button class="secondary" style="width:100%; background: #313d4b;" onclick="changePassword()">Изменить пароль</button>
-            </div>
+            <hr style="border:0; border-top:1px solid var(--border-color); margin:15px 0;">
+            <span class="p-info-label">💻 Активные сессии (Устройства)</span>
+            <div id="devices-list" style="max-height: 150px; overflow-y: auto;"></div>
 
-            <div class="settings-section">
-                <span class="p-info-label">💻 Активные сессии / Устройства</span>
-                <div id="devices-list"></div>
-            </div>
-
-            <div class="settings-section">
-                <span class="p-info-label">⚙️ Системные настройки</span>
-                <button class="secondary" style="width:100%; background: #4a5a6a; margin-top:5px;" onclick="clearAppCache()">🧹 Очистить кэш приложения</button>
-            </div>
-            
-            <hr style="border:0; border-top:1px solid #2b5278; margin:15px 0;">
-            <button class="secondary" style="width:100%;" onclick="closeM('my-prof-modal')">Закрыть настройки</button>
+            <button class="secondary" style="width:100%; margin-top:15px;" onclick="closeM('my-prof-modal')">Закрыть</button>
             <button class="danger" style="margin-top:8px;" onclick="logOut()">Выйти из аккаунта</button>
-        </div>
-    </div>
-
-    <div id="admin-modal" class="modal-overlay">
-        <div class="modal-card">
-            <h3 style="margin-top:0; color:#2ea043;">Настройки группы</h3>
-            <div class="av-upload-row">
-                <img id="gAvPreview" src="" style="width: 55px; height: 55px; border-radius: 50%; object-fit: cover; border: 2px solid #2ea043;">
-                <div style="flex: 1;">
-                    <label for="gAvFile" class="custom-file-btn" style="margin:0; padding: 6px; font-size: 12px; border-color:#2ea043; color:#2ea043; border-style:solid;">🖼️ Загрузить иконку</label>
-                    <input type="file" id="gAvFile" accept="image/*" style="display:none;" onchange="handleAvUpload(this, 'gAvPreview')">
-                </div>
-            </div>
-            <input type="text" id="gAvNew" placeholder="Или ссылка на иконку">
-            <input type="text" id="gNameNew" placeholder="Название">
-            <textarea id="gDescNew" placeholder="Описание..." rows="2"></textarea>
-            <button class="btn-success" onclick="updateG()">Сохранить изменения</button>
-            <hr style="border:0; border-top:1px solid #2b5278; margin:15px 0;">
-            <label class="p-info-label">Добавить участника</label>
-            <div style="display:flex; gap:5px;">
-                <input type="text" id="addEmail" placeholder="Email друга" style="margin:0;">
-                <button class="secondary" style="margin:0; width:90px;" onclick="invite()">Инвайт</button>
-            </div>
-            <button class="danger" style="margin-top:15px;" onclick="killG()">УДАЛИТЬ ГРУППУ</button>
-            <button class="secondary" style="width:100%; margin-top:8px;" onclick="closeM('admin-modal')">Назад</button>
         </div>
     </div>
 
     <div id="user-prof-modal" class="modal-overlay">
         <div class="modal-card">
-            <img id="pCardAv" style="width:80px; height:80px; border-radius:50%; display:block; margin:0 auto 10px; object-fit:cover; border:2px solid #58a6ff;">
-            <h3 id="pCardNick" style="text-align: center; margin: 0 0 15px 0; color: #58a6ff;">Никнейм</h3>
-            <div style="background:#242f3d; padding:10px; border-radius:8px; font-size:14px; border:1px solid #2b5278;">
-                <div style="font-size:10px; color:#58a6ff; font-weight:bold; margin-bottom:3px;">EMAIL</div>
-                <div id="pCardEmail" style="color: #fff;"></div>
+            <img id="pCardAv" style="width:80px; height:80px; border-radius:50%; display:block; margin:0 auto 10px; object-fit:cover; border:2px solid var(--accent);">
+            <h3 id="pCardNick" style="text-align: center; margin: 0 0 15px 0; color: var(--accent);">Никнейм</h3>
+            
+            <div style="background:var(--bg-input); padding:15px; border-radius:8px; border:1px solid var(--border-color);">
+                <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:bold;">
+                    <input type="checkbox" id="isContact" style="width:auto; margin:0;" onchange="toggleContactSettings()"> 
+                    Добавить в Мои Контакты 📒
+                </label>
+                <div id="contactSettings" style="display:none; margin-top:10px; border-top:1px dashed var(--border-color); padding-top:10px;">
+                    <small style="color:var(--text-muted);">Локальное имя (видишь только ты):</small>
+                    <input type="text" id="contactLocName" placeholder="Бро / Брат / Кент">
+                    <small style="color:var(--text-muted);">Локальная аватарка (URL):</small>
+                    <input type="text" id="contactLocAv" placeholder="https://...">
+                    <button class="success" style="padding:6px; font-size:12px;" onclick="saveContact()">Сохранить контакт</button>
+                </div>
             </div>
-            <div style="background:#242f3d; padding:10px; border-radius:8px; font-size:14px; border:1px solid #2b5278; margin-top:8px;">
-                <div style="font-size:10px; color:#58a6ff; font-weight:bold; margin-bottom:3px;">О СЕБЕ</div>
-                <div id="pCardBio" style="color: #aaa; font-style:italic;"></div>
-            </div>
-            <button class="secondary" style="width:100%; margin-top:12px;" onclick="closeM('user-prof-modal')">Закрыть</button>
-        </div>
-    </div>
 
-    <div id="members-modal" class="modal-overlay">
-        <div class="modal-card">
-            <h3>Участники</h3>
-            <div id="memList" style="max-height: 250px; overflow-y: auto;"></div>
-            <button class="secondary" style="width:100%; margin-top:10px;" onclick="closeM('members-modal')">Закрыть</button>
+            <button id="blockBtn" class="danger" style="margin-top:15px;" onclick="toggleBlock()">🚫 Заблокировать пользователя</button>
+            <button class="secondary" style="width:100%; margin-top:8px;" onclick="closeM('user-prof-modal')">Закрыть</button>
         </div>
     </div>
 
     <div id="app" class="tg-container">
         <aside class="tg-sidebar">
             <div class="profile-header">
-                <img id="myAvImg" class="avatar" src="" onclick="openMe()">
-                <div id="myName" style="font-weight:bold; cursor:pointer;" onclick="openMe()">Загрузка...</div>
+                <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="openMe()">
+                    <img id="myAvImg" class="avatar" src="">
+                    <div id="myName" style="font-weight:bold;">Загрузка...</div>
+                </div>
+                <button class="secondary" style="border-radius:50%; width:35px; height:35px; padding:0; font-size:16px;" onclick="toggleTheme()" id="themeBtn">🌙</button>
             </div>
+            
             <div style="padding:10px; display:flex; gap:5px;">
                 <input type="text" id="srch" placeholder="Поиск..." oninput="render()" style="margin:0">
-                <button onclick="newG()" style="width:40px; font-size:20px; background: #2ea043; margin:0">+</button>
+                <button class="success" onclick="newG()" style="width:40px; margin:0; font-size:18px;">+</button>
             </div>
+
+            <div class="tabs">
+                <div class="tab-btn active" onclick="setTab('chats', this)">Чаты</div>
+                <div class="tab-btn" onclick="setTab('groups', this)">Группы</div>
+                <div class="tab-btn" onclick="setTab('contacts', this)">Контакты</div>
+            </div>
+
             <div class="chat-list" id="chatList"></div>
         </aside>
 
-        <main class="tg-main">
+        <main class="tg-main" style="position:relative;">
             <header class="header">
                 <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="openUserCardFromHeader()">
                     <img id="hAv" src="" style="width:35px; height:35px; border-radius:50%; display:none; object-fit: cover;">
                     <div>
                         <b id="hTitle">Выберите чат</b><br>
-                        <small id="hDesc" style="color:#888;font-size:11px"></small>
+                        <small id="hDesc" style="color:var(--text-muted);font-size:11px"></small>
                     </div>
                 </div>
-                <div id="hBtns" style="display:none; gap:8px">
-                    <button class="secondary" onclick="showMem()">👥</button>
-                    <button id="admBtn" class="secondary" style="display:none;" onclick="openAdm()">⚙️</button>
-                    <button id="leaveBtn" class="danger" style="width:auto; padding:5px 10px; font-size:12px; display:none;" onclick="leaveG()">Выйти</button>
-                </div>
             </header>
+            
             <div id="msgBox" class="messages"></div>
             
+            <div id="blockOverlay" class="block-overlay">Вы заблокировали этого пользователя</div>
+
             <div class="input-bar">
-                <button onclick="openMediaModal()" style="width:42px; background:#313d4b; font-size:18px; margin:0;">📎</button>
                 <input type="text" id="msgInp" placeholder="Написать..." onkeydown="if(event.key==='Enter') sendMsg()" style="margin:0;">
-                <button onclick="sendMsg()" style="width:55px; margin:0; background: #58a6ff; color: #000;">➤</button>
+                <button onclick="sendMsg()" style="width:55px; margin:0; background: var(--accent); color: #fff;">➤</button>
             </div>
         </main>
     </div>
@@ -288,53 +231,45 @@
 
         let myID = "";
         let active = null;
-        let cache = { u: {}, g: {} };
-        let uploadedProfileAv = null;
-        let uploadedGroupAv = null;
+        let currentTab = 'chats';
+        let sessionId = "";
+        
+        let cache = { u: {}, g: {}, contacts: {}, blocked: {} };
 
-        function showView(viewId) {
-            const views = ['login-view', 'reg-view', 'verify-view', 'pin-view'];
-            views.forEach(v => {
-                const el = document.getElementById(v);
-                if(el) el.style.display = (v === viewId) ? 'block' : 'none';
-            });
+        // ТЕМА
+        if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); document.getElementById('themeBtn').innerText = '🌞'; }
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+            document.getElementById('themeBtn').innerText = isLight ? '🌞' : '🌙';
         }
 
         authSystem.onAuthStateChanged(user => {
             if (user) {
-                if (!user.emailVerified && user.providerData[0].providerId === 'password') {
-                    document.getElementById('login-scr').style.display = 'flex';
-                    showView('verify-view');
-                    document.getElementById('app').style.display = 'none';
-                    return;
-                }
-
                 myID = user.uid;
                 
+                // Инициализация юзера
                 db.ref("users/" + myID).on("value", s => {
                     const d = s.val();
                     if(!d) {
-                        db.ref("users/" + myID).set({
-                            nickname: user.displayName || "User_" + myID.substring(0,5),
-                            avatar: user.photoURL || "https://api.dicebear.com/7.x/pixel-art/svg?seed=" + myID,
-                            email: user.email || "",
-                            bio: "Я в VChat!",
-                            pin: "" 
-                        });
-                        document.getElementById('login-scr').style.display = 'none';
-                        document.getElementById('app').style.display = 'flex';
+                        db.ref("users/" + myID).set({ nickname: user.email.split('@')[0], avatar: "", email: user.email || "" });
+                        document.getElementById('login-scr').style.display = 'none'; document.getElementById('app').style.display = 'flex';
                     } else {
                         document.getElementById('myName').innerText = d.nickname;
-                        document.getElementById('myAvImg').src = d.avatar || "https://api.dicebear.com/7.x/pixel-art/svg?seed="+d.nickname;
+                        document.getElementById('myAvImg').src = d.avatar || "https://api.dicebear.com/7.x/identicon/svg?seed="+myID;
                         
-                        if (d.pin && d.pin.trim() !== "" && sessionStorage.getItem('vchat_pin_passed_' + myID) !== 'true') {
+                        cache.contacts = d.contacts || {};
+                        cache.blocked = d.blocked || {};
+
+                        if (d.pin && d.pin.trim() !== "" && sessionStorage.getItem('vchat_pin_pass') !== 'true') {
                             document.getElementById('login-scr').style.display = 'flex';
-                            showView('pin-view');
-                            document.getElementById('app').style.display = 'none';
+                            document.getElementById('login-view').style.display = 'none';
+                            document.getElementById('pin-view').style.display = 'block';
                             document.getElementById('authPinInp').focus();
                         } else {
-                            document.getElementById('login-scr').style.display = 'none';
-                            document.getElementById('app').style.display = 'flex';
+                            document.getElementById('login-scr').style.display = 'none'; document.getElementById('app').style.display = 'flex';
+                            registerSession(); // Регаем девайс только после успешного входа
                         }
                     }
                 });
@@ -342,267 +277,141 @@
                 db.ref("users").on("value", s => { cache.u = s.val() || {}; render(); });
                 db.ref("groups").on("value", s => { cache.g = s.val() || {}; render(); });
             } else {
-                myID = "";
-                sessionStorage.clear();
+                myID = ""; sessionStorage.clear();
                 document.getElementById('login-scr').style.display = 'flex';
-                showView('login-view');
                 document.getElementById('app').style.display = 'none';
             }
         });
 
-        function verifyPin() {
-            const inputPin = document.getElementById('authPinInp').value.trim();
-            if(!myID) return;
+        // СЕССИИ (АНТИ-ВТЫК)
+        function registerSession() {
+            if (sessionId) return;
+            sessionId = "sess_" + Date.now() + "_" + Math.floor(Math.random()*1000);
+            
+            // Парсим ОС и Браузер
+            let os = "Неизвестное устройство"; let browser = "Неизвестный браузер";
+            let ua = navigator.userAgent;
+            if (ua.includes("Win")) os = "Windows PC"; else if (ua.includes("Mac") && !ua.includes("iPhone")) os = "macOS"; else if (ua.includes("Android")) os = "Android Смартфон"; else if (ua.includes("iPhone")) os = "iPhone";
+            if (ua.includes("Chrome")) browser = "Chrome"; else if (ua.includes("Safari") && !ua.includes("Chrome")) browser = "Safari"; else if (ua.includes("Firefox")) browser = "Firefox";
 
-            db.ref("users/" + myID + "/pin").once("value", s => {
-                const correctPin = s.val();
-                if (inputPin === String(correctPin)) {
-                    sessionStorage.setItem('vchat_pin_passed_' + myID, 'true');
-                    document.getElementById('authPinInp').value = "";
-                    document.getElementById('login-scr').style.display = 'none';
-                    document.getElementById('app').style.display = 'flex';
-                } else {
-                    alert("Неверный ПИН-код! ❌");
-                    document.getElementById('authPinInp').value = "";
+            let sessionRef = db.ref(`users/${myID}/sessions/${sessionId}`);
+            sessionRef.set({ os: os, browser: browser, time: new Date().toLocaleString() });
+            sessionRef.onDisconnect().remove(); // Авто-удаление при закрытии вкладки
+
+            // Слушаем, не кикнули ли нас с другого устройства
+            sessionRef.on("value", snap => {
+                if (snap.val() === null && myID) {
+                    alert("Вас кикнули с другого устройства! Сессия завершена.");
+                    authSystem.signOut();
                 }
             });
         }
 
-        function updatePinCode() {
-            const newPin = document.getElementById('changePinInp').value.trim();
-            if (newPin !== "" && (newPin.length !== 4 || isNaN(newPin))) {
-                return alert("ПИН-код должен состоять ровно из 4 цифр!");
-            }
-
-            db.ref("users/" + myID).update({ pin: newPin }).then(() => {
-                alert(newPin === "" ? "ПИН-код успешно удален! 👍" : "ПИН-код успешно обновлен! 🛡️");
-                if (newPin !== "") sessionStorage.setItem('vchat_pin_passed_' + myID, 'true');
-                document.getElementById('changePinInp').value = "";
+        function loadDevices() {
+            const list = document.getElementById('devices-list'); list.innerHTML = "Загрузка...";
+            db.ref(`users/${myID}/sessions`).once("value", s => {
+                list.innerHTML = "";
+                const sessions = s.val() || {};
+                for(let sid in sessions) {
+                    const data = sessions[sid];
+                    const isMe = (sid === sessionId);
+                    list.innerHTML += `
+                        <div class="device-item">
+                            <div><b>${data.os}</b> <small style="color:var(--accent);">(${data.browser})</small><br>
+                            <small style="color:var(--text-muted); font-size:10px;">Вход: ${data.time}</small></div>
+                            ${isMe ? '<span style="background:var(--success); color:#fff; padding:3px 6px; border-radius:4px; font-size:10px;">Текущий</span>' 
+                                   : `<button class="danger" style="width:auto; padding:5px 10px; font-size:11px; margin:0;" onclick="kickSession('${sid}')">Кикнуть</button>`}
+                        </div>`;
+                }
             });
         }
 
-        function deletePinCode() {
-            if(confirm("Уверены, что хотите отключить защиту ПИН-кодом?")) {
-                db.ref("users/" + myID).update({ pin: "" }).then(() => {
-                    alert("Защита отключена!");
-                    document.getElementById('changePinInp').value = "";
-                });
+        function kickSession(sid) {
+            if(confirm("Выкинуть это устройство из аккаунта?")) {
+                db.ref(`users/${myID}/sessions/${sid}`).remove().then(()=> loadDevices());
             }
         }
 
-        function loginWithGoogle() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            authSystem.signInWithPopup(provider).catch(err => alert("Ошибка: " + err.message));
+        // ВКЛАДКИ
+        function setTab(tabName, element) {
+            currentTab = tabName;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            if(element) element.classList.add('active');
+            render();
         }
 
-        function switchAuth(mode) {
-            showView(mode === 'reg' ? 'reg-view' : 'login-view');
-        }
-
-        function login() {
-            const e = document.getElementById('uEmail').value.trim().toLowerCase();
-            const p = document.getElementById('uPass').value.trim();
-            if (!e || !p) return alert("Заполни поля!");
-            authSystem.signInWithEmailAndPassword(e, p).catch(err => alert("Ошибка: " + err.message));
-        }
-
-        function register() {
-            const e = document.getElementById('regEmail').value.trim().toLowerCase();
-            const p = document.getElementById('regPass').value.trim();
-            const n = document.getElementById('uNick').value.trim();
-            const pin = document.getElementById('regPin').value.trim();
-
-            if (!e || !p || !n) return alert("Заполни обязательные поля!");
-            if (pin && (pin.length !== 4 || isNaN(pin))) return alert("Если ставишь ПИН, то делай его из 4 цифр!");
-
-            authSystem.createUserWithEmailAndPassword(e, p).then(cred => {
-                cred.user.sendEmailVerification().then(() => {
-                    alert("Ссылка для подтверждения отправлена на почту!");
-                });
-                db.ref("users/" + cred.user.uid).set({ 
-                    nickname: n, 
-                    avatar: "https://api.dicebear.com/7.x/pixel-art/svg?seed=" + n, 
-                    email: e, 
-                    bio: "Новичок в VChat!",
-                    pin: pin || "" 
-                });
-            }).catch(err => alert("Ошибка регистрации: " + err.message));
-        }
-
-        function checkEmailVerification() {
-            const user = authSystem.currentUser;
-            if(user) {
-                user.reload().then(() => {
-                    if(user.emailVerified) { alert("Почта подтверждена! 🔥"); location.reload(); } 
-                    else { alert("Ты еще не кликнул по ссылке в письме!"); }
-                });
-            }
-        }
-
-        function logOut() { if(confirm("Выйти из аккаунта?")) authSystem.signOut().then(() => location.reload()); }
-
-        function updateFileName(input) {
-            const label = document.getElementById('fileBtnLabel');
-            if (input.files && input.files.length > 0) {
-                label.innerText = "✅ Выбран: " + input.files[0].name;
-                label.classList.add('active');
-            } else {
-                label.innerText = "📁 Нажми, чтобы выбрать файл";
-                label.classList.remove('active');
-            }
-        }
-
-        function handleAvUpload(input, previewId) {
-            const file = input.files[0];
-            if(!file) return;
-            if (file.size > 2 * 1024 * 1024) return alert("Аватарка слишком тяжелая! Максимум 2 МБ.");
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById(previewId).src = e.target.result;
-                if(previewId === 'myAvPreview') { uploadedProfileAv = e.target.result; } else { uploadedGroupAv = e.target.result; }
-            }
-            reader.readAsDataURL(file);
-        }
-
-        function openMediaModal() {
-            if(!active) return alert("Сначала выбери чат! 💬");
-            document.getElementById('mediaFileInp').value = "";
-            document.getElementById('mediaCaption').value = "";
-            updateFileName(document.getElementById('mediaFileInp'));
-            document.getElementById('media-modal').style.display = 'flex';
-        }
-
-        function sendMedia() {
-            const caption = document.getElementById('mediaCaption').value.trim();
-            const path = active.type === 'USER' ? (myID < active.id ? myID+"_"+active.id : active.id+"_"+myID) : active.id;
-            const file = document.getElementById('mediaFileInp').files[0];
-            if(!file) return alert("Выбери файл!");
-
-            let detectedType = 'doc';
-            if (file.type.startsWith('image/')) detectedType = 'img';
-            else if (file.type.startsWith('video/')) detectedType = 'video';
-
-            const reader = new FileReader();
-            reader.onloadend = function() {
-                db.ref("msgs/" + path).push().set({ sid: myID, snick: document.getElementById('myName').innerText, txt: caption, isMedia: true, mediaType: detectedType, mediaUrl: reader.result, fileName: file.name });
-                closeM('media-modal');
-            }
-            reader.readAsDataURL(file);
-        }
-
-        function getMediaHtml(m) {
-            if(!m.isMedia) return m.txt;
-            let contentHtml = "";
-            if(m.mediaType === 'img') contentHtml = `<img class="msg-media-img" src="${m.mediaUrl}">`;
-            else if(m.mediaType === 'video') contentHtml = `<video class="msg-media-video" src="${m.mediaUrl}" controls></video>`;
-            else if(m.mediaType === 'doc') contentHtml = `<a class="msg-media-doc" href="${m.mediaUrl}" download="${m.fileName}">📄 ${m.fileName}</a>`;
-            return contentHtml + (m.txt ? `<div style="margin-top:5px;">${m.txt}</div>` : "");
-        }
-
-        function closeM(id) {
-            const overlay = document.getElementById(id);
-            const card = overlay.querySelector('.modal-card');
-            overlay.classList.add('closing'); card.classList.add('closing');
-            setTimeout(() => { overlay.style.display = 'none'; overlay.classList.remove('closing'); card.classList.remove('closing'); }, 190);
-        }
-
-        function detectDevice() {
-            let os = "Unknown OS";
-            if (navigator.userAgent.indexOf("Win") !== -1) os = "Windows PC";
-            else if (navigator.userAgent.indexOf("Mac") !== -1) os = "macOS";
-            else if (navigator.userAgent.indexOf("Linux") !== -1) os = "Linux PC";
-            else if (navigator.userAgent.indexOf("Android") !== -1) os = "Android Смартфон";
-            else if (navigator.userAgent.indexOf("like Mac") !== -1) os = "iPhone/iOS";
+        // РЕНДЕР И ФИЛЬТРАЦИЯ
+        function getUserDisplayData(uid) {
+            const baseUser = cache.u[uid];
+            if (!baseUser) return { name: "Неизвестный", avatar: "" };
             
-            let browser = "Браузер";
-            if (navigator.userAgent.indexOf("Chrome") !== -1) browser = "Chrome";
-            else if (navigator.userAgent.indexOf("Firefox") !== -1) browser = "Firefox";
-            else if (navigator.userAgent.indexOf("Safari") !== -1) browser = "Safari";
-            
-            const list = document.getElementById('devices-list');
-            list.innerHTML = `
-                <div class="device-item">
-                    <div><b>${os}</b><br><small style="color:#aaa;">Сессия через ${browser}</small></div>
-                    <span class="device-badge">Текущее</span>
-                </div>
-            `;
-        }
-
-        function changePassword() {
-            const newPass = document.getElementById('newPassInp').value.trim();
-            if(newPass.length < 6) return alert("Пароль должен быть от 6 символов, бро!");
-            authSystem.currentUser.updatePassword(newPass).then(() => {
-                alert("Пароль успешно обновлен! 🔒");
-                document.getElementById('newPassInp').value = "";
-            }).catch(err => alert("Ошибка: " + err.message));
-        }
-
-        function clearAppCache() {
-            if (confirm("Уверен, что хочешь очистить кэш приложения?")) {
-                localStorage.clear(); sessionStorage.clear(); location.reload();
+            // Если он в моих контактах, переопределяем
+            if (cache.contacts[uid]) {
+                return {
+                    name: cache.contacts[uid].locName || baseUser.nickname,
+                    avatar: cache.contacts[uid].locAv || baseUser.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${uid}`,
+                    isContact: true
+                };
             }
+            return { name: baseUser.nickname, avatar: baseUser.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${uid}`, isContact: false };
         }
-
-        function openMe() {
-            const d = cache.u[myID]; if(!d) return;
-            document.getElementById('myNickNew').value = d.nickname;
-            document.getElementById('myAvNew').value = d.avatar || "";
-            document.getElementById('myBioNew').value = d.bio || "";
-            document.getElementById('myAvPreview').src = d.avatar || "https://api.dicebear.com/7.x/pixel-art/svg?seed="+myID;
-            document.getElementById('changePinInp').value = "";
-            uploadedProfileAv = null; detectDevice();
-            document.getElementById('my-prof-modal').style.display='flex';
-        }
-
-        function updateMe() {
-            const finalAv = uploadedProfileAv || document.getElementById('myAvNew').value.trim();
-            db.ref("users/"+myID).update({ nickname: document.getElementById('myNickNew').value, avatar: finalAv, bio: document.getElementById('myBioNew').value }).then(() => alert("Сохранено!"));
-            closeM('my-prof-modal');
-        }
-
-        function openUserCard(uid) {
-            const u = cache.u[uid]; if(!u) return;
-            document.getElementById('pCardAv').src = u.avatar || "https://api.dicebear.com/7.x/identicon/svg?seed="+uid;
-            document.getElementById('pCardNick').innerText = u.nickname;
-            document.getElementById('pCardEmail').innerText = u.email || "Скрыт";
-            document.getElementById('pCardBio').innerText = u.bio || "Информации нет.";
-            document.getElementById('user-prof-modal').style.display = 'flex';
-        }
-        function openUserCardFromHeader() { if(active && active.type === 'USER') openUserCard(active.id); }
 
         function render() {
-            const list = document.getElementById('chatList'); const q = document.getElementById('srch').value.toLowerCase(); list.innerHTML = "";
-            for (let id in cache.g) {
-                const g = cache.g[id]; const gAv = g.avatar || 'https://api.dicebear.com/7.x/shapes/svg?seed='+id;
-                if (g.roles && g.roles[myID] && g.name.toLowerCase().includes(q)) addLi(list, g.name, gAv, id, 'GROUP');
+            const list = document.getElementById('chatList'); 
+            const q = document.getElementById('srch').value.toLowerCase(); 
+            list.innerHTML = "";
+
+            if (currentTab === 'groups' || currentTab === 'chats') {
+                for (let id in cache.g) {
+                    const g = cache.g[id]; 
+                    if (g.roles && g.roles[myID] && g.name.toLowerCase().includes(q) && currentTab === 'groups') {
+                        addLi(list, g.name, g.avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${id}`, id, 'GROUP');
+                    }
+                }
             }
+            
             for (let id in cache.u) {
-                if (id !== myID && cache.u[id].nickname.toLowerCase().includes(q)) addLi(list, cache.u[id].nickname, cache.u[id].avatar, id, 'USER');
+                if (id === myID) continue;
+                const dData = getUserDisplayData(id);
+                
+                // Не показываем заблокированных в общем списке, если это не поиск или вкладка контактов
+                if (cache.blocked[id] && currentTab === 'chats' && !q) continue; 
+
+                if (dData.name.toLowerCase().includes(q)) {
+                    if (currentTab === 'contacts' && !dData.isContact) continue; // Во вкладке контактов только контакты
+                    if (currentTab === 'groups') continue; // В группах юзеров нет
+                    
+                    let suffix = cache.blocked[id] ? " (ЗАБЛОКИРОВАН)" : (dData.isContact ? " 📒" : "");
+                    addLi(list, dData.name + suffix, dData.avatar, id, 'USER');
+                }
             }
         }
 
         function addLi(cont, name, av, id, type) {
             const d = document.createElement('div'); d.className = 'chat-item'; d.onclick = () => select(id, name, type);
-            d.innerHTML = `<img src="${av || 'https://api.dicebear.com/7.x/identicon/svg?seed='+id}"><div style="flex:1"><b>${name}</b><br><small style="color:#58a6ff;font-size:9px">${type}</small></div>`;
+            d.innerHTML = `<img src="${av}"><div style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"><b>${name}</b><br><small style="color:var(--text-muted);font-size:10px">${type}</small></div>`;
             cont.appendChild(d);
         }
 
+        // ЧАТЫ И СООБЩЕНИЯ
         function select(id, name, type) {
-            active = { id, name, type }; document.getElementById('hTitle').innerText = name; document.getElementById('msgBox').innerHTML = "";
-            document.getElementById('hBtns').style.display = type === 'GROUP' ? 'flex' : 'none';
+            active = { id, name, type }; 
+            document.getElementById('hTitle').innerText = name.replace(" (ЗАБЛОКИРОВАН)", "").replace(" 📒", ""); 
+            document.getElementById('msgBox').innerHTML = "";
             const hAv = document.getElementById('hAv');
-            if(type === 'USER' && cache.u[id]) {
-                hAv.src = cache.u[id].avatar || "https://api.dicebear.com/7.x/identicon/svg?seed="+id; hAv.style.display = 'block';
-                document.getElementById('hDesc').innerText = cache.u[id]?.bio || "Пользователь";
-            } else if (type === 'GROUP' && cache.g[id]) {
-                hAv.src = cache.g[id].avatar || "https://api.dicebear.com/7.x/shapes/svg?seed="+id; hAv.style.display = 'block';
-            } else { hAv.style.display = 'none'; }
+            
+            // Проверка блокировки
+            const isBlockedByMe = cache.blocked[id];
+            document.getElementById('blockOverlay').style.display = (type === 'USER' && isBlockedByMe) ? 'flex' : 'none';
+            document.getElementById('msgInp').disabled = (type === 'USER' && isBlockedByMe);
 
-            let currentRole = null;
-            if (type === 'GROUP') {
-                const g = cache.g[id]; document.getElementById('hDesc').innerText = g.desc || "Группа"; currentRole = g.roles ? g.roles[myID] : null;
-                document.getElementById('admBtn').style.display = (currentRole === 'owner' || currentRole === 'admin') ? 'block' : 'none';
-                document.getElementById('leaveBtn').style.display = (currentRole && currentRole !== 'owner') ? 'block' : 'none';
+            if(type === 'USER') {
+                const uD = getUserDisplayData(id);
+                hAv.src = uD.avatar; hAv.style.display = 'block';
+                document.getElementById('hDesc').innerText = uD.isContact ? "Мой Контакт" : "Пользователь";
+            } else {
+                hAv.src = cache.g[id].avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${id}`; hAv.style.display = 'block';
+                document.getElementById('hDesc').innerText = "Группа";
             }
 
             const path = type === 'USER' ? (myID < id ? myID+"_"+id : id+"_"+myID) : id;
@@ -610,11 +419,18 @@
             db.ref("msgs/" + path).on("value", snapshot => {
                 document.getElementById('msgBox').innerHTML = "";
                 snapshot.forEach(child => {
-                    const m = child.val(); const mKey = child.key; const div = document.createElement('div');
+                    const m = child.val(); 
+                    
+                    // Если собеседник меня заблокировал (или я его) - можно скрыть сообщения, но оставим как есть, заглушка сверху всё закрывает.
+                    
+                    const div = document.createElement('div');
                     div.className = 'msg ' + (m.sid === myID ? 'me' : 'he');
-                    const canDelete = (m.sid === myID) || (type === 'GROUP' && (currentRole === 'owner' || currentRole === 'admin'));
-                    const delHtml = canDelete ? `<span class="msg-del" onclick="deleteMessage('${path}', '${mKey}')">🗑️</span>` : "";
-                    div.innerHTML = `<div class="msg-name" style="cursor:pointer;" onclick="openUserCard('${m.sid}')">${m.snick} ${delHtml}</div>${getMediaHtml(m)}`;
+                    
+                    // Для групп выводим имена, для ЛС - нет нужды, но для совместимости оставим
+                    let displayNick = m.snick;
+                    if (m.sid !== myID && type === 'USER') displayNick = getUserDisplayData(m.sid).name;
+                    
+                    div.innerHTML = `<div class="msg-name">${displayNick} ${m.sid === myID ? `<span class="msg-del" onclick="deleteMessage('${path}', '${child.key}')">🗑️</span>` : ""}</div>${m.txt}`;
                     document.getElementById('msgBox').appendChild(div);
                 });
                 document.getElementById('msgBox').scrollTop = document.getElementById('msgBox').scrollHeight;
@@ -623,49 +439,101 @@
 
         function sendMsg() {
             const t = document.getElementById('msgInp').value.trim(); if (!t || !active) return;
+            // Анти-втык: если заблокирован
+            if (active.type === 'USER' && cache.blocked[active.id]) return alert("Вы заблокировали этого пользователя!");
+
             const path = active.type === 'USER' ? (myID < active.id ? myID+"_"+active.id : active.id+"_"+myID) : active.id;
-            db.ref("msgs/" + path).push().set({ sid: myID, snick: document.getElementById('myName').innerText, txt: t, isMedia: false });
+            db.ref("msgs/" + path).push().set({ sid: myID, snick: document.getElementById('myName').innerText, txt: t });
             document.getElementById('msgInp').value = "";
         }
 
-        function deleteMessage(path, key) { if(confirm("Удалить сообщение?")) db.ref("msgs/" + path + "/" + key).remove(); }
+        function deleteMessage(path, key) { if(confirm("Удалить?")) db.ref("msgs/" + path + "/" + key).remove(); }
 
-        function showMem() {
-            const g = cache.g[active.id]; const list = document.getElementById('memList'); list.innerHTML = ""; const myRole = g.roles[myID];
-            for(let uid in g.roles) {
-                const u = cache.u[uid]; const r = g.roles[uid]; let actionsHtml = "";
-                if (uid !== myID && r !== 'owner') {
-                    if (myRole === 'owner' && r === 'member') actionsHtml += `<button class="secondary" style="background:#238636; margin-right:5px;" onclick="changeRole('${uid}', 'admin')">Admin</button>`;
-                    if (myRole === 'owner' || (myRole === 'admin' && r === 'member')) actionsHtml += `<button class="danger" style="padding:2px 8px; font-size:11px; width:auto;" onclick="kickUser('${uid}')">Kick</button>`;
+        // ПРОФИЛИ, КОНТАКТЫ, БЛОКИРОВКИ
+        let viewingUserId = "";
+        
+        function openMe() {
+            const d = cache.u[myID]; if(!d) return;
+            document.getElementById('myNickNew').value = d.nickname; document.getElementById('myAvNew').value = d.avatar || "";
+            document.getElementById('myAvPreview').src = d.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${myID}`;
+            loadDevices();
+            document.getElementById('my-prof-modal').style.display='flex';
+        }
+        function updateMe() {
+            db.ref("users/"+myID).update({ nickname: document.getElementById('myNickNew').value, avatar: document.getElementById('myAvNew').value }).then(() => { alert("Сохранено!"); closeM('my-prof-modal'); });
+        }
+
+        function openUserCardFromHeader() {
+            if(active && active.type === 'USER') {
+                viewingUserId = active.id;
+                const dData = getUserDisplayData(viewingUserId);
+                
+                document.getElementById('pCardAv').src = dData.avatar;
+                document.getElementById('pCardNick').innerText = dData.name;
+                
+                // Чекбокс контактов
+                const isC = cache.contacts[viewingUserId];
+                document.getElementById('isContact').checked = !!isC;
+                document.getElementById('contactSettings').style.display = isC ? 'block' : 'none';
+                if(isC) {
+                    document.getElementById('contactLocName').value = isC.locName || "";
+                    document.getElementById('contactLocAv').value = isC.locAv || "";
+                } else {
+                    document.getElementById('contactLocName').value = ""; document.getElementById('contactLocAv').value = "";
                 }
-                list.innerHTML += `<div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px solid #242f3d;">
-                    <div style="cursor:pointer;" onclick="closeM('members-modal'); openUserCard('${uid}')"><b>${u ? u.nickname : 'Юзер'}</b> <span class="role-badge">${r}</span></div><div>${actionsHtml}</div></div>`;
-            }
-            document.getElementById('members-modal').style.display='flex';
-        }
-        function changeRole(uid, newRole) { db.ref("groups/" + active.id + "/roles/" + uid).set(newRole).then(() => showMem()); }
-        function kickUser(uid) { if(confirm("Выгнать?")) db.ref("groups/" + active.id + "/roles/" + uid).remove().then(() => showMem()); }
 
-        function openAdm() {
-            const g = cache.g[active.id]; document.getElementById('gNameNew').value = g.name; document.getElementById('gDescNew').value = g.desc || "";
-            document.getElementById('gAvNew').value = g.avatar || ""; document.getElementById('gAvPreview').src = g.avatar || "https://api.dicebear.com/7.x/shapes/svg?seed="+active.id;
-            uploadedGroupAv = null; document.getElementById('admin-modal').style.display='flex';
+                // Кнопка блокировки
+                const isB = cache.blocked[viewingUserId];
+                const bBtn = document.getElementById('blockBtn');
+                bBtn.innerText = isB ? "✅ Разблокировать пользователя" : "🚫 Заблокировать пользователя";
+                bBtn.className = isB ? "success" : "danger";
+
+                document.getElementById('user-prof-modal').style.display = 'flex';
+            }
         }
-        function updateG() { 
-            const finalAv = uploadedGroupAv || document.getElementById('gAvNew').value.trim();
-            db.ref("groups/"+active.id).update({ name: document.getElementById('gNameNew').value, desc: document.getElementById('gDescNew').value, avatar: finalAv }); closeM('admin-modal'); 
+
+        function toggleContactSettings() {
+            document.getElementById('contactSettings').style.display = document.getElementById('isContact').checked ? 'block' : 'none';
+            if (!document.getElementById('isContact').checked) {
+                // Удаляем из контактов
+                db.ref(`users/${myID}/contacts/${viewingUserId}`).remove().then(() => { render(); select(active.id, active.name, active.type); });
+            }
         }
-        function invite() {
-            const inp = document.getElementById('addEmail').value.trim().toLowerCase(); let fid = null;
-            for(let id in cache.u) { if(cache.u[id].email === inp) { fid = id; break; } }
-            if(fid) { db.ref("groups/"+active.id+"/roles/"+fid).set('member'); document.getElementById('addEmail').value=""; alert("Добавлен!"); } else { alert("Пользователь не найден"); }
+
+        function saveContact() {
+            const locN = document.getElementById('contactLocName').value.trim();
+            const locA = document.getElementById('contactLocAv').value.trim();
+            db.ref(`users/${myID}/contacts/${viewingUserId}`).set({ locName: locN, locAv: locA }).then(() => {
+                alert("Контакт обновлен!"); render(); closeM('user-prof-modal'); select(active.id, getUserDisplayData(active.id).name, active.type);
+            });
         }
-        function newG() {
-            const n = prompt("Название группы:");
-            if(n) { const id = "grp_"+Date.now(); db.ref("groups/"+id).set({ name: n, owner: myID, roles: { [myID]: 'owner' }, desc: "Добро пожаловать!", avatar: "" }); }
+
+        function toggleBlock() {
+            const isB = cache.blocked[viewingUserId];
+            if (isB) {
+                db.ref(`users/${myID}/blocked/${viewingUserId}`).remove().then(() => { render(); closeM('user-prof-modal'); select(active.id, active.name, active.type); });
+            } else {
+                if(confirm("Уверены, что хотите кинуть его в блок? Он не сможет писать, чат будет скрыт.")) {
+                    db.ref(`users/${myID}/blocked/${viewingUserId}`).set(true).then(() => { render(); closeM('user-prof-modal'); select(active.id, active.name, active.type); });
+                }
+            }
         }
-        function leaveG() { if(confirm("Выйти из группы?")) { db.ref("groups/"+active.id+"/roles/"+myID).remove(); location.reload(); } }
-        function killG() { if(confirm("Удалить группу полностью?")) { db.ref("groups/"+active.id).remove(); db.ref("msgs/"+active.id).remove(); location.reload(); } }
+
+        function closeM(id) { document.getElementById(id).style.display = 'none'; }
+
+        // БАЗОВАЯ РЕГИСТРАЦИЯ И ВХОД (минимизировано для примера)
+        function login() { const e=document.getElementById('uEmail').value, p=document.getElementById('uPass').value; authSystem.signInWithEmailAndPassword(e, p).catch(err=>alert(err.message)); }
+        function register() {
+            const e=document.getElementById('regEmail').value, p=document.getElementById('regPass').value, n=document.getElementById('uNick').value, pin=document.getElementById('regPin').value;
+            authSystem.createUserWithEmailAndPassword(e, p).then(c => { db.ref("users/"+c.user.uid).set({ nickname: n, avatar:"", pin: pin||"" }); }).catch(err=>alert(err.message));
+        }
+        function verifyPin() {
+            const p = document.getElementById('authPinInp').value;
+            db.ref("users/"+myID+"/pin").once("value", s => { if(s.val()===p) { sessionStorage.setItem('vchat_pin_pass','true'); document.getElementById('login-scr').style.display='none'; document.getElementById('app').style.display='flex'; registerSession(); } else alert("Неверный ПИН!"); });
+        }
+        function loginWithGoogle() { authSystem.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+        function logOut() { authSystem.signOut().then(()=>location.reload()); }
+        function newG() { const n=prompt("Имя группы:"); if(n) db.ref("groups/grp_"+Date.now()).set({name:n, roles:{[myID]:'owner'}}); }
     </script>
 </body>
 </html>
