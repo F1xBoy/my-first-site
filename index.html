@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat 6.6</title>
+    <title>VChat 6.8</title>
     <meta name="google-site-verification" content="bnrGuCFyUfxc7XB3jmiLYsr6mbgod0QWt2PHqIXGSrg" />
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     
@@ -20,28 +20,31 @@
             --msg-me: #dbeafe; --msg-he: #ffffff; --danger: #ef4444; --success: #16a34a; --warning: #ca8a04;
         }
 
-        body, html, .tg-sidebar, .tg-main, .header, .modal-card, input, textarea, .profile-header, .tab-btn, .chat-item, .device-item, .member-item {
-            transition: background 0.5s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        /* Плавные переходы для ВСЕГО */
+        body, html, .tg-sidebar, .tg-main, .header, .modal-card, input, textarea, .profile-header, .tab-btn, .chat-item, .device-item, .member-item, .msg {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body, html { margin: 0; padding: 0; height: 100%; background: var(--bg-main); color: var(--text-main); font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         * { box-sizing: border-box; }
 
+        /* Крутые анимации */
         @keyframes themeRotate { 0% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.2) rotate(180deg); } 100% { transform: scale(1) rotate(360deg); } }
         .theme-spin { animation: themeRotate 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes msgIn { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; animation: fadeIn 0.2s ease-out forwards; }
-        .modal-card { background: var(--bg-card); padding: 25px; border-radius: 12px; width: 380px; border: 1px solid var(--border-color); animation: slideUp 0.25s ease-out forwards; max-height: 90vh; overflow-y: auto; color: var(--text-main); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         
-        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); outline: none; font-family: inherit; }
-        input:focus, textarea:focus { border-color: var(--accent); }
+        @keyframes fadeIn { from { opacity: 0; backdrop-filter: blur(0px); } to { opacity: 1; backdrop-filter: blur(8px); } }
+        @keyframes slideUp { from { transform: translateY(30px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+        @keyframes msgIn { from { transform: translateY(15px) scale(0.98); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
 
-        button { width: 100%; padding: 10px; background: var(--border-color); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.1s; }
-        button:hover { filter: brightness(1.1); }
-        button:active { transform: scale(0.98); }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .modal-card { background: var(--bg-card); padding: 25px; border-radius: 16px; width: 380px; border: 1px solid var(--border-color); animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; max-height: 90vh; overflow-y: auto; color: var(--text-main); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        
+        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); outline: none; font-family: inherit; }
+        input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2); }
+
+        button { width: 100%; padding: 12px; background: var(--border-color); color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 5px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        button:hover { filter: brightness(1.15); transform: translateY(-1px); }
+        button:active { transform: translateY(1px) scale(0.98); }
         button.danger { background: var(--danger); }
         button.success { background: var(--success); }
         button.warning { background: var(--warning); color: #000; }
@@ -54,22 +57,26 @@
         .profile-header { padding: 15px; background: var(--bg-hover); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); }
         .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid var(--accent); }
         
-        .tabs { display: flex; background: var(--bg-card); border-bottom: 1px solid var(--border-color); overflow-x: auto; }
-        .tab-btn { flex: 1; padding: 12px 5px; text-align: center; cursor: pointer; font-size: 12px; font-weight: bold; color: var(--text-muted); transition: 0.2s; border-bottom: 3px solid transparent; user-select: none; white-space: nowrap; }
+        .tabs { display: flex; background: var(--bg-card); border-bottom: 1px solid var(--border-color); overflow-x: auto; min-height: 44px; }
+        .tab-btn { flex: 1; padding: 12px 5px; text-align: center; cursor: pointer; font-size: 12px; font-weight: bold; color: var(--text-muted); border-bottom: 3px solid transparent; user-select: none; white-space: nowrap; }
         .tab-btn.active { color: var(--accent); border-bottom: 3px solid var(--accent); }
 
         .chat-list { flex: 1; overflow-y: auto; }
-        .chat-item { display: flex; align-items: center; padding: 12px; cursor: pointer; border-bottom: 1px solid var(--bg-main); }
+        .chat-item { display: flex; align-items: center; padding: 12px; cursor: pointer; border-bottom: 1px solid var(--bg-main); position: relative; }
         .chat-item:hover { background: var(--bg-hover); }
         .chat-item img { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; object-fit: cover; }
+        
+        .pin-btn { background: transparent; border: none; width: auto; padding: 5px; margin: 0; color: var(--text-muted); opacity: 0; position: absolute; right: 10px; top: 18px; transition: opacity 0.2s; }
+        .chat-item:hover .pin-btn, .chat-item.pinned .pin-btn { opacity: 1; }
+        .chat-item.pinned { background: rgba(88, 166, 255, 0.05); }
 
         .tg-main { flex: 1; display: flex; flex-direction: column; background: var(--bg-main); }
         .header { padding: 10px 20px; background: var(--bg-card); display: flex; align-items: center; justify-content: space-between; height: 65px; border-bottom: 1px solid var(--border-color); }
         .messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         
-        .msg { max-width: 75%; padding: 8px 12px; border-radius: 10px; font-size: 14px; word-wrap: break-word; position: relative; animation: msgIn 0.2s ease-out forwards; }
-        .msg.me { align-self: flex-end; background: var(--msg-me); color: var(--text-main); }
-        .msg.he { align-self: flex-start; background: var(--msg-he); color: var(--text-main); border: 1px solid var(--border-color); }
+        .msg { max-width: 75%; padding: 10px 14px; border-radius: 14px; font-size: 14px; word-wrap: break-word; position: relative; animation: msgIn 0.3s cubic-bezier(0.1, 1, 0.1, 1) forwards; }
+        .msg.me { align-self: flex-end; background: var(--msg-me); color: var(--text-main); border-bottom-right-radius: 4px; }
+        .msg.he { align-self: flex-start; background: var(--msg-he); color: var(--text-main); border: 1px solid var(--border-color); border-bottom-left-radius: 4px; }
         .msg-name { font-size: 10px; color: var(--accent); font-weight: bold; margin-bottom: 4px; }
         .msg-del { display: none; color: var(--danger); cursor: pointer; margin-left: 8px; font-size: 11px; float: right; }
         .msg:hover .msg-del { display: inline-block; }
@@ -77,14 +84,9 @@
         .input-bar { padding: 15px; background: var(--bg-card); display: flex; gap: 10px; align-items: center; border-top: 1px solid var(--border-color); }
         .p-info-label { font-size: 10px; color: var(--accent); text-transform: uppercase; font-weight: bold; margin-top: 10px; margin-bottom: 3px; display: block; }
         
-        .device-item, .member-item { background: var(--bg-input); padding: 10px; border-radius: 8px; font-size: 13px; margin-top: 8px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
-        .role-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-left: 5px; }
-        .role-owner { background: var(--accent); color: #fff; }
-        .role-admin { background: var(--success); color: #fff; }
-        .role-member { background: var(--text-muted); color: #fff; }
-
-        .block-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); display:flex; justify-content:center; align-items:center; color:#fff; font-weight:bold; z-index:10; display:none; }
-        .tab-setting-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; background: var(--bg-input); padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); }
+        /* Умный оверлей блокировки (не перекрывает шапку!) */
+        .block-overlay { position: absolute; bottom: 0; left: 0; width: 100%; height: calc(100% - 65px); background: rgba(14, 22, 33, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; color: #fff; z-index: 10; display: none; }
+        .tab-setting-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; background: var(--bg-input); padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); }
     </style>
 </head>
 <body>
@@ -104,7 +106,7 @@
             <input type="text" id="uNick" placeholder="Никнейм">
             <input type="email" id="regEmail" placeholder="Email">
             <input type="password" id="regPass" placeholder="Пароль">
-            <input type="password" id="regPin" placeholder="4-значный ПИН (необязательно)" maxlength="4" style="text-align:center;">
+            <input type="password" id="regPin" placeholder="4-значный ПИН" maxlength="4" style="text-align:center;">
             <button class="success" onclick="register()">Создать</button>
             <p style="font-size: 13px; color: var(--accent); cursor: pointer;" onclick="document.getElementById('reg-view').style.display='none';">Назад ко входу</p>
         </div>
@@ -130,7 +132,7 @@
             <button class="success" onclick="updateMe()">Сохранить профиль</button>
 
             <hr style="border:0; border-top:1px solid var(--border-color); margin:15px 0;">
-            <span class="p-info-label">💻 Активные сессии (Устройства)</span>
+            <span class="p-info-label">💻 Активные сессии</span>
             <div id="devices-list" style="max-height: 120px; overflow-y: auto;"></div>
 
             <button class="secondary" style="width:100%; margin-top:15px;" onclick="closeM('my-prof-modal')">Закрыть</button>
@@ -141,10 +143,7 @@
     <div id="tabs-settings-modal" class="modal-overlay">
         <div class="modal-card">
             <h3 style="margin-top:0; color:var(--accent);">Настройка вкладок ⚙️</h3>
-            <p style="font-size:12px; color:var(--text-muted); margin-bottom:15px;">Переименовывай вкладки как хочешь и меняй их порядок кнопками.</p>
-            
             <div id="tabs-edit-list"></div>
-            
             <button class="success" onclick="saveTabsConfig()" style="margin-top: 15px;">Сохранить изменения</button>
             <button class="secondary" style="width:100%; margin-top:8px;" onclick="closeM('tabs-settings-modal')">Закрыть</button>
         </div>
@@ -165,15 +164,13 @@
                     Добавить в Мои Контакты 📒
                 </label>
                 <div id="contactSettings" style="display:none; margin-top:10px; border-top:1px dashed var(--border-color); padding-top:10px;">
-                    <small style="color:var(--text-muted);">Локальное имя:</small>
-                    <input type="text" id="contactLocName" placeholder="Бро / Брат / Кент">
-                    <small style="color:var(--text-muted);">Локальная аватарка (URL):</small>
-                    <input type="text" id="contactLocAv" placeholder="https://...">
+                    <input type="text" id="contactLocName" placeholder="Локальное имя">
+                    <input type="text" id="contactLocAv" placeholder="Локальная аватарка (URL)">
                     <button class="success" style="padding:6px; font-size:12px;" onclick="saveContact()">Сохранить</button>
                 </div>
             </div>
 
-            <button id="blockBtn" class="danger" style="margin-top:15px;" onclick="toggleBlock()">🚫 Заблокировать пользователя</button>
+            <button id="blockBtn" class="danger" style="margin-top:15px;" onclick="toggleBlock()">🚫 Заблокировать</button>
             <button class="secondary" style="width:100%; margin-top:8px;" onclick="closeM('user-prof-modal')">Закрыть</button>
         </div>
     </div>
@@ -181,19 +178,16 @@
     <div id="group-prof-modal" class="modal-overlay">
         <div class="modal-card">
             <img id="gCardAv" style="width:80px; height:80px; border-radius:50%; display:block; margin:0 auto 10px; object-fit:cover; border:2px solid var(--accent);">
-            <h3 id="gCardNameTitle" style="text-align: center; margin: 0 0 10px 0; color: var(--accent);">Название группы</h3>
+            <h3 id="gCardNameTitle" style="text-align: center; margin: 0 0 10px 0; color: var(--accent);">Группа</h3>
             
             <div id="groupReadView" style="display:none; background:var(--bg-main); padding:12px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:12px; font-size:13px; text-align:center;">
                 <span id="gCardDescView" style="font-style: italic; color: var(--text-muted);">Описание отсутствует</span>
             </div>
 
             <div id="groupEditView" style="display:none;">
-                <label class="p-info-label">Название группы</label>
                 <input type="text" id="groupNameInp">
-                <label class="p-info-label">Аватар (URL)</label>
                 <input type="text" id="groupAvInp">
-                <label class="p-info-label">Описание</label>
-                <textarea id="groupDescInp" rows="2" placeholder="О чём эта группа..."></textarea>
+                <textarea id="groupDescInp" rows="2"></textarea>
                 <button class="success" onclick="updateGroup()">Сохранить настройки</button>
             </div>
 
@@ -202,7 +196,6 @@
                 <span class="p-info-label" style="margin:0;">👥 Участники</span>
                 <button id="addMemberBtn" class="success" style="width:auto; padding:4px 8px; font-size:11px; margin:0; display:none;" onclick="addMemberPrompt()">+ Добавить</button>
             </div>
-            
             <div id="groupMembersList" style="max-height: 150px; overflow-y: auto; margin-top: 10px;"></div>
 
             <button id="leaveGroupBtn" class="danger" style="margin-top:15px;" onclick="leaveGroup()">🚪 Выйти из группы</button>
@@ -227,7 +220,6 @@
             </div>
 
             <div class="tabs" id="tabsContainer"></div>
-
             <div class="chat-list" id="chatList"></div>
         </aside>
 
@@ -244,7 +236,10 @@
             
             <div id="msgBox" class="messages"></div>
             
-            <div id="blockOverlay" class="block-overlay">Вы заблокировали этого пользователя</div>
+            <div id="blockOverlay" class="block-overlay">
+                <span style="font-size:16px; font-weight:bold; color:var(--danger);">Вы заблокировали этого пользователя 🚫</span>
+                <button class="success" style="width:auto; padding:10px 20px;" onclick="quickUnblock()">Разблокировать прямо сейчас</button>
+            </div>
 
             <div class="input-bar">
                 <input type="text" id="msgInp" placeholder="Написать..." onkeydown="if(event.key==='Enter') sendMsg()" style="margin:0;">
@@ -262,9 +257,9 @@
         firebase.initializeApp(cfg); const db = firebase.database(); const authSystem = firebase.auth();
 
         let myID = ""; let active = null; let sessionId = "";
-        let cache = { u: {}, g: {}, contacts: {}, blocked: {}, myChats: {} };
+        let cache = { u: {}, g: {}, contacts: {}, blocked: {}, myChats: {}, pins: {} };
 
-        // ИНИЦИАЛИЗАЦИЯ ДИНАМИЧЕСКИХ ВКЛАДОК
+        // ИСПРАВЛЕННЫЙ ПОРЯДОК ВКЛАДОК ПО ДЕФОЛТУ
         const defaultTabs = [
             { id: 'chats', name: 'Чаты' },
             { id: 'global', name: 'Общее' },
@@ -272,7 +267,7 @@
             { id: 'contacts', name: 'Контакты' }
         ];
         let tabsConfig = JSON.parse(localStorage.getItem('vchat_tabs_cfg')) || defaultTabs;
-        let currentTab = tabsConfig[0].id; // По умолчанию активна первая вкладка из конфига
+        let currentTab = tabsConfig[0].id;
 
         if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); document.getElementById('themeBtn').innerText = '🌞'; }
         
@@ -290,12 +285,11 @@
                     const d = s.val();
                     if(!d) {
                         db.ref("users/" + myID).set({ nickname: user.email.split('@')[0], avatar: "", email: user.email || "", bio: "Я в VChat!" });
-                        document.getElementById('login-scr').style.display = 'none'; document.getElementById('app').style.display = 'flex';
                     } else {
                         document.getElementById('myName').innerText = d.nickname;
                         document.getElementById('myAvImg').src = d.avatar || "https://api.dicebear.com/7.x/identicon/svg?seed="+myID;
                         cache.contacts = d.contacts || {}; cache.blocked = d.blocked || {};
-                        cache.myChats = d.chats || {};
+                        cache.myChats = d.chats || {}; cache.pins = d.pins || {};
 
                         if (d.pin && d.pin.trim() !== "" && sessionStorage.getItem('vchat_pin_pass') !== 'true') {
                             document.getElementById('login-scr').style.display = 'flex'; document.getElementById('login-view').style.display = 'none';
@@ -315,76 +309,58 @@
         function registerSession() {
             if (sessionId) return;
             sessionId = "sess_" + Date.now() + "_" + Math.floor(Math.random()*1000);
-            let os = "Неизвестное устройство"; let browser = "Неизвестный браузер"; let ua = navigator.userAgent;
-            if (ua.includes("Win")) os = "Windows PC"; else if (ua.includes("Mac") && !ua.includes("iPhone")) os = "macOS"; else if (ua.includes("Android")) os = "Android Смартфон"; else if (ua.includes("iPhone")) os = "iPhone";
-            if (ua.includes("Chrome")) browser = "Chrome"; else if (ua.includes("Safari") && !ua.includes("Chrome")) browser = "Safari"; else if (ua.includes("Firefox")) browser = "Firefox";
+            let os = "PC"; let browser = "Браузер"; let ua = navigator.userAgent;
+            if (ua.includes("Win")) os = "Windows"; else if (ua.includes("Mac")) os = "macOS"; else if (ua.includes("Android")) os = "Android"; else if (ua.includes("iPhone")) os = "iPhone";
             let sessionRef = db.ref(`users/${myID}/sessions/${sessionId}`);
             sessionRef.set({ os: os, browser: browser, time: new Date().toLocaleString() }); sessionRef.onDisconnect().remove();
-            sessionRef.on("value", snap => { if (snap.val() === null && myID) { alert("Вас кикнули с другого устройства! Сессия завершена."); authSystem.signOut(); } });
         }
 
         function loadDevices() {
-            const list = document.getElementById('devices-list'); list.innerHTML = "Загрузка...";
+            const list = document.getElementById('devices-list'); list.innerHTML = "";
             db.ref(`users/${myID}/sessions`).once("value", s => {
-                list.innerHTML = ""; const sessions = s.val() || {};
+                const sessions = s.val() || {};
                 for(let sid in sessions) {
                     const data = sessions[sid]; const isMe = (sid === sessionId);
-                    list.innerHTML += `<div class="device-item"><div><b>${data.os}</b> <small style="color:var(--accent);">(${data.browser})</small><br><small style="color:var(--text-muted); font-size:10px;">Вход: ${data.time}</small></div>${isMe ? '<span style="background:var(--success); color:#fff; padding:3px 6px; border-radius:4px; font-size:10px;">Текущий</span>' : `<button class="danger" style="width:auto; padding:5px 10px; font-size:11px; margin:0;" onclick="kickSession('${sid}')">Кикнуть</button>`}</div>`;
+                    list.innerHTML += `<div class="device-item"><div><b>${data.os}</b> <small>(${data.browser})</small></div>${isMe ? '<span>Текущий</span>' : `<button class="danger" style="width:auto; padding:4px;" onclick="kickSession('${sid}')">Кик</button>`}</div>`;
                 }
             });
         }
 
-        function kickSession(sid) { if(confirm("Выкинуть это устройство из аккаунта?")) db.ref(`users/${myID}/sessions/${sid}`).remove().then(()=> loadDevices()); }
-
-        // ДИНАМИЧЕСКИЙ РЕНДЕР ВКЛАДОК ИЗ КОНФИГА
         function renderTabs() {
-            const container = document.getElementById('tabsContainer'); container.innerHTML = '';
+            const container = document.getElementById('tabsContainer'); if(!container) return;
+            container.innerHTML = '';
             tabsConfig.forEach(t => {
-                const btn = document.createElement('div');
-                btn.className = `tab-btn ${currentTab === t.id ? 'active' : ''}`;
-                btn.innerText = t.name;
-                btn.onclick = () => setTab(t.id);
+                const btn = document.createElement('div'); btn.className = `tab-btn ${currentTab === t.id ? 'active' : ''}`;
+                btn.innerText = t.name; btn.onclick = () => { currentTab = t.id; renderTabs(); render(); };
                 container.appendChild(btn);
             });
         }
 
-        function setTab(tabId) {
-            currentTab = tabId; renderTabs(); render();
-        }
-
-        // ЛОГИКА НАСТРОЙКИ ВКЛАДОК (КАСТОМИЗАЦИЯ)
         function openTabsSettings() {
             const list = document.getElementById('tabs-edit-list'); list.innerHTML = "";
             tabsConfig.forEach((t, idx) => {
                 list.innerHTML += `
                     <div class="tab-setting-row">
-                        <input type="text" id="tab-rename-${t.id}" value="${t.name}" style="margin:0; flex:1; padding:6px 10px;" oninput="syncTabName('${t.id}', this.value)">
-                        <button class="secondary" style="width:auto; margin:0; padding:5px 8px;" onclick="moveTab(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>▲</button>
-                        <button class="secondary" style="width:auto; margin:0; padding:5px 8px;" onclick="moveTab(${idx}, 1)" ${idx === tabsConfig.length - 1 ? 'disabled' : ''}>▼</button>
+                        <input type="text" id="tab-rename-${t.id}" value="${t.name}" style="margin:0; flex:1; padding:6px;">
+                        <button class="secondary" type="button" onclick="moveTab(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>▲</button>
+                        <button class="secondary" type="button" onclick="moveTab(${idx}, 1)" ${idx === tabsConfig.length - 1 ? 'disabled' : ''}>▼</button>
                     </div>
                 `;
             });
             document.getElementById('tabs-settings-modal').style.display = 'flex';
         }
 
-        function syncTabName(id, val) {
-            let t = tabsConfig.find(x => x.id === id); if(t) t.name = val;
-        }
-
         function moveTab(idx, dir) {
-            // Сохраняем текущие введенные имена перед перемещением в массиве
             tabsConfig.forEach(t => { const inp = document.getElementById(`tab-rename-${t.id}`); if(inp) t.name = inp.value; });
             let targetIdx = idx + dir;
             if(targetIdx >= 0 && targetIdx < tabsConfig.length) {
-                let temp = tabsConfig[idx]; tabsConfig[idx] = tabsConfig[targetIdx]; tabsConfig[targetIdx] = temp;
-                openTabsSettings();
+                let temp = tabsConfig[idx]; tabsConfig[idx] = tabsConfig[targetIdx]; tabsConfig[targetIdx] = temp; openTabsSettings();
             }
         }
 
         function saveTabsConfig() {
             tabsConfig.forEach(t => { const inp = document.getElementById(`tab-rename-${t.id}`); if(inp) t.name = inp.value.trim() || t.id; });
-            localStorage.setItem('vchat_tabs_cfg', JSON.stringify(tabsConfig));
-            renderTabs(); render(); closeM('tabs-settings-modal'); alert("Вкладки настроены по твоему фэншую, бро! 👌");
+            localStorage.setItem('vchat_tabs_cfg', JSON.stringify(tabsConfig)); renderTabs(); render(); closeM('tabs-settings-modal');
         }
 
         function getUserDisplayData(uid) {
@@ -393,20 +369,32 @@
             return { name: baseUser.nickname, avatar: baseUser.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${uid}`, isContact: false };
         }
 
-        function render() {
-            const list = document.getElementById('chatList'); const q = document.getElementById('srch').value.toLowerCase(); list.innerHTML = "";
+        // ЛОГИКА ЗАКРЕПЛЕНИЯ ЧАТОВ
+        function togglePin(id, e) {
+            e.stopPropagation();
+            const isPinned = cache.pins && cache.pins[id];
+            if (isPinned) { db.ref(`users/${myID}/pins/${id}`).remove(); } 
+            else { db.ref(`users/${myID}/pins/${id}`).set(true); }
+        }
 
-            // РЕНДЕР ГРУПП (В зависимости от скрытых ID системной логики)
+        // УМНЫЙ РЕНДЕР С СОРТИРОВКОЙ ПО ЗАКРЕПАМ
+        function render() {
+            const list = document.getElementById('chatList'); if(!list) return;
+            const q = document.getElementById('srch').value.toLowerCase(); list.innerHTML = "";
+
+            let items = [];
+
+            // Собираем группы
             if (currentTab === 'groups' || currentTab === 'chats') {
                 for (let id in cache.g) {
                     const g = cache.g[id]; 
                     if (g.roles && g.roles[myID] && g.name.toLowerCase().includes(q)) {
-                        addLi(list, g.name, g.avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${id}`, id, 'GROUP');
+                        items.push({ id, name: g.name, avatar: g.avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${id}`, type: 'GROUP' });
                     }
                 }
             }
             
-            // РЕНДЕР ПОЛЬЗОВАТЕЛЕЙ
+            // Собираем пользователей
             for (let id in cache.u) {
                 if (id === myID) continue;
                 const dData = getUserDisplayData(id);
@@ -418,19 +406,38 @@
                     if (currentTab === 'chats' && (!cache.myChats || !cache.myChats[id])) continue;
                     
                     let suffix = cache.blocked[id] ? " (БЛОК)" : (dData.isContact ? " 📒" : "");
-                    addLi(list, dData.name + suffix, dData.avatar, id, 'USER');
+                    items.push({ id, name: dData.name + suffix, avatar: dData.avatar, type: 'USER' });
                 }
             }
-        }
 
-        function addLi(cont, name, av, id, type) {
-            const d = document.createElement('div'); d.className = 'chat-item'; d.onclick = () => select(id, name, type);
-            d.innerHTML = `<img src="${av}"><div style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"><b>${name}</b><br><small style="color:var(--text-muted);font-size:10px">${type}</small></div>`; cont.appendChild(d);
+            // Сортировка: сначала закрепленные (`true`), потом обычные
+            items.sort((a, b) => {
+                const aPinned = cache.pins && cache.pins[a.id] ? 1 : 0;
+                const bPinned = cache.pins && cache.pins[b.id] ? 1 : 0;
+                return bPinned - aPinned;
+            });
+
+            // Отрисовка элементов
+            items.forEach(item => {
+                const isPinned = cache.pins && cache.pins[item.id];
+                const d = document.createElement('div');
+                d.className = `chat-item ${isPinned ? 'pinned' : ''}`;
+                d.onclick = () => select(item.id, item.name, item.type);
+                d.innerHTML = `
+                    <img src="${item.avatar}">
+                    <div style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                        <b>${item.name}</b><br><small style="color:var(--text-muted);font-size:10px">${item.type}</small>
+                    </div>
+                    <button class="pin-btn" onclick="togglePin('${item.id}', event)">${isPinned ? '📍' : '📌'}</button>
+                `;
+                list.appendChild(d);
+            });
         }
 
         function select(id, name, type) {
             active = { id, name, type }; document.getElementById('hTitle').innerText = name.replace(" (БЛОК)", "").replace(" 📒", ""); 
             document.getElementById('msgBox').innerHTML = ""; const hAv = document.getElementById('hAv');
+            
             const isBlockedByMe = cache.blocked[id];
             document.getElementById('blockOverlay').style.display = (type === 'USER' && isBlockedByMe) ? 'flex' : 'none';
             document.getElementById('msgInp').disabled = (type === 'USER' && isBlockedByMe);
@@ -454,12 +461,21 @@
             });
         }
 
+        // БЫСТРАЯ РАЗБЛОКИРОВКА С ЭКРАНА ЧАТА
+        function quickUnblock() {
+            if(active && active.type === 'USER') {
+                db.ref(`users/${myID}/blocked/${active.id}`).remove().then(() => {
+                    alert("Пользователь успешно разблокирован! 🎉");
+                    select(active.id, active.name, active.type);
+                });
+            }
+        }
+
         function sendMsg() {
             const t = document.getElementById('msgInp').value.trim(); if (!t || !active) return;
             if (active.type === 'USER' && cache.blocked[active.id]) return alert("Вы заблокировали этого пользователя!");
             const path = active.type === 'USER' ? (myID < active.id ? myID+"_"+active.id : active.id+"_"+myID) : active.id;
             db.ref("msgs/" + path).push().set({ sid: myID, snick: document.getElementById('myName').innerText, txt: t }); 
-            
             db.ref(`users/${myID}/chats/${active.id}`).set(true);
             if (active.type === 'USER') { db.ref(`users/${active.id}/chats/${myID}`).set(true); }
             document.getElementById('msgInp').value = "";
@@ -467,6 +483,7 @@
 
         function deleteMessage(path, key) { if(confirm("Удалить?")) db.ref("msgs/" + path + "/" + key).remove(); }
 
+        let viewingUserId = "";
         function openUserCardFromHeader() {
             if(!active) return;
             if(active.type === 'USER') {
@@ -475,8 +492,8 @@
                 document.getElementById('pCardBio').innerText = baseUser?.bio || "Информация отсутствует";
                 
                 const isC = cache.contacts[viewingUserId]; document.getElementById('isContact').checked = !!isC; document.getElementById('contactSettings').style.display = isC ? 'block' : 'none';
-                if(isC) { document.getElementById('contactLocName').value = isC.locName || ""; document.getElementById('contactLocAv').value = isC.locAv || ""; } else { document.getElementById('contactLocName').value = ""; document.getElementById('contactLocAv').value = ""; }
-
+                if(isC) { document.getElementById('contactLocName').value = isC.locName || ""; document.getElementById('contactLocAv').value = isC.locAv || ""; }
+                
                 const isB = cache.blocked[viewingUserId]; const bBtn = document.getElementById('blockBtn');
                 bBtn.innerText = isB ? "✅ Разблокировать" : "🚫 Заблокировать"; bBtn.className = isB ? "success" : "danger";
                 document.getElementById('user-prof-modal').style.display = 'flex';
@@ -487,7 +504,6 @@
             const gid = active.id; const g = cache.g[gid]; if(!g) return;
             document.getElementById('gCardAv').src = g.avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${gid}`;
             document.getElementById('gCardNameTitle').innerText = g.name;
-
             const myRole = g.roles ? g.roles[myID] : null; const isOwner = (myRole === 'owner'); const isAdmin = (myRole === 'admin');
 
             if(isOwner) {
@@ -500,46 +516,26 @@
 
             document.getElementById('addMemberBtn').style.display = (isOwner || isAdmin) ? 'block' : 'none';
             const mList = document.getElementById('groupMembersList'); mList.innerHTML = "";
-            
             for(let uid in g.roles) {
                 const uRole = g.roles[uid]; const uName = (uid === myID) ? "Вы" : (cache.u[uid]?.nickname || "Неизвестный");
-                let roleBadge = `<span class="role-badge role-${uRole}">${uRole.toUpperCase()}</span>`;
-                let controls = "";
-                if(uid !== myID) {
-                    if (isOwner) {
-                        controls += `<button class="${uRole === 'admin' ? 'warning' : 'success'}" style="padding:2px 5px; font-size:10px; width:auto; margin:0 5px;" onclick="toggleAdmin('${gid}', '${uid}', '${uRole}')">${uRole === 'admin' ? 'Снять Админа' : 'Дать Админа'}</button>`;
-                        controls += `<button class="danger" style="padding:2px 5px; font-size:10px; width:auto; margin:0;" onclick="kickMember('${gid}', '${uid}')">Кик</button>`;
-                    } else if (isAdmin && uRole === 'member') {
-                        controls += `<button class="danger" style="padding:2px 5px; font-size:10px; width:auto; margin:0;" onclick="kickMember('${gid}', '${uid}')">Кик</button>`;
-                    }
-                }
-                mList.innerHTML += `<div class="member-item"><div><b>${uName}</b> ${roleBadge}</div> <div style="display:flex;">${controls}</div></div>`;
+                mList.innerHTML += `<div class="member-item"><div><b>${uName}</b> <span class="role-badge">${uRole}</span></div></div>`;
             }
             document.getElementById('group-prof-modal').style.display = 'flex';
         }
 
-        function toggleAdmin(gid, uid, currentRole) { db.ref(`groups/${gid}/roles/${uid}`).set(currentRole === 'admin' ? 'member' : 'admin'); }
-        function kickMember(gid, uid) { if(confirm("Реально выгнать этого юзера?")) db.ref(`groups/${gid}/roles/${uid}`).remove(); }
-        function addMemberPrompt() {
-            const nick = prompt("Введите точный никнейм чела:"); if(!nick) return;
-            let targetId = null; for(let id in cache.u) { if(cache.u[id].nickname.toLowerCase() === nick.toLowerCase()) { targetId = id; break; } }
-            if(!targetId) return alert("Пользователь не найден!");
-            if(cache.g[active.id].roles && cache.g[active.id].roles[targetId]) return alert("Он уже тут!");
-            db.ref(`groups/${active.id}/roles/${targetId}`).set('member'); alert("Добавлен!");
-        }
-
-        function updateGroup() {
-            const gid = active.id; const newName = document.getElementById('groupNameInp').value.trim(); if(!newName) return alert("Название группы обязательно!");
-            db.ref("groups/" + gid).update({ name: newName, avatar: document.getElementById('groupAvInp').value.trim(), desc: document.getElementById('groupDescInp').value.trim() }).then(() => { alert("Сохранено!"); closeM('group-prof-modal'); select(gid, newName, 'GROUP'); });
-        }
-
-        function leaveGroup() {
-            if(confirm("Реально хочешь ливнуть?")) {
-                db.ref(`groups/${active.id}/roles/${myID}`).remove().then(() => {
-                    alert("Вы вышли."); closeM('group-prof-modal'); active = null;
-                    document.getElementById('hTitle').innerText = "Выберите чат"; document.getElementById('hDesc').innerText = ""; document.getElementById('hAv').style.display = 'none'; document.getElementById('msgBox').innerHTML = ""; render();
-                });
-            }
+        function toggleBlock() { 
+            const isB = cache.blocked[viewingUserId]; 
+            if (isB) { 
+                db.ref(`users/${myID}/blocked/${viewingUserId}`).remove().then(() => { 
+                    alert("Разблокирован!"); render(); closeM('user-prof-modal'); select(active.id, active.name, active.type);
+                }); 
+            } else { 
+                if(confirm("Заблокировать?")) { 
+                    db.ref(`users/${myID}/blocked/${viewingUserId}`).set(true).then(() => { 
+                        render(); closeM('user-prof-modal'); select(active.id, active.name, active.type);
+                    }); 
+                } 
+            } 
         }
 
         function openMe() {
@@ -548,9 +544,8 @@
             loadDevices(); document.getElementById('my-prof-modal').style.display='flex';
         }
         function updateMe() { db.ref("users/"+myID).update({ nickname: document.getElementById('myNickNew').value, avatar: document.getElementById('myAvNew').value, bio: document.getElementById('myBioNew').value }).then(() => { alert("Сохранено!"); closeM('my-prof-modal'); }); }
-        function toggleContactSettings() { document.getElementById('contactSettings').style.display = document.getElementById('isContact').checked ? 'block' : 'none'; if (!document.getElementById('isContact').checked) { db.ref(`users/${myID}/contacts/${viewingUserId}`).remove().then(() => { render(); select(active.id, active.name, active.type); }); } }
-        function saveContact() { db.ref(`users/${myID}/contacts/${viewingUserId}`).set({ locName: document.getElementById('contactLocName').value.trim(), locAv: document.getElementById('contactLocAv').value.trim() }).then(() => { alert("Контакт обновлен!"); render(); closeM('user-prof-modal'); select(active.id, getUserDisplayData(active.id).name, active.type); }); }
-        function toggleBlock() { const isB = cache.blocked[viewingUserId]; if (isB) { db.ref(`users/${myID}/blocked/${viewingUserId}`).remove().then(() => { render(); closeM('user-prof-modal'); select(active.id, active.name, active.type); }); } else { if(confirm("Кинуть в блок?")) { db.ref(`users/${myID}/blocked/${viewingUserId}`).set(true).then(() => { render(); closeM('user-prof-modal'); select(active.id, active.name, active.type); }); } } }
+        function toggleContactSettings() { document.getElementById('contactSettings').style.display = document.getElementById('isContact').checked ? 'block' : 'none'; }
+        function saveContact() { db.ref(`users/${myID}/contacts/${viewingUserId}`).set({ locName: document.getElementById('contactLocName').value.trim(), locAv: document.getElementById('contactLocAv').value.trim() }).then(() => { alert("Обновлено!"); render(); closeM('user-prof-modal'); }); }
         function closeM(id) { document.getElementById(id).style.display = 'none'; }
         
         function login() { authSystem.signInWithEmailAndPassword(document.getElementById('uEmail').value, document.getElementById('uPass').value).catch(err=>alert(err.message)); }
