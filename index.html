@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat 6.2</title>
+    <title>VChat 6.3</title>
     <meta name="google-site-verification" content="bnrGuCFyUfxc7XB3jmiLYsr6mbgod0QWt2PHqIXGSrg" />
     
     <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -40,8 +40,24 @@
             --success: #16a34a;
         }
 
-        body, html { margin: 0; padding: 0; height: 100%; background: var(--bg-main); color: var(--text-main); font-family: 'Segoe UI', sans-serif; overflow: hidden; transition: background 0.3s, color 0.3s; }
+        /* Плавная анимация смены темы для ВСЕХ основных элементов */
+        body, html, .tg-sidebar, .tg-main, .header, .modal-card, input, textarea, .profile-header, .tab-btn, .chat-item, .device-item {
+            transition: background 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+                        background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+                        color 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+                        border-color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body, html { margin: 0; padding: 0; height: 100%; background: var(--bg-main); color: var(--text-main); font-family: 'Segoe UI', sans-serif; overflow: hidden; }
         * { box-sizing: border-box; }
+
+        /* Крутящаяся анимация для кнопки темы */
+        @keyframes themeRotate {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.2) rotate(180deg); }
+            100% { transform: scale(1) rotate(360deg); }
+        }
+        .theme-spin { animation: themeRotate 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -50,7 +66,7 @@
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; animation: fadeIn 0.2s ease-out forwards; }
         .modal-card { background: var(--bg-card); padding: 25px; border-radius: 12px; width: 380px; border: 1px solid var(--border-color); animation: slideUp 0.25s ease-out forwards; max-height: 90vh; overflow-y: auto; color: var(--text-main); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         
-        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); outline: none; transition: 0.2s ease; font-family: inherit; }
+        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); outline: none; font-family: inherit; }
         input:focus, textarea:focus { border-color: var(--accent); }
 
         button { width: 100%; padding: 10px; background: var(--border-color); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 5px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.1s; }
@@ -71,7 +87,7 @@
         .tab-btn.active { color: var(--accent); border-bottom: 3px solid var(--accent); }
 
         .chat-list { flex: 1; overflow-y: auto; }
-        .chat-item { display: flex; align-items: center; padding: 12px; cursor: pointer; border-bottom: 1px solid var(--bg-main); transition: background 0.1s; }
+        .chat-item { display: flex; align-items: center; padding: 12px; cursor: pointer; border-bottom: 1px solid var(--bg-main); }
         .chat-item:hover { background: var(--bg-hover); }
         .chat-item img { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; object-fit: cover; }
 
@@ -173,6 +189,30 @@
         </div>
     </div>
 
+    <div id="group-prof-modal" class="modal-overlay">
+        <div class="modal-card">
+            <img id="gCardAv" style="width:80px; height:80px; border-radius:50%; display:block; margin:0 auto 10px; object-fit:cover; border:2px solid var(--accent);">
+            <h3 id="gCardNameTitle" style="text-align: center; margin: 0 0 10px 0; color: var(--accent);">Название группы</h3>
+            
+            <div id="groupReadView" style="display:none; background:var(--bg-main); padding:12px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:12px; font-size:13px; text-align:center;">
+                <span id="gCardDescView" style="font-style: italic; color: var(--text-muted);">Описание отсутствует</span>
+            </div>
+
+            <div id="groupEditView" style="display:none;">
+                <label class="p-info-label">Название группы</label>
+                <input type="text" id="groupNameInp">
+                <label class="p-info-label">Аватар группы (URL)</label>
+                <input type="text" id="groupAvInp">
+                <label class="p-info-label">Описание группы</label>
+                <textarea id="groupDescInp" rows="2" placeholder="О чём эта группа..."></textarea>
+                <button class="success" onclick="updateGroup()">Сохранить настройки</button>
+            </div>
+
+            <button id="leaveGroupBtn" class="danger" style="margin-top:15px; display:none;" onclick="leaveGroup()">🚪 Выйти из группы</button>
+            <button class="secondary" style="width:100%; margin-top:8px;" onclick="closeM('group-prof-modal')">Закрыть</button>
+        </div>
+    </div>
+
     <div id="app" class="tg-container">
         <aside class="tg-sidebar">
             <div class="profile-header">
@@ -241,11 +281,17 @@
         let cache = { u: {}, g: {}, contacts: {}, blocked: {} };
 
         if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); document.getElementById('themeBtn').innerText = '🌞'; }
+        
         function toggleTheme() {
+            // Анимация кручения кнопки
+            const btn = document.getElementById('themeBtn');
+            btn.classList.add('theme-spin');
+            setTimeout(() => btn.classList.remove('theme-spin'), 500);
+
             document.body.classList.toggle('light-mode');
             const isLight = document.body.classList.contains('light-mode');
             localStorage.setItem('theme', isLight ? 'light' : 'dark');
-            document.getElementById('themeBtn').innerText = isLight ? '🌞' : '🌙';
+            btn.innerText = isLight ? '🌞' : '🌙';
         }
 
         authSystem.onAuthStateChanged(user => {
@@ -429,32 +475,18 @@
             const t = document.getElementById('msgInp').value.trim(); if (!t || !active) return;
             if (active.type === 'USER' && cache.blocked[active.id]) return alert("Вы заблокировали этого пользователя!");
 
-            const path = active.type === 'USER' ? (myID < active.id ? myID+"_"+id : active.id+"_"+myID) : active.id;
+            const path = active.type === 'USER' ? (myID < active.id ? myID+"_"+active.id : active.id+"_"+myID) : active.id;
             db.ref("msgs/" + path).push().set({ sid: myID, snick: document.getElementById('myName').innerText, txt: t });
             document.getElementById('msgInp').value = "";
         }
 
         function deleteMessage(path, key) { if(confirm("Удалить?")) db.ref("msgs/" + path + "/" + key).remove(); }
 
-        function openMe() {
-            const d = cache.u[myID]; if(!d) return;
-            document.getElementById('myNickNew').value = d.nickname; 
-            document.getElementById('myAvNew').value = d.avatar || "";
-            document.getElementById('myBioNew').value = d.bio || "";
-            document.getElementById('myAvPreview').src = d.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${myID}`;
-            loadDevices();
-            document.getElementById('my-prof-modal').style.display='flex';
-        }
-        function updateMe() {
-            db.ref("users/"+myID).update({ 
-                nickname: document.getElementById('myNickNew').value, 
-                avatar: document.getElementById('myAvNew').value,
-                bio: document.getElementById('myBioNew').value
-            }).then(() => { alert("Сохранено!"); closeM('my-prof-modal'); });
-        }
-
+        // ОБЩИЙ ОБРАБОТЧИК КЛИКА ПО ШАПКЕ ЧАТА (ФИКС!)
         function openUserCardFromHeader() {
-            if(active && active.type === 'USER') {
+            if(!active) return;
+            
+            if(active.type === 'USER') {
                 viewingUserId = active.id;
                 const dData = getUserDisplayData(viewingUserId);
                 const baseUser = cache.u[viewingUserId];
@@ -479,7 +511,91 @@
                 bBtn.className = isB ? "success" : "danger";
 
                 document.getElementById('user-prof-modal').style.display = 'flex';
+            } 
+            // Клик по группе открывает модалку группы
+            else if(active.type === 'GROUP') {
+                openGroupCard();
             }
+        }
+
+        // ЛОГИКА УПРАВЛЕНИЯ ГРУППОЙ
+        function openGroupCard() {
+            const gid = active.id;
+            const g = cache.g[gid];
+            if(!g) return;
+
+            document.getElementById('gCardAv').src = g.avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${gid}`;
+            document.getElementById('gCardNameTitle').innerText = g.name;
+
+            const isOwner = (g.roles && g.roles[myID] === 'owner');
+
+            if(isOwner) {
+                document.getElementById('groupEditView').style.display = 'block';
+                document.getElementById('groupReadView').style.display = 'none';
+                document.getElementById('groupNameInp').value = g.name;
+                document.getElementById('groupAvInp').value = g.avatar || "";
+                document.getElementById('groupDescInp').value = g.desc || "";
+                document.getElementById('leaveGroupBtn').style.display = 'none';
+            } else {
+                document.getElementById('groupEditView').style.display = 'none';
+                document.getElementById('groupReadView').style.display = 'block';
+                document.getElementById('gCardDescView').innerText = g.desc || "Описание отсутствует";
+                document.getElementById('leaveGroupBtn').style.display = 'block';
+            }
+
+            document.getElementById('group-prof-modal').style.display = 'flex';
+        }
+
+        function updateGroup() {
+            const gid = active.id;
+            const newName = document.getElementById('groupNameInp').value.trim();
+            const newAv = document.getElementById('groupAvInp').value.trim();
+            const newDesc = document.getElementById('groupDescInp').value.trim();
+
+            if(!newName) return alert("Группа должна иметь название!");
+
+            db.ref("groups/" + gid).update({
+                name: newName,
+                avatar: newAv,
+                desc: newDesc
+            }).then(() => {
+                alert("Настройки группы сохранены!");
+                closeM('group-prof-modal');
+                select(gid, newName, 'GROUP'); // Обновляем шапку чата
+            });
+        }
+
+        function leaveGroup() {
+            const gid = active.id;
+            if(confirm("Реально хочешь ливнуть из этой группы?")) {
+                db.ref(`groups/${gid}/roles/${myID}`).remove().then(() => {
+                    alert("Вы вышли из группы.");
+                    closeM('group-prof-modal');
+                    active = null;
+                    document.getElementById('hTitle').innerText = "Выберите чат";
+                    document.getElementById('hDesc').innerText = "";
+                    document.getElementById('hAv').style.display = 'none';
+                    document.getElementById('msgBox').innerHTML = "";
+                    render();
+                });
+            }
+        }
+
+        function openMe() {
+            const d = cache.u[myID]; if(!d) return;
+            document.getElementById('myNickNew').value = d.nickname; 
+            document.getElementById('myAvNew').value = d.avatar || "";
+            document.getElementById('myBioNew').value = d.bio || "";
+            document.getElementById('myAvPreview').src = d.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${myID}`;
+            loadDevices();
+            document.getElementById('my-prof-modal').style.display='flex';
+        }
+        function updateMe() {
+            db.ref("users/"+myID).update({ 
+                nickname: document.getElementById('myNickNew').value, 
+                avatar: document.getElementById('myAvNew').value,
+                bio: document.getElementById('myBioNew').value
+            }).then(() => { alert("Сохранено!"); closeM('my-prof-modal'); });
         }
 
         function toggleContactSettings() {
@@ -521,7 +637,7 @@
         }
         function loginWithGoogle() { authSystem.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
         function logOut() { authSystem.signOut().then(()=>location.reload()); }
-        function newG() { const n=prompt("Имя группы:"); if(n) db.ref("groups/grp_"+Date.now()).set({name:n, roles:{[myID]:'owner'}, desc:"Добро пожаловать!", avatar:""}); }
+        function newG() { const n=prompt("Имя группы:"); if(n) db.ref("groups/grp_"+Date.now()).set({name:n, roles:{[myID]:'owner'}, desc:"Добро пожаловать в новую группу!", avatar:""}); }
     </script>
 </body>
 </html>
