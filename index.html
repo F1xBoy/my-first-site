@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat 7.4</title>
+    <title>VChat 7.5</title>
     <meta name="google-site-verification" content="bnrGuCFyUfxc7XB3jmiLYsr6mbgod0QWt2PHqIXGSrg" />
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     
@@ -167,14 +167,14 @@
                 <input type="text" id="editGroupAv">
                 <button class="success" onclick="updateGroupSettings()">Сохранить настройки</button>
                 
-                <label class="p-info-label" style="color:var(--success); margin-top:15px;">Добавить участника (Никнейм)</label>
+                <label class="p-info-label" style="color:var(--success); margin-top:15px;">Добавить участника (По Email)</label>
                 <div style="display:flex; gap:5px; margin-bottom:10px;">
-                    <input type="text" id="groupAddUserNick" placeholder="Никнейм юзера" style="margin:0;">
-                    <button class="success" onclick="addGroupMemberByNick()" style="width:auto; margin:0; padding:0 15px;">➕</button>
+                    <input type="email" id="groupAddUserEmail" placeholder="Email пользователя" style="margin:0;">
+                    <button class="success" onclick="addGroupMemberByEmail()" style="width:auto; margin:0; padding:0 15px;">➕</button>
                 </div>
 
                 <label class="p-info-label">Список участников группы</label>
-                <div id="groupMembersList" style="background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; padding:8px; max-height:150px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;"></div>
+                <div id="groupMembersList" style="background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; padding:8px; max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;"></div>
                 
                 <hr style="border:0; border-top:1px solid var(--border-color); margin:15px 0;">
                 <button class="danger" onclick="deleteGroupPermanently()">🗑️ Удалить группу навсегда</button>
@@ -183,7 +183,7 @@
             <div id="groupUserPanel" style="display:none;">
                 <p style="font-size:14px; text-align:center; margin-bottom:5px;">Вы участник этой группы.</p>
                 <label class="p-info-label">Участники группы</label>
-                <div id="groupMembersListUser" style="background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; padding:8px; max-height:150px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; margin-bottom:15px;"></div>
+                <div id="groupMembersListUser" style="background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; padding:8px; max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; margin-bottom:15px;"></div>
                 <button class="danger" onclick="leaveGroup()">🚪 Выйти из группы</button>
             </div>
             
@@ -195,6 +195,10 @@
         <div class="modal-card">
             <h3 style="margin-top:0; color:var(--accent);">Мой Аккаунт</h3>
             <img id="myAvPreview" src="" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; display:block; margin: 0 auto; border: 2px solid var(--accent);">
+            
+            <label class="p-info-label">Мой Email</label>
+            <div id="myEmailView" style="font-size:14px; opacity:0.8; padding:5px; background:var(--bg-main); border-radius:6px; border:1px solid var(--border-color); margin-bottom:5px;">Загрузка...</div>
+
             <label class="p-info-label">Никнейм</label>
             <input type="text" id="myNickNew">
             <label class="p-info-label">Аватар (URL)</label>
@@ -206,7 +210,7 @@
             <hr style="border:0; border-top:1px solid var(--border-color); margin:15px 0;">
             
             <h4 style="margin:0 0 5px 0; color:var(--accent);">Безопасность & Настройки 🔒</h4>
-            <label class="p-info-label">Изменить 4-значный ПИН-код</label>
+            <label class="p-info-label">Изменить ПИН-код</label>
             <div style="display:flex; gap:5px; margin-bottom:12px;">
                 <input type="password" id="changePinInp" placeholder="Новый ПИН" maxlength="4" style="margin:0; text-align:center;">
                 <button class="success" onclick="updatePinCode()" style="width:auto; margin:0; font-size:12px; white-space:nowrap;">Сменить ПИН</button>
@@ -223,18 +227,23 @@
     <div id="user-prof-modal" class="modal-overlay">
         <div class="modal-card">
             <img id="pCardAv" style="width:80px; height:80px; border-radius:50%; display:block; margin:0 auto 10px; object-fit:cover; border:2px solid var(--accent);">
-            <h3 id="pCardNick" style="text-align: center; margin: 0 0 10px 0; color: var(--accent);">Никнейм</h3>
+            <h3 id="pCardNick" style="text-align: center; margin: 0 0 2px 0; color: var(--accent);">Никнейм</h3>
+            <small id="pCardEmail" style="color:var(--text-muted); display:block; text-align:center; margin-bottom:12px; font-size:12px; font-family:monospace;"></small>
+            
             <div style="background:var(--bg-main); padding:10px; border-radius:8px; border:1px solid var(--border-color); margin-bottom:12px; font-size:13px; text-align:center;">
                 <span id="pCardBio" style="font-style: italic; color: var(--text-muted);">Информация отсутствует</span>
             </div>
             <div style="background:var(--bg-input); padding:15px; border-radius:8px; border:1px solid var(--border-color);">
                 <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-weight:bold; font-size:14px;">
-                    <input type="checkbox" id="isContact" style="width:auto; margin:0;" onchange="toggleContactSettings()"> Добавить в Контакты 📒
+                    <input type="checkbox" id="isContact" style="width:auto; margin:0;" onchange="toggleContactSettings()"> Настройки Контакта 📒
                 </label>
                 <div id="contactSettings" style="display:none; margin-top:10px; border-top:1px dashed var(--border-color); padding-top:10px;">
                     <input type="text" id="contactLocName" placeholder="Локальное имя">
                     <input type="text" id="contactLocAv" placeholder="Локальная аватарка (URL)">
-                    <button class="success" style="padding:6px; font-size:12px;" onclick="saveContact()">Сохранить</button>
+                    <div style="display:flex; gap:5px;">
+                        <button class="success" style="padding:6px; font-size:12px; flex:1;" onclick="saveContact()">Сохранить</button>
+                        <button class="danger" id="remContactBtn" style="padding:6px; font-size:12px; flex:1;" onclick="removeContact()">Удалить ❌</button>
+                    </div>
                 </div>
             </div>
             <button id="blockBtn" class="danger" style="margin-top:15px;" onclick="toggleBlock()">🚫 Заблокировать</button>
@@ -266,7 +275,7 @@
             </div>
             
             <div style="padding:10px; display:flex; gap:5px;">
-                <input type="text" id="srch" placeholder="Поиск..." oninput="render()" style="margin:0; flex:1;">
+                <input type="text" id="srch" placeholder="Поиск..." oninput="render'" style="margin:0; flex:1;">
             </div>
             <div class="tabs" id="tabsContainer"></div>
             <div class="chat-list" id="chatList"></div>
@@ -293,7 +302,7 @@
             </div>
 
             <div class="input-bar">
-                <textarea id="msgInp" placeholder="Написать... (Shift+Enter для абзаца)" rows="1" style="margin:0; resize:none; overflow-y:auto; max-height:120px;" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'" onkeydown="checkEnter(event)"></textarea>
+                <textarea id="msgInp" placeholder="Написать..." rows="1" style="margin:0; resize:none; overflow-y:auto; max-height:120px;" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'" onkeydown="checkEnter(event)"></textarea>
                 <button onclick="sendMsg()" style="width:55px; height:45px; margin:0; background: var(--accent); color: #fff;">➤</button>
             </div>
         </main>
@@ -333,7 +342,9 @@
                     if(!d) { 
                         db.ref("users/" + myID).set({ nickname: user.email.split('@')[0], avatar: "", email: user.email || "", bio: "Я в VChat!" }); 
                     } else {
+                        if(!d.email && user.email) { db.ref(`users/${myID}/email`).set(user.email); }
                         document.getElementById('myName').innerText = d.nickname;
+                        document.getElementById('myEmailView').innerText = d.email || user.email || "Скрыт";
                         document.getElementById('myAvImg').src = d.avatar || "https://api.dicebear.com/7.x/identicon/svg?seed="+myID;
                         cache.contacts = d.contacts || {}; cache.blocked = d.blocked || {};
                         cache.myChats = d.chats || {}; cache.pins = d.pins || {};
@@ -354,7 +365,7 @@
         });
 
         function login() { authSystem.signInWithEmailAndPassword(document.getElementById('uEmail').value, document.getElementById('uPass').value).catch(err=>alert(err.message)); }
-        function register() { authSystem.createUserWithEmailAndPassword(document.getElementById('regEmail').value, document.getElementById('regPass').value).then(c => { db.ref("users/"+c.user.uid).set({ nickname: document.getElementById('uNick').value, avatar:"", bio: "Я в VChat!", pin: document.getElementById('regPin').value||"" }); }).catch(err=>alert(err.message)); }
+        function register() { authSystem.createUserWithEmailAndPassword(document.getElementById('regEmail').value, document.getElementById('regPass').value).then(c => { db.ref("users/"+c.user.uid).set({ nickname: document.getElementById('uNick').value, email: document.getElementById('regEmail').value, avatar:"", bio: "Я в VChat!", pin: document.getElementById('regPin').value||"" }); }).catch(err=>alert(err.message)); }
         function verifyPin() { const p = document.getElementById('authPinInp').value; db.ref("users/"+myID+"/pin").once("value", s => { if(s.val()===p) { sessionStorage.setItem('vchat_pin_pass','true'); document.getElementById('login-scr').style.display='none'; document.getElementById('app').style.display='flex'; } else alert("Неверный ПИН!"); }); }
         function logOut() { authSystem.signOut().then(()=>location.reload()); }
 
@@ -401,12 +412,10 @@
 
         function togglePin(id, e) { e.stopPropagation(); const isPinned = cache.pins && cache.pins[id]; if (isPinned) { db.ref(`users/${myID}/pins/${id}`).remove(); } else { db.ref(`users/${myID}/pins/${id}`).set(true); } }
 
-        // ИСПРАВЛЕННЫЙ РЕНДЕР: Заглушка для Чатов + исчезновение групп при выходе
         function render() {
             const list = document.getElementById('chatList'); if(!list) return;
             const q = document.getElementById('srch').value.toLowerCase(); list.innerHTML = ""; let items = [];
 
-            // 1. Сбор ГРУПП (Исправлено: Показываем только если ты участник)
             for (let id in cache.g) {
                 const g = cache.g[id]; 
                 if (g.name.toLowerCase().includes(q)) {
@@ -417,13 +426,12 @@
                 }
             }
             
-            // 2. Сбор ПОЛЬЗОВАТЕЛЕЙ
             for (let id in cache.u) {
                 if (id === myID) continue;
                 const dData = getUserDisplayData(id);
                 if (cache.blocked[id] && currentTab !== 'global' && !q) continue; 
 
-                if (dData.name.toLowerCase().includes(q) || cache.u[id].nickname.toLowerCase().includes(q)) {
+                if (dData.name.toLowerCase().includes(q) || cache.u[id].nickname.toLowerCase().includes(q) || (cache.u[id].email && cache.u[id].email.toLowerCase().includes(q))) {
                     if (currentTab === 'groups') continue; 
                     if (currentTab === 'contacts' && !dData.isContact) continue; 
                     if (currentTab === 'chats' && (!cache.myChats || !cache.myChats[id])) continue; 
@@ -433,7 +441,6 @@
                 }
             }
 
-            // Вывод заглушки-инструкции для пустой вкладки Чаты
             if (items.length === 0) {
                 if (currentTab === 'chats') {
                     list.innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-muted); font-size:13px; line-height:1.5;">У тебя пока нет активных чатов, бро! 😎<br><br>Перейди во вкладку <b>«Общее»</b>, выбери любого юзера и напиши ему что-нибудь, чтобы создать диалог!</div>`;
@@ -482,14 +489,18 @@
             });
         }
 
-        // ИСПРАВЛЕННЫЙ И ПРОКАЧАННЫЙ УПРАВЛЕНЕЦ УЧАСТНИКАМИ
+        // ИСПРАВЛЕНО: ВЫДАЧА АДМИНОК, ОТОБРАЖЕНИЕ EMAIL И УДАЛЕНИЕ КОНТАКТА
         function openChatContextInfo() {
             if(!active) return;
             if(active.type === 'USER') {
                 viewingUserId = active.id; const dData = getUserDisplayData(viewingUserId); const baseUser = cache.u[viewingUserId];
-                document.getElementById('pCardAv').src = dData.avatar; document.getElementById('pCardNick').innerText = dData.name; document.getElementById('pCardBio').innerText = baseUser?.bio || "Информация отсутствует";
+                document.getElementById('pCardAv').src = dData.avatar; document.getElementById('pCardNick').innerText = dData.name;
+                document.getElementById('pCardEmail').innerText = baseUser?.email || "Email скрыт/не указан";
+                document.getElementById('pCardBio').innerText = baseUser?.bio || "Информация отсутствует";
+                
                 const isC = cache.contacts[viewingUserId]; document.getElementById('isContact').checked = !!isC; document.getElementById('contactSettings').style.display = isC ? 'block' : 'none';
                 if(isC) { document.getElementById('contactLocName').value = isC.locName || ""; document.getElementById('contactLocAv').value = isC.locAv || ""; }
+                
                 const isB = cache.blocked[viewingUserId]; const bBtn = document.getElementById('blockBtn');
                 bBtn.innerText = isB ? "✅ Разблокировать" : "🚫 Заблокировать"; bBtn.className = isB ? "success" : "danger";
                 document.getElementById('user-prof-modal').style.display = 'flex';
@@ -497,28 +508,37 @@
                 const gId = active.id; const gData = cache.g[gId]; if(!gData) return;
                 document.getElementById('gManageTitle').innerText = `Управление: ${gData.name}`;
                 
-                const isOwner = gData.roles && gData.roles[myID] === 'owner';
+                const myRole = gData.roles && gData.roles[myID];
+                const isOwner = myRole === 'owner'; const isAdmin = myRole === 'admin';
                 const listCont = document.getElementById('groupMembersList'); const listContUser = document.getElementById('groupMembersListUser');
                 listCont.innerHTML = ""; listContUser.innerHTML = "";
                 
-                if(isOwner) {
+                if(isOwner || isAdmin) {
                     document.getElementById('groupAdminPanel').style.display = 'block'; document.getElementById('groupUserPanel').style.display = 'none';
                     document.getElementById('editGroupName').value = gData.name; document.getElementById('editGroupAv').value = gData.avatar || "";
                 } else {
                     document.getElementById('groupAdminPanel').style.display = 'none'; document.getElementById('groupUserPanel').style.display = 'block';
                 }
                 
-                const activeList = isOwner ? listCont : listContUser;
+                const activeList = (isOwner || isAdmin) ? listCont : listContUser;
                 if(gData.roles) {
                     for(let memberUid in gData.roles) {
                         const role = gData.roles[memberUid]; const uName = cache.u[memberUid]?.nickname || "Неизвестный";
                         const div = document.createElement('div');
-                        div.style = "display:flex; justify-content:space-between; align-items:center; padding:6px; border-bottom:1px solid var(--border-color); background:var(--bg-main); border-radius:6px; margin-bottom:3px;";
-                        let kickBtn = "";
-                        if(isOwner && memberUid !== myID) {
-                            kickBtn = `<button class="danger" style="width:auto; margin:0; padding:2px 8px; font-size:11px;" onclick="kickGroupMember('${memberUid}')">Кик ❌</button>`;
+                        div.style = "display:flex; justify-content:space-between; align-items:center; padding:6px; border-bottom:1px solid var(--border-color); background:var(--bg-main); border-radius:6px; margin-bottom:3px; font-size:13px;";
+                        
+                        let actionsHtml = "";
+                        if(memberUid !== myID) {
+                            if(isOwner) {
+                                const optBtn = role === 'admin' ? 
+                                    `<button class="warning" style="width:auto; margin:0; padding:2px 6px; font-size:11px;" onclick="changeMemberRole('${memberUid}', 'member')">Снять админку 🎖️</button>` : 
+                                    `<button class="success" style="width:auto; margin:0; padding:2px 6px; font-size:11px;" onclick="changeMemberRole('${memberUid}', 'admin')">Дать админку 🎖️</button>`;
+                                actionsHtml = `<div style="display:flex; gap:3px;">${optBtn}<button class="danger" style="width:auto; margin:0; padding:2px 6px; font-size:11px;" onclick="kickGroupMember('${memberUid}')">Кик ❌</button></div>`;
+                            } else if(isAdmin && role === 'member') {
+                                actionsHtml = `<button class="danger" style="width:auto; margin:0; padding:2px 6px; font-size:11px;" onclick="kickGroupMember('${memberUid}')">Кик ❌</button>`;
+                            }
                         }
-                        div.innerHTML = `<span><b>${uName}</b> <small style="color:var(--text-muted)">(${role})</small></span> ${kickBtn}`;
+                        div.innerHTML = `<span><b>${uName}</b> <small style="color:var(--text-muted)">(${role})</small></span> ${actionsHtml}`;
                         activeList.appendChild(div);
                     }
                 }
@@ -526,22 +546,30 @@
             }
         }
 
-        function addGroupMemberByNick() {
+        // ИСПРАВЛЕНО: ДОБАВЛЕНИЕ СТРОГО ПО EMAIL
+        function addGroupMemberByEmail() {
             if(!active || active.type !== 'GROUP') return;
-            const nick = document.getElementById('groupAddUserNick').value.trim().toLowerCase(); if(!nick) return alert("Введите ник!");
+            const email = document.getElementById('groupAddUserEmail').value.trim().toLowerCase(); if(!email) return alert("Введите Email!");
             let foundUid = null;
-            for(let uid in cache.u) { if(cache.u[uid].nickname && cache.u[uid].nickname.toLowerCase() === nick) { foundUid = uid; break; } }
-            if(!foundUid) return alert("Пользователь не найден!");
+            for(let uid in cache.u) { if(cache.u[uid].email && cache.u[uid].email.toLowerCase() === email) { foundUid = uid; break; } }
+            if(!foundUid) return alert("Пользователь с таким Email не найден!");
             
             db.ref(`groups/${active.id}/roles/${foundUid}`).set("member").then(() => {
-                alert("Добавлен в группу!"); document.getElementById('groupAddUserNick').value = ""; openChatContextInfo();
+                alert("Пользователь добавлен! 🎉"); document.getElementById('groupAddUserEmail').value = ""; openChatContextInfo();
             });
+        }
+
+        // ИСПРАВЛЕНО: ИЗМЕНЕНИЕ АДМИН-РОЛЕЙ
+        function changeMemberRole(uid, newRole) {
+            if(!active || active.type !== 'GROUP') return;
+            db.ref(`groups/${active.id}/roles/${uid}`).set(newRole).then(() => { alert("Статус роли успешно изменен! ⚡"); openChatContextInfo(); });
         }
 
         function kickGroupMember(uid) {
             if(!active || active.type !== 'GROUP') return;
-            if(confirm("Вышвырнуть его из группы?")) {
-                db.ref(`groups/${active.id}/roles/${uid}`).remove().then(() => { alert("Пользователь успешно кикнут."); openChatContextInfo(); });
+            if(confirm("Вышвырнуть участника из группы?")) {
+                db.ref(`groups/${active.id}/roles/${uid}`).remove();
+                db.ref(`users/${uid}/chats/${active.id}`).remove().then(() => { alert("Пользователь удален."); openChatContextInfo(); });
             }
         }
 
@@ -556,18 +584,40 @@
         
         function deleteGroupPermanently() {
             if(!active || active.type !== 'GROUP') return;
-            if(confirm("Реально удалить группу НАВСЕГДА?")) { const gId = active.id; db.ref(`msgs/${gId}`).remove(); db.ref(`groups/${gId}`).remove().then(() => { alert("Группа уничтожена."); resetActiveChatState(); }); }
+            if(confirm("Реально удалить группу НАВСЕГДА?")) { 
+                const gId = active.id; 
+                db.ref(`msgs/${gId}`).remove(); 
+                db.ref(`groups/${gId}`).remove().then(() => {
+                    db.ref(`users/${myID}/chats/${gId}`).remove();
+                    alert("Группа полностью уничтожена."); resetActiveChatState(); 
+                }); 
+            }
         }
 
+        // ИСПРАВЛЕНО: ТОТАЛЬНЫЙ ВЫХОД ИЗ ГРУППЫ С ЧИСТКОЙ ЛОГОВ
         function leaveGroup() {
             if(!active || active.type !== 'GROUP') return;
-            if(confirm("Выйти из группы?")) { db.ref(`groups/${active.id}/roles/${myID}`).remove().then(() => { alert("Вы вышли."); resetActiveChatState(); }); }
+            if(confirm("Выйти из группы?")) { 
+                const gId = active.id;
+                db.ref(`groups/${gId}/roles/${myID}`).remove(); 
+                db.ref(`users/${myID}/chats/${gId}`).remove().then(() => { 
+                    alert("Вы успешно вышли из группы! 🚪"); resetActiveChatState(); 
+                }); 
+            }
         }
 
         function toggleBlock() { const isB = cache.blocked[viewingUserId]; if (isB) { db.ref(`users/${myID}/blocked/${viewingUserId}`).remove().then(() => { alert("Разблокирован!"); render(); closeM('user-prof-modal'); select(active.id, active.name, active.type); }); } else { if(confirm("Заблокировать?")) { db.ref(`users/${myID}/blocked/${viewingUserId}`).set(true).then(() => { render(); closeM('user-prof-modal'); select(active.id, active.name, active.type); }); } } }
         function quickUnblock() { if(active && active.type === 'USER') { db.ref(`users/${myID}/blocked/${active.id}`).remove().then(() => { alert("Разблокирован!"); select(active.id, active.name, active.type); }); } }
         function toggleContactSettings() { document.getElementById('contactSettings').style.display = document.getElementById('isContact').checked ? 'block' : 'none'; }
         function saveContact() { db.ref(`users/${myID}/contacts/${viewingUserId}`).set({ locName: document.getElementById('contactLocName').value.trim(), locAv: document.getElementById('contactLocAv').value.trim() }).then(() => { alert("Обновлено!"); render(); closeM('user-prof-modal'); }); }
+        
+        // ИСПРАВЛЕНО: СИСТЕМА УДАЛЕНИЯ ИЗ КОНТАКТОВ
+        function removeContact() {
+            if(!viewingUserId) return;
+            if(confirm("Точно удалить человека из контактов?")) {
+                db.ref(`users/${myID}/contacts/${viewingUserId}`).remove().then(() => { alert("Контакт удален 🗑️"); render(); closeM('user-prof-modal'); });
+            }
+        }
 
         function checkEnter(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); } }
         function cancelAction() { editMsgId = null; replyMsgData = null; document.getElementById('action-bar').style.display = 'none'; const inp = document.getElementById('msgInp'); if(editMsgId) inp.value = ""; inp.style.height = '45px'; }
