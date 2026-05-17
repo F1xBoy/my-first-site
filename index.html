@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat 7.6</title>
+    <title>VChat V7.7.1</title>
     <meta name="google-site-verification" content="bnrGuCFyUfxc7XB3jmiLYsr6mbgod0QWt2PHqIXGSrg" />
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     
@@ -41,7 +41,7 @@
         input, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); outline: none; font-family: inherit; }
         input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2); transform: translateY(-1px); }
 
-        button { width: 100%; padding: 12px; background: var(--border-color); color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 5px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        button { width: 100%; padding: 12px; background: var(--border-color); color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 5px; display: flex; align-items: center; justify-content: center; gap: 8px; user-select: none; }
         button:hover { filter: brightness(1.15); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
         button:active { transform: translateY(1px) scale(0.98); }
         button.danger { background: var(--danger); }
@@ -56,9 +56,10 @@
         .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; cursor: pointer; border: 2px solid var(--accent); }
         .avatar:hover { transform: scale(1.05); }
         
-        .tabs { display: flex; background: var(--bg-card); border-bottom: 1px solid var(--border-color); overflow-x: auto; min-height: 44px; }
-        .tab-btn { flex: 1; padding: 12px 5px; text-align: center; cursor: pointer; font-size: 12px; font-weight: bold; color: var(--text-muted); border-bottom: 3px solid transparent; user-select: none; white-space: nowrap; }
-        .tab-btn:hover { color: var(--text-main); background: var(--bg-hover); }
+        .tabs { display: flex; background: var(--bg-card); border-bottom: 1px solid var(--border-color); overflow-x: auto; min-height: 44px; gap: 2px; padding: 0 4px; }
+        .tab-btn { flex: 1; padding: 12px 5px; text-align: center; cursor: grab; font-size: 12px; font-weight: bold; color: var(--text-muted); border-bottom: 3px solid transparent; user-select: none; white-space: nowrap; }
+        .tab-btn:active { cursor: grabbing; }
+        .tab-btn:hover { color: var(--text-main); background: var(--bg-hover); border-radius: 6px 6px 0 0; }
         .tab-btn.active { color: var(--accent); border-bottom: 3px solid var(--accent); }
 
         .chat-list { flex: 1; overflow-y: auto; }
@@ -99,16 +100,26 @@
         .header-actions-box { display: flex; gap: 5px; }
         .hdr-icon-btn { background: transparent; border: none; font-size: 16px; padding: 6px; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 6px; color: var(--text-muted); }
         .hdr-icon-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-main); }
+
+        /* ИСПРАВЛЕНО: Маскировка ПИНа без превращения поля в input type="password" (защита от автозаполнения браузера) */
+                .secure-pin-mask {
+            -webkit-text-security: disc;
+        }
     </style>
 </head>
 <body>
 
     <div id="login-scr" class="modal-overlay" style="display: flex;">
         <div class="modal-card" style="text-align: center;">
-            <h2 style="color:var(--accent); margin-top:0;">Вход в VChat</h2>
+            <h2 style="color:var(--accent); margin-top:0;">Вход в VChat V7.7.1</h2>
             <input type="email" id="uEmail" placeholder="Email">
             <input type="password" id="uPass" placeholder="Пароль">
             <button class="success" onclick="login()" style="margin-top: 10px;">Войти</button>
+            
+            <button onclick="loginWithGoogle()" style="margin-top: 5px; background: #ffffff; color: #1f1f1f; border: 1px solid var(--border-color); font-size: 14px;">
+                🌐 Войти через Google
+            </button>
+
             <p style="font-size: 13px; color: var(--accent); cursor: pointer; text-decoration: underline;" onclick="document.getElementById('login-view').style.display='none'; document.getElementById('reg-view').style.display='block';">Нет аккаунта? Зарегистрироваться</p>
         </div>
         <div class="modal-card" id="reg-view" style="display: none; position: absolute; text-align: center;">
@@ -116,13 +127,13 @@
             <input type="text" id="uNick" placeholder="Никнейм">
             <input type="email" id="regEmail" placeholder="Email">
             <input type="password" id="regPass" placeholder="Пароль">
-            <input type="password" id="regPin" placeholder="4-значный ПИН" maxlength="4" style="text-align:center;">
+            <input type="text" id="regPin" class="secure-pin-mask" placeholder="4-значный ПИН (необязательно)" maxlength="4" style="text-align:center;">
             <button class="success" onclick="register()">Создать</button>
             <p style="font-size: 13px; color: var(--accent); cursor: pointer;" onclick="document.getElementById('reg-view').style.display='none';">Назад ко входу</p>
         </div>
         <div class="modal-card" id="pin-view" style="display: none; position: absolute; text-align: center;">
             <h2 style="color:var(--accent); margin-top:0;">Защита аккаунта 🔒</h2>
-            <input type="password" id="authPinInp" placeholder="••••" maxlength="4" style="text-align:center; font-size:26px; letter-spacing:10px; width:160px; margin:15px auto;" onkeydown="if(event.key==='Enter') verifyPin()">
+            <input type="text" id="authPinInp" class="secure-pin-mask" placeholder="••••" maxlength="4" style="text-align:center; font-size:26px; letter-spacing:10px; width:160px; margin:15px auto;" onkeydown="if(event.key==='Enter') verifyPin()">
             <button class="success" onclick="verifyPin()">Войти ➤</button>
         </div>
     </div>
@@ -186,13 +197,6 @@
                 <div id="groupMembersListUser" style="background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; padding:8px; max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; margin-bottom:15px;"></div>
                 <button class="danger" onclick="leaveGroup()">🚪 Выйти из группы</button>
             </div>
-
-            <div id="groupJoinPanel" style="display:none;">
-                <p style="font-size:14px; text-align:center; margin-bottom:10px; color:var(--warning);">Вы не состоите в этой группе.</p>
-                <button class="success" onclick="joinGroup()" style="background:var(--success); font-size:15px; padding:14px;">➕ Вступить в группу</button>
-                <label class="p-info-label" style="margin-top:15px;">Участники группы</label>
-                <div id="groupMembersListJoin" style="background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; padding:8px; max-height:150px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;"></div>
-            </div>
             
             <button class="secondary" style="width:100%; margin-top:15px;" onclick="closeM('group-manage-modal')">Закрыть</button>
         </div>
@@ -217,10 +221,11 @@
             <hr style="border:0; border-top:1px solid var(--border-color); margin:15px 0;">
             
             <h4 style="margin:0 0 5px 0; color:var(--accent);">Безопасность & Настройки 🔒</h4>
-            <label class="p-info-label">Изменить ПИН-код</label>
+            <label class="p-info-label">Управление ПИН-кодом</label>
             <div style="display:flex; gap:5px; margin-bottom:12px;">
-                <input type="password" id="changePinInp" placeholder="Новый ПИН" maxlength="4" style="margin:0; text-align:center;">
-                <button class="success" onclick="updatePinCode()" style="width:auto; margin:0; font-size:12px; white-space:nowrap;">Сменить ПИН</button>
+                <input type="text" id="changePinInp" class="secure-pin-mask" placeholder="Новый ПИН" maxlength="4" style="margin:0; text-align:center;">
+                <button class="success" onclick="updatePinCode()" style="width:auto; margin:0; font-size:12px; white-space:nowrap;">Сменить</button>
+                <button class="danger" onclick="deletePinCode()" style="width:auto; margin:0; font-size:12px; white-space:nowrap; padding: 0 8px;">❌ Удалить</button>
             </div>
             
             <button class="warning" style="width:100%; margin-bottom:8px;" onclick="closeM('my-prof-modal'); document.getElementById('devices-modal').style.display='flex'">💻 Проверить Мои Сессии</button>
@@ -347,7 +352,8 @@
                 db.ref("users/" + myID).on("value", s => {
                     const d = s.val();
                     if(!d) { 
-                        db.ref("users/" + myID).set({ nickname: user.email.split('@')[0], avatar: "", email: user.email || "", bio: "Я в VChat!" }); 
+                        // ИСПРАВЛЕНО: Теперь корректно создается карточка юзера, если вход через Google
+                        db.ref("users/" + myID).set({ nickname: user.displayName || user.email.split('@')[0], avatar: user.photoURL || "", email: user.email || "", bio: "Я в VChat!" }); 
                     } else {
                         if(!d.email && user.email) { db.ref(`users/${myID}/email`).set(user.email); }
                         document.getElementById('myName').innerText = d.nickname;
@@ -372,6 +378,13 @@
         });
 
         function login() { authSystem.signInWithEmailAndPassword(document.getElementById('uEmail').value, document.getElementById('uPass').value).catch(err=>alert(err.message)); }
+        
+        // ИСПРАВЛЕНО: Функция авторизации через Google Аккаунт
+        function loginWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            authSystem.signInWithPopup(provider).catch(err => alert("Google Ошибка: " + err.message));
+        }
+
         function register() { authSystem.createUserWithEmailAndPassword(document.getElementById('regEmail').value, document.getElementById('regPass').value).then(c => { db.ref("users/"+c.user.uid).set({ nickname: document.getElementById('uNick').value, email: document.getElementById('regEmail').value, avatar:"", bio: "Я в VChat!", pin: document.getElementById('regPin').value||"" }); }).catch(err=>alert(err.message)); }
         function verifyPin() { const p = document.getElementById('authPinInp').value; db.ref("users/"+myID+"/pin").once("value", s => { if(s.val()===p) { sessionStorage.setItem('vchat_pin_pass','true'); document.getElementById('login-scr').style.display='none'; document.getElementById('app').style.display='flex'; } else alert("Неверный ПИН!"); }); }
         function logOut() { authSystem.signOut().then(()=>location.reload()); }
@@ -388,6 +401,17 @@
             if(newPin.length !== 4 || isNaN(newPin)) return alert("ПИН должен состоять из 4 цифр!");
             db.ref(`users/${myID}/pin`).set(newPin).then(() => { alert("ПИН-код успешно обновлен! 🔒"); document.getElementById('changePinInp').value = ""; });
         }
+
+        // ИСПРАВЛЕНО: Добавлена функция полного сброса/удаления ПИН-кода
+        function deletePinCode() {
+            if(confirm("Реально удалить ПИН-код? Защита при входе в приложение отключится!")) {
+                db.ref(`users/${myID}/pin`).set("").then(() => {
+                    alert("ПИН-код успешно удален! 🔓");
+                    document.getElementById('changePinInp').value = "";
+                });
+            }
+        }
+
         function clearAppCache() { if(confirm("Очистить локальный кэш приложения? Сбросятся сессии и кастомные вкладки.")) { localStorage.clear(); sessionStorage.clear(); location.reload(); } }
 
         function getUserDisplayData(uid) {
@@ -412,9 +436,21 @@
             tabsConfig.forEach(t => { const val = document.getElementById(`tabInp_${t.id}`).value.trim(); if(val) t.name = val; });
             localStorage.setItem('vchat_tabs_cfg', JSON.stringify(tabsConfig)); alert("Вкладки обновлены!"); closeM('tabs-settings-modal'); renderTabs();
         }
+
         function renderTabs() {
             const container = document.getElementById('tabsContainer'); if(!container) return; container.innerHTML = '';
-            tabsConfig.forEach(t => { const btn = document.createElement('div'); btn.className = `tab-btn ${currentTab === t.id ? 'active' : ''}`; btn.innerText = t.name; btn.onclick = () => { currentTab = t.id; renderTabs(); render(); }; container.appendChild(btn); });
+            tabsConfig.forEach(t => {
+                const btn = document.createElement('div'); btn.className = `tab-btn ${currentTab === t.id ? 'active' : ''}`; btn.innerText = t.name; btn.draggable = true;
+                btn.onclick = () => { currentTab = t.id; renderTabs(); render(); };
+                btn.ondragstart = (e) => { e.dataTransfer.setData('text/plain', t.id); btn.style.opacity = '0.4'; };
+                btn.ondragend = () => { btn.style.opacity = '1'; }; btn.ondragover = (e) => { e.preventDefault(); };
+                btn.ondrop = (e) => {
+                    e.preventDefault(); const draggedId = e.dataTransfer.getData('text/plain'); if (draggedId === t.id) return;
+                    const draggedIdx = tabsConfig.findIndex(x => x.id === draggedId); const targetIdx = tabsConfig.findIndex(x => x.id === t.id);
+                    const [draggedItem] = tabsConfig.splice(draggedIdx, 1); tabsConfig.splice(targetIdx, 0, draggedItem);
+                    localStorage.setItem('vchat_tabs_cfg', JSON.stringify(tabsConfig)); renderTabs(); render();
+                }; container.appendChild(btn);
+            });
         }
 
         function togglePin(id, e) { e.stopPropagation(); const isPinned = cache.pins && cache.pins[id]; if (isPinned) { db.ref(`users/${myID}/pins/${id}`).remove(); } else { db.ref(`users/${myID}/pins/${id}`).set(true); } }
@@ -427,7 +463,7 @@
                 const g = cache.g[id]; 
                 if (g.name.toLowerCase().includes(q)) {
                     if (currentTab === 'global' || currentTab === 'groups') {
-                        if (currentTab === 'groups' && (!g.roles || !g.roles[myID])) continue; 
+                        if (!g.roles || !g.roles[myID]) continue; 
                         items.push({ id, name: g.name, avatar: g.avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${id}`, type: 'GROUP' });
                     }
                 }
@@ -450,11 +486,9 @@
 
             if (items.length === 0) {
                 if (currentTab === 'chats') {
-                    list.innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-muted); font-size:13px; line-height:1.5;">У тебя пока нет активных чатов, бро! 😎<br><br>Перейди во вкладку <b>«Общее»</b>, выбери любого юзера и напиши ему что-нибудь, чтобы создать диалог!</div>`;
-                    return;
+                    list.innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-muted); font-size:13px; line-height:1.5;">У тебя пока нет активных чатов, бро! 😎<br><br>Перейди во вкладку <b>«Общее»</b>, выбери любого юзера и напиши ему что-нибудь, чтобы создать диалог!</div>`; return;
                 } else {
-                    list.innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-muted); font-size:13px;">Тут пока пусто...</div>`;
-                    return;
+                    list.innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-muted); font-size:13px;">Тут пока пусто...</div>`; return;
                 }
             }
 
@@ -468,7 +502,6 @@
             });
         }
 
-        // ИСПРАВЛЕНО: ДИНАМИЧЕСКАЯ БЛОКИРОВКА ВВОДА ДЛЯ НЕУЧАСТНИКОВ ГРУПП
         function select(id, name, type) {
             active = { id, name, type }; document.getElementById('hTitle').innerText = name.replace(" (БЛОК)", "").replace(" 📒", ""); 
             document.getElementById('msgBox').innerHTML = ""; cancelAction(); const hAv = document.getElementById('hAv');
@@ -481,12 +514,8 @@
             } else { 
                 document.getElementById('blockOverlay').style.display = 'none';
                 hAv.src = cache.g[id].avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${id}`; hAv.style.display = 'block'; 
-                
-                const gData = cache.g[id];
-                const isMember = gData && gData.roles && gData.roles[myID];
-                document.getElementById('hDesc').innerText = isMember ? "Группа ⚙️ (Нажми для управления)" : "Группа 🌍 (Вы не участник)";
-                document.getElementById('msgInp').disabled = !isMember;
-                document.getElementById('msgInp').placeholder = isMember ? "Написать..." : "Вступите в группу, чтобы писать...";
+                document.getElementById('hDesc').innerText = "Группа ⚙️ (Нажми для управления)";
+                document.getElementById('msgInp').disabled = false; document.getElementById('msgInp').placeholder = "Написать...";
             }
 
             const path = type === 'USER' ? (myID < id ? myID+"_"+id : id+"_"+myID) : id;
@@ -507,7 +536,6 @@
             });
         }
 
-        // ИСПРАВЛЕНО: ТРЕХСТОРОННЕЕ РАЗДЕЛЕНИЕ ПРАВ В ОКНЕ ГРУППЫ (ВСТУПИТЬ / УЧАСТНИК / АДМИН)
         function openChatContextInfo() {
             if(!active) return;
             if(active.type === 'USER') {
@@ -525,168 +553,76 @@
             } else {
                 const gId = active.id; const gData = cache.g[gId]; if(!gData) return;
                 document.getElementById('gManageTitle').innerText = `Управление: ${gData.name}`;
+                const myRole = gData.roles ? gData.roles[myID] : null; if(!myRole) return;
                 
-                const myRole = gData.roles ? gData.roles[myID] : null;
+                const isOwner = myRole === 'owner'; const isAdmin = myRole === 'admin';
+                const listCont = document.getElementById('groupMembersList'); const listContUser = document.getElementById('groupMembersListUser');
+                listCont.innerHTML = ""; listContUser.innerHTML = "";
                 
-                if(myRole) {
-                    // Если юзер в группе
-                    document.getElementById('groupJoinPanel').style.display = 'none';
-                    const isOwner = myRole === 'owner'; const isAdmin = myRole === 'admin';
-                    const listCont = document.getElementById('groupMembersList'); const listContUser = document.getElementById('groupMembersListUser');
-                    listCont.innerHTML = ""; listContUser.innerHTML = "";
-                    
-                    if(isOwner || isAdmin) {
-                        document.getElementById('groupAdminPanel').style.display = 'block'; document.getElementById('groupUserPanel').style.display = 'none';
-                        document.getElementById('editGroupName').value = gData.name; document.getElementById('editGroupAv').value = gData.avatar || "";
-                    } else {
-                        document.getElementById('groupAdminPanel').style.display = 'none'; document.getElementById('groupUserPanel').style.display = 'block';
-                    }
-                    
-                    const activeList = (isOwner || isAdmin) ? listCont : listContUser;
-                    if(gData.roles) {
-                        for(let memberUid in gData.roles) {
-                            const role = gData.roles[memberUid]; const uName = cache.u[memberUid]?.nickname || "Неизвестный";
-                            const div = document.createElement('div');
-                            div.style = "display:flex; justify-content:space-between; align-items:center; padding:6px; border-bottom:1px solid var(--border-color); background:var(--bg-main); border-radius:6px; margin-bottom:3px; font-size:13px;";
-                            
-                            let actionsHtml = "";
-                            if(memberUid !== myID) {
-                                if(isOwner) {
-                                    const optBtn = role === 'admin' ? 
-                                        `<button class="warning" style="width:auto; margin:0; padding:2px 6px; font-size:11px;" onclick="changeMemberRole('${memberUid}', 'member')">Снять админку 🎖️</button>` : 
-                                        `<button class="success" style="width:auto; margin:0; padding:2px 6px; font-size:11px;" onclick="changeMemberRole('${memberUid}', 'admin')">Дать админку 🎖️</button>`;
-                                    actionsHtml = `<div style="display:flex; gap:3px;">${optBtn}<button class="danger" style="width:auto; margin:0; padding:2px 6px; font-size:11px;" onclick="kickGroupMember('${memberUid}')">Кик ❌</button></div>`;
-                                } else if(isAdmin && role === 'member') {
-                                    actionsHtml = `<button class="danger" style="width:auto; margin:0; padding:2px 6px; font-size:11px;" onclick="kickGroupMember('${memberUid}')">Кик ❌</button>`;
-                                }
-                            }
-                            div.innerHTML = `<span><b>${uName}</b> <small style="color:var(--text-muted)">(${role})</small></span> ${actionsHtml}`;
-                            activeList.appendChild(div);
-                        }
-                    }
+                if(isOwner || isAdmin) {
+                    document.getElementById('groupAdminPanel').style.display = 'block'; document.getElementById('groupUserPanel').style.display = 'none';
+                    document.getElementById('editGroupName').value = gData.name; document.getElementById('editGroupAv').value = gData.avatar || "";
                 } else {
-                    // ИСПРАВЛЕНО: Если юзер ЛИВНУЛ или еще не зашел (Вкладка ОБЩЕЕ)
-                    document.getElementById('groupAdminPanel').style.display = 'none';
-                    document.getElementById('groupUserPanel').style.display = 'none';
-                    document.getElementById('groupJoinPanel').style.display = 'block';
-                    
-                    const listContJoin = document.getElementById('groupMembersListJoin');
-                    listContJoin.innerHTML = "";
-                    if(gData.roles) {
-                        for(let memberUid in gData.roles) {
-                            const role = gData.roles[memberUid]; const uName = cache.u[memberUid]?.nickname || "Неизвестный";
-                            listContJoin.innerHTML += `<div style="padding:6px; border-bottom:1px solid var(--border-color); font-size:13px; color:var(--text-main);"><b>${uName}</b> <small style="color:var(--text-muted)">(${role})</small></div>`;
-                        }
-                    }
+                    document.getElementById('groupAdminPanel').style.display = 'none'; document.getElementById('groupUserPanel').style.display = 'block';
                 }
-                document.getElementById('group-manage-modal').style.display = 'flex';
+                
+                const activeList = (isOwner || isAdmin) ? listCont : listContUser;
+                if(gData.roles) {
+                    for(let memberUid in gData.roles) {
+                        const role = gData.roles[memberUid]; const uName = cache.u[memberUid]?.nickname || "Неизвестный";
+                        const div = document.createElement('div');
+                        div.style = "display:flex; justify-content:space-between; align-items:center; padding:6px; border-bottom:1px solid var(--border-color); background:var(--bg-main); border-radius:6px; margin-bottom:3px; font-size:13px;";
+                        
+                        let actionsHtml = "";
+                        if(memberUid !== myID) {
+                            if(isOwner) {
+                                const optBtn = role === 'admin' ? 
+                                    `<button class="warning" style="width:auto; margin:0; padding:2px 6px; font-size:11px;" onclick="changeMemberRole('${memberUid}', 'member')">Снять админку 🎖️</button>` : 
+                                    `<button class="success" style="width:auto; margin:0; padding:2px 6px; font-size:11px;" onclick="changeMemberRole('${memberUid}', 'admin')">Дать админку 🎖️</button>`;
+                                actionsHtml = `<div style="display:flex; gap:3px;">${optBtn}<button class="danger" style="width:auto; margin:0; padding:2px 6px; font-size:11px;" onclick="kickGroupMember('${memberUid}')">Кик ❌</button></div>`;
+                            } else if(isAdmin && role === 'member') {
+                                actionsHtml = `<button class="danger" style="width:auto; margin:0; padding:2px 6px; font-size:11px;" onclick="kickGroupMember('${memberUid}')">Кик ❌</button>`;
+                            }
+                        }
+                        div.innerHTML = `<span><b>${uName}</b> <small style="color:var(--text-muted)">(${role})</small></span> ${actionsHtml}`;
+                        activeList.appendChild(div);
+                    }
+                } document.getElementById('group-manage-modal').style.display = 'flex';
             }
-        }
-
-        // ИСПРАВЛЕНО: СИСТЕМА ВСТУПЛЕНИЯ В ГРУППУ ИЗ ГЛОБАЛЬНОГО ПОИСКА
-        function joinGroup() {
-            if(!active || active.type !== 'GROUP') return;
-            const gId = active.id;
-            db.ref(`groups/${gId}/roles/${myID}`).set("member");
-            db.ref(`users/${myID}/chats/${gId}`).set(true).then(() => {
-                alert("Ты успешно вступил в группу! 🎉");
-                closeM('group-manage-modal');
-                select(active.id, active.name, active.type); // Мгновенный анлок чата
-            });
         }
 
         function addGroupMemberByEmail() {
             if(!active || active.type !== 'GROUP') return;
             const email = document.getElementById('groupAddUserEmail').value.trim().toLowerCase(); if(!email) return alert("Введите Email!");
-            let foundUid = null;
-            for(let uid in cache.u) { if(cache.u[uid].email && cache.u[uid].email.toLowerCase() === email) { foundUid = uid; break; } }
+            let foundUid = null; for(let uid in cache.u) { if(cache.u[uid].email && cache.u[uid].email.toLowerCase() === email) { foundUid = uid; break; } }
             if(!foundUid) return alert("Пользователь с таким Email не найден!");
-            
-            db.ref(`groups/${active.id}/roles/${foundUid}`).set("member").then(() => {
-                alert("Пользователь добавлен! 🎉"); document.getElementById('groupAddUserEmail').value = ""; openChatContextInfo();
-            });
+            db.ref(`groups/${active.id}/roles/${foundUid}`).set("member").then(() => { alert("Пользователь добавлен! 🎉"); document.getElementById('groupAddUserEmail').value = ""; openChatContextInfo(); });
         }
 
-        function changeMemberRole(uid, newRole) {
-            if(!active || active.type !== 'GROUP') return;
-            db.ref(`groups/${active.id}/roles/${uid}`).set(newRole).then(() => { alert("Статус роли успешно изменен! ⚡"); openChatContextInfo(); });
-        }
-
-        function kickGroupMember(uid) {
-            if(!active || active.type !== 'GROUP') return;
-            if(confirm("Вышвырнуть участника из группы?")) {
-                db.ref(`groups/${active.id}/roles/${uid}`).remove();
-                db.ref(`users/${uid}/chats/${active.id}`).remove().then(() => { alert("Пользователь удален."); openChatContextInfo(); });
-            }
-        }
-
-        function updateGroupSettings() {
-            if(!active || active.type !== 'GROUP') return;
-            const newN = document.getElementById('editGroupName').value.trim(); const newA = document.getElementById('editGroupAv').value.trim();
-            if(!newN) return alert("Название пустое!");
-            db.ref(`groups/${active.id}`).update({ name: newN, avatar: newA }).then(() => { alert("Обновлено!"); document.getElementById('hTitle').innerText = newN; closeM('group-manage-modal'); render(); });
-        }
-
-        function resetActiveChatState() { 
-            closeM('group-manage-modal'); active = null; 
-            document.getElementById('hTitle').innerText = "Выберите чат"; document.getElementById('hDesc').innerText = ""; 
-            document.getElementById('hAv').style.display = 'none'; document.getElementById('msgBox').innerHTML = ""; 
-            document.getElementById('msgInp').disabled = false; document.getElementById('msgInp').placeholder = "Написать..."; 
-            render(); 
-        }
-        
-        function deleteGroupPermanently() {
-            if(!active || active.type !== 'GROUP') return;
-            if(confirm("Реально удалить группу НАВСЕГДА?")) { 
-                const gId = active.id; 
-                db.ref(`msgs/${gId}`).remove(); 
-                db.ref(`groups/${gId}`).remove().then(() => {
-                    db.ref(`users/${myID}/chats/${gId}`).remove();
-                    alert("Группа полностью уничтожена."); resetActiveChatState(); 
-                }); 
-            }
-        }
-
-        function leaveGroup() {
-            if(!active || active.type !== 'GROUP') return;
-            if(confirm("Выйти из группы?")) { 
-                const gId = active.id;
-                db.ref(`groups/${gId}/roles/${myID}`).remove(); 
-                db.ref(`users/${myID}/chats/${gId}`).remove().then(() => { 
-                    alert("Вы успешно вышли из группы! 🚪"); resetActiveChatState(); 
-                }); 
-            }
-        }
-
+        function changeMemberRole(uid, newRole) { if(!active || active.type !== 'GROUP') return; db.ref(`groups/${active.id}/roles/${uid}`).set(newRole).then(() => { alert("Статус роли успешно изменен! ⚡"); openChatContextInfo(); }); }
+        function kickGroupMember(uid) { if(!active || active.type !== 'GROUP') return; if(confirm("Вышвырнуть участника из группы?")) { db.ref(`groups/${active.id}/roles/${uid}`).remove(); db.ref(`users/${uid}/chats/${active.id}`).remove().then(() => { alert("Пользователь удален."); openChatContextInfo(); }); } }
+        function updateGroupSettings() { if(!active || active.type !== 'GROUP') return; const newN = document.getElementById('editGroupName').value.trim(); const newA = document.getElementById('editGroupAv').value.trim(); if(!newN) return alert("Название пустое!"); db.ref(`groups/${active.id}`).update({ name: newN, avatar: newA }).then(() => { alert("Обновлено!"); document.getElementById('hTitle').innerText = newN; closeM('group-manage-modal'); render(); }); }
+        function resetActiveChatState() { closeM('group-manage-modal'); active = null; document.getElementById('hTitle').innerText = "Выберите чат"; document.getElementById('hDesc').innerText = ""; document.getElementById('hAv').style.display = 'none'; document.getElementById('msgBox').innerHTML = ""; render(); }
+        function deleteGroupPermanently() { if(!active || active.type !== 'GROUP') return; if(confirm("Реально удалить группу НАВСЕГДА?")) { const gId = active.id; db.ref(`msgs/${gId}`).remove(); db.ref(`groups/${gId}`).remove().then(() => { db.ref(`users/${myID}/chats/${gId}`).remove(); alert("Группа полностью уничтожена."); resetActiveChatState(); }); } }
+        function leaveGroup() { if(!active || active.type !== 'GROUP') return; if(confirm("Выйти из группы?")) { const gId = active.id; db.ref(`groups/${gId}/roles/${myID}`).remove(); db.ref(`users/${myID}/chats/${gId}`).remove().then(() => { alert("Вы успешно вышли из группы! 🚪"); resetActiveChatState(); }); } }
         function toggleBlock() { const isB = cache.blocked[viewingUserId]; if (isB) { db.ref(`users/${myID}/blocked/${viewingUserId}`).remove().then(() => { alert("Разблокирован!"); render(); closeM('user-prof-modal'); select(active.id, active.name, active.type); }); } else { if(confirm("Заблокировать?")) { db.ref(`users/${myID}/blocked/${viewingUserId}`).set(true).then(() => { render(); closeM('user-prof-modal'); select(active.id, active.name, active.type); }); } } }
         function quickUnblock() { if(active && active.type === 'USER') { db.ref(`users/${myID}/blocked/${active.id}`).remove().then(() => { alert("Разблокирован!"); select(active.id, active.name, active.type); }); } }
         function toggleContactSettings() { document.getElementById('contactSettings').style.display = document.getElementById('isContact').checked ? 'block' : 'none'; }
         function saveContact() { db.ref(`users/${myID}/contacts/${viewingUserId}`).set({ locName: document.getElementById('contactLocName').value.trim(), locAv: document.getElementById('contactLocAv').value.trim() }).then(() => { alert("Обновлено!"); render(); closeM('user-prof-modal'); }); }
-        
-        function removeContact() {
-            if(!viewingUserId) return;
-            if(confirm("Точно удалить человека из контактов?")) {
-                db.ref(`users/${myID}/contacts/${viewingUserId}`).remove().then(() => { alert("Контакт удален 🗑️"); render(); closeM('user-prof-modal'); });
-            }
-        }
-
+        function removeContact() { if(!viewingUserId) return; if(confirm("Точно удалить человека из контактов?")) { db.ref(`users/${myID}/contacts/${viewingUserId}`).remove().then(() => { alert("Контакт удален 🗑️"); render(); closeM('user-prof-modal'); }); } }
         function checkEnter(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); } }
         function cancelAction() { editMsgId = null; replyMsgData = null; document.getElementById('action-bar').style.display = 'none'; const inp = document.getElementById('msgInp'); if(editMsgId) inp.value = ""; inp.style.height = '45px'; }
         function copyMsg(key) { navigator.clipboard.writeText(currentMessages[key].txt); alert("Скопировано! 📋"); }
         function initReply(key) { editMsgId = null; const m = currentMessages[key]; replyMsgData = { nick: m.snick, txt: m.txt }; document.getElementById('action-bar').style.display = 'flex'; document.getElementById('action-text').innerHTML = `<b style="color:var(--accent);">Ответ:</b> ${m.txt}`; document.getElementById('msgInp').focus(); }
         function initEdit(key) { replyMsgData = null; editMsgId = key; const m = currentMessages[key]; document.getElementById('action-bar').style.display = 'flex'; document.getElementById('action-text').innerHTML = `<b style="color:var(--warning);">Изменение:</b> ${m.txt}`; const inp = document.getElementById('msgInp'); inp.value = m.txt; inp.focus(); inp.style.height = inp.scrollHeight + 'px'; }
-        
         function initForward(key) { forwardMsgData = currentMessages[key]; renderFwdList(); document.getElementById('forward-modal').style.display = 'flex'; }
+        
         function renderFwdList() {
             const list = document.getElementById('fwdChatList'); const q = document.getElementById('fwdSearch').value.toLowerCase(); list.innerHTML = "";
             for (let id in cache.myChats) { if(cache.u[id] && cache.u[id].nickname.toLowerCase().includes(q)) { list.innerHTML += `<div class="fwd-list-item" onclick="executeForward('${id}', 'USER')"><b>👤 ${cache.u[id].nickname}</b></div>`; } }
             for (let id in cache.g) { if(cache.g[id].roles && cache.g[id].roles[myID] && cache.g[id].name.toLowerCase().includes(q)) { list.innerHTML += `<div class="fwd-list-item" onclick="executeForward('${id}', 'GROUP')"><b>👥 ${cache.g[id].name}</b></div>`; } }
         }
-        function executeForward(targetId, type) {
-            if(!forwardMsgData) return; const path = type === 'USER' ? (myID < targetId ? myID+"_"+targetId : targetId+"_"+myID) : targetId;
-            let msgObj = { sid: myID, snick: document.getElementById('myName').innerText, txt: forwardMsgData.txt, fwd: forwardMsgData.snick };
-            db.ref("msgs/" + path).push().set(msgObj).then(() => { alert("Переслано! 🚀"); closeM('forward-modal'); forwardMsgData = null; });
-        }
+        function executeForward(targetId, type) { if(!forwardMsgData) return; const path = type === 'USER' ? (myID < targetId ? myID+"_"+targetId : targetId+"_"+myID) : targetId; let msgObj = { sid: myID, snick: document.getElementById('myName').innerText, txt: forwardMsgData.txt, fwd: forwardMsgData.snick }; db.ref("msgs/" + path).push().set(msgObj).then(() => { alert("Переслано! 🚀"); closeM('forward-modal'); forwardMsgData = null; }); }
 
         function sendMsg() {
             const inp = document.getElementById('msgInp'); const t = inp.value.trim(); if (!t || !active) return;
@@ -694,10 +630,8 @@
             if (editMsgId) { db.ref("msgs/" + path + "/" + editMsgId).update({ txt: t, edited: true }); } 
             else {
                 let msgObj = { sid: myID, snick: document.getElementById('myName').innerText, txt: t }; if (replyMsgData) { msgObj.reply = replyMsgData; }
-                db.ref("msgs/" + path).push().set(msgObj);
-                db.ref(`users/${myID}/chats/${active.id}`).set(true); if (active.type === 'USER') { db.ref(`users/${active.id}/chats/${myID}`).set(true); }
-            }
-            inp.value = ""; inp.style.height = '45px'; cancelAction();
+                db.ref("msgs/" + path).push().set(msgObj); db.ref(`users/${myID}/chats/${active.id}`).set(true); if (active.type === 'USER') { db.ref(`users/${active.id}/chats/${myID}`).set(true); }
+            } inp.value = ""; inp.style.height = '45px'; cancelAction();
         }
 
         function deleteMessage(path, key) { if(confirm("Удалить сообщение?")) db.ref("msgs/" + path + "/" + key).remove(); }
