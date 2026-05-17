@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat 6.4</title>
+    <title>VChat 6.5</title>
     <meta name="google-site-verification" content="bnrGuCFyUfxc7XB3jmiLYsr6mbgod0QWt2PHqIXGSrg" />
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     
@@ -252,7 +252,7 @@
         firebase.initializeApp(cfg); const db = firebase.database(); const authSystem = firebase.auth();
 
         let myID = ""; let active = null; let currentTab = 'chats'; let sessionId = "";
-        let cache = { u: {}, g: {}, contacts: {}, blocked: {} };
+        let cache = { u: {}, g: {}, contacts: {}, blocked: {}, myChats: {} };
 
         if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); document.getElementById('themeBtn').innerText = '🌞'; }
         
@@ -275,6 +275,7 @@
                         document.getElementById('myName').innerText = d.nickname;
                         document.getElementById('myAvImg').src = d.avatar || "https://api.dicebear.com/7.x/identicon/svg?seed="+myID;
                         cache.contacts = d.contacts || {}; cache.blocked = d.blocked || {};
+                        cache.myChats = d.chats || {}; // Подгружаем активные чаты юзера
 
                         if (d.pin && d.pin.trim() !== "" && sessionStorage.getItem('vchat_pin_pass') !== 'true') {
                             document.getElementById('login-scr').style.display = 'flex'; document.getElementById('login-view').style.display = 'none';
@@ -330,23 +331,27 @@
         function render() {
             const list = document.getElementById('chatList'); const q = document.getElementById('srch').value.toLowerCase(); list.innerHTML = "";
 
+            // РЕНДЕР ГРУПП (Только во вкладках Чаты и Группы)
             if (currentTab === 'groups' || currentTab === 'chats') {
                 for (let id in cache.g) {
                     const g = cache.g[id]; 
-                    if (g.roles && g.roles[myID] && g.name.toLowerCase().includes(q) && (currentTab === 'groups' || currentTab === 'chats')) {
+                    if (g.roles && g.roles[myID] && g.name.toLowerCase().includes(q)) {
                         addLi(list, g.name, g.avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${id}`, id, 'GROUP');
                     }
                 }
             }
             
+            // РЕНДЕР ПОЛЬЗОВАТЕЛЕЙ
             for (let id in cache.u) {
                 if (id === myID) continue;
                 const dData = getUserDisplayData(id);
                 if (cache.blocked[id] && currentTab !== 'global' && !q) continue; 
 
                 if (dData.name.toLowerCase().includes(q) || cache.u[id].nickname.toLowerCase().includes(q)) {
+                    // ФИЛЬТРАЦИЯ ПО ВКЛАДКАМ (ФИКС!)
                     if (currentTab === 'contacts' && !dData.isContact) continue; 
                     if (currentTab === 'groups') continue; 
+                    if (currentTab === 'chats' && (!cache.myChats || !cache.myChats[id])) continue; // В Чатах только активные переписки!
                     
                     let suffix = cache.blocked[id] ? " (БЛОК)" : (dData.isContact ? " 📒" : "");
                     addLi(list, dData.name + suffix, dData.avatar, id, 'USER');
@@ -389,7 +394,14 @@
             const t = document.getElementById('msgInp').value.trim(); if (!t || !active) return;
             if (active.type === 'USER' && cache.blocked[active.id]) return alert("Вы заблокировали этого пользователя!");
             const path = active.type === 'USER' ? (myID < active.id ? myID+"_"+active.id : active.id+"_"+myID) : active.id;
-            db.ref("msgs/" + path).push().set({ sid: myID, snick: document.getElementById('myName').innerText, txt: t }); document.getElementById('msgInp').value = "";
+            db.ref("msgs/" + path).push().set({ sid: myID, snick: document.getElementById('myName').innerText, txt: t }); 
+            
+            // Активируем чат для обоих участников (чтобы он вывелся в табе Чаты)
+            db.ref(`users/${myID}/chats/${active.id}`).set(true);
+            if (active.type === 'USER') {
+                db.ref(`users/${active.id}/chats/${myID}`).set(true);
+            }
+            document.getElementById('msgInp').value = "";
         }
 
         function deleteMessage(path, key) { if(confirm("Удалить?")) db.ref("msgs/" + path + "/" + key).remove(); }
@@ -421,7 +433,6 @@
             const isAdmin = (myRole === 'admin');
             const canEditSettings = isOwner;
 
-            // Настройки
             if(canEditSettings) {
                 document.getElementById('groupEditView').style.display = 'block'; document.getElementById('groupReadView').style.display = 'none';
                 document.getElementById('groupNameInp').value = g.name; document.getElementById('groupAvInp').value = g.avatar || ""; document.getElementById('groupDescInp').value = g.desc || "";
@@ -430,7 +441,6 @@
                 document.getElementById('gCardDescView').innerText = g.desc || "Описание отсутствует";
             }
 
-            // Участники
             document.getElementById('addMemberBtn').style.display = (isOwner || isAdmin) ? 'block' : 'none';
             const mList = document.getElementById('groupMembersList'); mList.innerHTML = "";
             
