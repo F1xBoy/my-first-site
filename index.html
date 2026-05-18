@@ -118,8 +118,17 @@
 
         /* Сетка Лэйаута */
         .tg-layout { display: none; height: 100vh; width: 100vw; flex-direction: row; position: relative; overflow: hidden; }
-        .tg-sidebar { width: 360px; background: var(--bg-card); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; z-index: 10; height: 100%; }
         
+        /* Боковая панель по умолчанию 320px, но теперь ширина управляется JS */
+        .tg-sidebar { width: 320px; min-width: 250px; max-width: 500px; background: var(--bg-card); display: flex; flex-direction: column; z-index: 10; height: 100%; }
+        
+        /* Ползунок для изменения ширины (Resizer) */
+        .tg-resizer {
+            width: 4px; background: var(--border-color); cursor: col-resize;
+            position: relative; z-index: 15; transition: background 0.1s;
+        }
+        .tg-resizer:hover, .tg-resizer.is-dragging { background: var(--accent); width: 6px; }
+
         .sidebar-header { padding: 16px; background: var(--bg-hover); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); }
         .avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); cursor: pointer; }
         
@@ -207,8 +216,9 @@
            📱 СТИЛИ ДЛЯ МОБИЛОК
            ========================================================================== */
         @media (max-width: 767px) {
-            .tg-sidebar { width: 100%; position: absolute; left: 0; top: 0; transition: transform 0.3s cubic-bezier(0.1, 0.8, 0.25, 1); }
+            .tg-sidebar { width: 100% !important; min-width: 100% !important; max-width: 100% !important; position: absolute; left: 0; top: 0; transition: transform 0.3s cubic-bezier(0.1, 0.8, 0.25, 1); }
             .tg-body { width: 100%; position: absolute; left: 0; top: 0; transition: transform 0.3s cubic-bezier(0.1, 0.8, 0.25, 1); }
+            .tg-resizer { display: none; } /* Скрываем ползунок на мобилках */
             
             .tg-layout.mobile-view-sidebar .tg-sidebar { transform: translateX(0); }
             .tg-layout.mobile-view-sidebar .tg-body { transform: translateX(100%); }
@@ -285,7 +295,7 @@
             <button class="danger" onclick="executeClearAppCache()" style="background:#dc2626; margin-bottom: 5px;">🗑️ Очистить кэш приложения</button>
 
             <hr style="border-color:var(--border-color); margin:20px 0;">
-            <div style="text-align:center; color:var(--text-muted); font-size:12px; margin-bottom:10px;">Версия: VChat 1.0.7</div>
+            <div style="text-align:center; color:var(--text-muted); font-size:12px; margin-bottom:10px;">Версия: VChat 1.0.9</div>
             <button class="secondary" onclick="executeSignOut()">Выйти из аккаунта</button>
             <button class="danger" onclick="executeDeleteAccountPermanently()" style="background: #b91c1c; margin-top: 8px;">⚠️ УДАЛИТЬ АККАУНТ НАВСЕГДА</button>
             <button class="secondary" style="margin-top:12px;" onclick="closeModal('myProfileModal')">Закрыть</button>
@@ -355,7 +365,7 @@
     <div id="mediaViewerModal" class="modal-overlay" onclick="closeModal('mediaViewerModal')" style="background:rgba(0,0,0,0.95);"><img id="fullSizeImg" src="" style="max-width:90%; max-height:90%; border-radius:8px;"></div>
 
     <div id="appLayout" class="tg-layout mobile-view-sidebar">
-        <aside class="tg-sidebar">
+        <aside class="tg-sidebar" id="mainSidebar">
             <div class="sidebar-header">
                 <div style="display:flex; align-items:center; gap:12px; cursor:pointer;" onclick="openMyProfileSettings()">
                     <img id="myAvatarDisplay" class="avatar" src="">
@@ -366,7 +376,7 @@
                     <button class="secondary" style="padding:6px; margin:0; width:34px; height:34px;" onclick="executeToggleTheme()" id="themeBtn">🌙</button>
                 </div>
             </div>
-            <div style="padding:10px 14px;"><input type="text" id="searchBarInp" placeholder="Поиск..." oninput="renderChatLists()" style="margin:0;"></div>
+            <div style="padding:10px 14px;"><input type="text" id="searchBarInp" placeholder="Поиск (включая ЧС)..." oninput="renderChatLists()" style="margin:0;"></div>
             
             <div class="tabs-wrapper">
                 <div class="tabs-row" id="tabsRowElement"></div>
@@ -374,6 +384,8 @@
             </div>
             <div class="chats-scroll" id="chatListContainer"></div>
         </aside>
+
+        <div class="tg-resizer" id="sidebarResizer"></div>
 
         <main class="tg-body">
             <header class="body-header">
@@ -431,14 +443,42 @@
         if(localStorage.getItem('vchat_theme')==='light') { document.body.classList.add('light-mode'); document.getElementById('themeBtn').innerText='🌞'; }
         function executeToggleTheme() { document.body.classList.toggle('light-mode'); const isL=document.body.classList.contains('light-mode'); localStorage.setItem('vchat_theme', isL?'light':'dark'); document.getElementById('themeBtn').innerText=isL?'🌞':'🌙'; }
 
-        // СЛУШАТЕЛЬ СЕССИИ
+        // ==========================================================================
+        // 🏗️ СИСТЕМА ИЗМЕНЕНИЯ ШИРИНЫ БАРОВ (RESIZER)
+        // ==========================================================================
+        const sidebar = document.getElementById('mainSidebar');
+        const resizer = document.getElementById('sidebarResizer');
+        
+        // Загружаем сохраненную ширину, если она есть
+        const savedWidth = localStorage.getItem('vchat_sidebar_width');
+        if (savedWidth) sidebar.style.width = savedWidth + 'px';
+
+        resizer.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            resizer.classList.add('is-dragging');
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+        });
+
+        function handleMouseMove(e) {
+            let newWidth = e.clientX;
+            // Ограничения размеров панели безопасности ради
+            if (newWidth >= 250 && newWidth <= 500) {
+                sidebar.style.width = newWidth + 'px';
+                localStorage.setItem('vchat_sidebar_width', newWidth);
+            }
+        }
+
+        function handleMouseUp() {
+            resizer.classList.remove('is-dragging');
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        }
+
+        // СЛУШАТЕЛЬ СЕССИИ FIREBASE
         appAuth.onAuthStateChanged(user => {
             if (user) {
-                if (!user.emailVerified) {
-                    appAuth.signOut();
-                    return;
-                }
-
+                if (!user.emailVerified) { appAuth.signOut(); return; }
                 activeUserId = user.uid;
                 const sessionId = localStorage.getItem('vchat_session_id') || 'sess_' + Date.now();
                 localStorage.setItem('vchat_session_id', sessionId);
@@ -494,32 +534,14 @@
         
         function executeSignOut() { appAuth.signOut().then(() => location.reload()); }
 
-        // ХАРДКОРНОЕ УДАЛЕНИЕ АККАУНТА
         function executeDeleteAccountPermanently() {
-            const currentUser = appAuth.currentUser;
-            if (!currentUser) return;
-
-            if (confirm("🚨 БРО, ТЫ УВЕРЕН?! Это действие сотрет твой профиль, контакты и настройки НАВСЕГДА без возможности восстановления!")) {
-                const userPath = `users/${activeUserId}`;
-                
-                // 1. Сначала сносим все упоминания и данные из Realtime Database
-                realtimeDb.ref(userPath).remove()
-                .then(() => {
-                    // 2. Сносим саму учетку из Firebase Authentication
-                    return currentUser.delete();
-                })
-                .then(() => {
-                    alert("Твой аккаунт успешно удален. Жаль терять такого бойца! 🫡");
-                    localStorage.clear();
-                    location.reload();
-                })
-                .catch(error => {
-                    // Перехват ошибки безопасности авторизации
-                    if (error.code === 'auth/requires-recent-login') {
-                        alert("⚠️ Ошибка безопасности Firebase!\n\nУдаление аккаунта — критическая операция. Пожалуйста, выйди из аккаунта, зайди заново (чтобы обновить сессию) и повтори удаление.");
-                    } else {
-                        alert("Кринж, что-то пошло не так: " + error.message);
-                    }
+            const currentUser = appAuth.currentUser; if (!currentUser) return;
+            if (confirm("🚨 БРО, ТЫ УВЕРЕН?! Это действие сотрет твой профиль, контакты и настройки НАВСЕГДА!")) {
+                realtimeDb.ref(`users/${activeUserId}`).remove().then(() => currentUser.delete()).then(() => {
+                    alert("Твой аккаунт успешно удален везде! 🫡"); localStorage.clear(); location.reload();
+                }).catch(e => {
+                    if (e.code === 'auth/requires-recent-login') alert("⚠️ Перезайди в аккаунт, чтобы обновить сессию безопасности, и повтори удаление.");
+                    else alert("Ошибка: " + e.message);
                 });
             }
         }
@@ -536,11 +558,8 @@
         function renderTabsRow() {
             const row = document.getElementById('tabsRowElement'); row.innerHTML = "";
             globalCache.tabs.forEach((t, index) => {
-                const el = document.createElement('div');
-                el.className = `tab-item ${activeSidebarTab === t.id ? 'active' : ''}`;
-                el.innerText = t.name;
-                el.onclick = () => { activeSidebarTab = t.id; renderTabsRow(); renderChatLists(); };
-                row.appendChild(el);
+                const el = document.createElement('div'); el.className = `tab-item ${activeSidebarTab === t.id ? 'active' : ''}`;
+                el.innerText = t.name; el.onclick = () => { activeSidebarTab = t.id; renderTabsRow(); renderChatLists(); }; row.appendChild(el);
             });
         }
         function openTabManagerModal() {
@@ -562,7 +581,7 @@
         function executeAddCustomTab() { const name = document.getElementById('newTabNameInp').value.trim(); if(!name) return; const id = 'custom_' + Date.now(); let arr = [...globalCache.tabs, {id, name}]; document.getElementById('newTabNameInp').value = ""; saveTabsStructure(arr); }
         function saveTabsStructure(arr) { globalCache.tabs = arr; realtimeDb.ref(`users/${activeUserId}/tabs`).set(arr); openTabManagerModal(); }
 
-        // РЕНДЕР ЧАТОВ
+        // РЕНДЕР ЧАТОВ (ТЕПЕРЬ ПОЗВОЛЯЕТ НАХОДИТЬ ЗАБЛОКИРОВАННЫХ ДЛЯ РАЗБЛОКИ)
         function renderChatLists() {
             const container = document.getElementById('chatListContainer'); container.innerHTML = "";
             const search = document.getElementById('searchBarInp').value.toLowerCase();
@@ -577,11 +596,18 @@
             }
             if (activeSidebarTab !== 'groups') {
                 for (let uId in globalCache.users) {
-                    if (uId === activeUserId || globalCache.blockedUsers[uId]) continue;
+                    if (uId === activeUserId) continue;
+                    // Если юзер в ЧС — показываем его ТОЛЬКО если идет активный поиск, чтобы можно было разблокировать
+                    if (globalCache.blockedUsers[uId] && !search) continue; 
                     if (activeSidebarTab === 'contacts' && !globalCache.contacts[uId]) continue;
+                    
                     const origName = globalCache.users[uId].nickname || "Юзер";
                     const dispName = globalCache.customNames[uId] ? `${globalCache.customNames[uId]} (${origName})` : origName;
-                    if (dispName.toLowerCase().includes(search)) items.push({ id: uId, name: dispName, av: globalCache.users[uId].avatar, type: 'USER' });
+                    const isBannedLabel = globalCache.blockedUsers[uId] ? " [В чёрном списке 🚫]" : "";
+
+                    if (dispName.toLowerCase().includes(search) || (globalCache.users[uId].email && globalCache.users[uId].email.toLowerCase().includes(search))) {
+                        items.push({ id: uId, name: dispName + isBannedLabel, av: globalCache.users[uId].avatar, type: 'USER' });
+                    }
                 }
             }
 
@@ -609,7 +635,7 @@
                 path = "saved_" + activeUserId; av.src = `https://api.dicebear.com/7.x/initials/svg?seed=Saved&backgroundColor=2b5278`; document.getElementById('activeChatTitle').innerText = "Сохранённые";
             } else if(chatType === 'USER') {
                 path = activeUserId < chatId ? activeUserId+"_"+chatId : chatId+"_"+activeUserId;
-                av.src = globalCache.users[chatId].avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${chatId}`; document.getElementById('activeChatTitle').innerText = chatName;
+                av.src = globalCache.users[chatId].avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${chatId}`; document.getElementById('activeChatTitle').innerText = chatName.replace(" [В чёрном списке 🚫]", "");
             } else {
                 path = chatId; const g = globalCache.groups[chatId] || {};
                 av.src = g.avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${chatId}`; document.getElementById('activeChatTitle').innerText = chatName;
@@ -617,6 +643,13 @@
 
             updateActiveChatStatus();
             realtimeDb.ref("msgs/" + path).off();
+            
+            // Если юзер в ЧС — не грузим сообщения ради безопасности
+            if(chatType === 'USER' && globalCache.blockedUsers[chatId]) {
+                document.getElementById('chatMessagesBox').innerHTML = `<div style="text-align:center; margin-top:40px; color:var(--danger); font-weight:bold;">Юзер заблокирован. Разблокируй его в меню профиля, чтобы общаться!</div>`;
+                return;
+            }
+
             realtimeDb.ref("msgs/" + path).on("value", snap => {
                 const box = document.getElementById('chatMessagesBox'); box.innerHTML = ""; loadedMessagesMap = {};
                 snap.forEach(child => {
@@ -649,7 +682,10 @@
         function updateActiveChatStatus() {
             if(!currentActiveChat) return; const statusEl = document.getElementById('activeChatStatus');
             if(currentActiveChat.type === 'SAVED') { statusEl.innerText = "Облачное хранилище заметок"; } 
-            else if(currentActiveChat.type === 'USER') { const u = globalCache.users[currentActiveChat.id] || {}; statusEl.innerText = u.sessions && Object.keys(u.sessions).length > 0 ? "Онлайн 🟢" : "Оффлайн 🔴"; } 
+            else if(currentActiveChat.type === 'USER') { 
+                if(globalCache.blockedUsers[currentActiveChat.id]) { statusEl.innerText = "🚫 В твоём Чёрном Списке"; return; }
+                const u = globalCache.users[currentActiveChat.id] || {}; statusEl.innerText = u.sessions && Object.keys(u.sessions).length > 0 ? "Онлайн 🟢" : "Оффлайн 🔴"; 
+            } 
             else { const g = globalCache.groups[currentActiveChat.id] || {}; statusEl.innerText = g.description ? `📋 ${g.description}` : "Групповой чат"; }
         }
 
@@ -680,6 +716,7 @@
 
         // ОТПРАВКА
         function executeSendMessage() {
+            if(currentActiveChat && currentActiveChat.type === 'USER' && globalCache.blockedUsers[currentActiveChat.id]) { alert("Разблокируй челика перед отправкой, бро!"); return; }
             const txt = document.getElementById('messageInputEngine').value.trim(); if(!txt && !base64CompressedAttachment && !pendingTextSnippet) return;
             let path = currentActiveChat.type === 'SAVED' ? "saved_" + activeUserId : (currentActiveChat.type === 'USER' ? (activeUserId < currentActiveChat.id ? activeUserId + "_" + currentActiveChat.id : currentActiveChat.id + "_" + activeUserId) : currentActiveChat.id);
             if(activeEditMessageKey) { realtimeDb.ref(`msgs/${path}/${activeEditMessageKey}`).update({ txt: txt }); } 
@@ -697,7 +734,7 @@
         function initReplyMessageContext(k) { activeReplyMessageData = { msgKey: k, author: loadedMessagesMap[k].snick, text: loadedMessagesMap[k].txt || "[Вложение]" }; document.getElementById('contextActionBar').style.display='flex'; document.getElementById('contextActionTitle').innerText=`ОТВЕТ ДЛЯ ${activeReplyMessageData.author.toUpperCase()}`; document.getElementById('contextActionText').innerText=activeReplyMessageData.text; }
         function initForwardMessageContext(k) {
             targetForwardMessageData = loadedMessagesMap[k]; document.getElementById('forwardModal').style.display='flex'; const cont = document.getElementById('forwardListContainer'); cont.innerHTML = "";
-            for(let uid in globalCache.users) if(uid!==activeUserId) cont.innerHTML += `<div style="padding:10px; cursor:pointer;" onclick="executeForwardTo('${uid}','USER')">👤 ${escapeHTML(globalCache.users[uid].nickname)}</div>`;
+            for(let uid in globalCache.users) if(uid!==activeUserId && !globalCache.blockedUsers[uid]) cont.innerHTML += `<div style="padding:10px; cursor:pointer;" onclick="executeForwardTo('${uid}','USER')">👤 ${escapeHTML(globalCache.users[uid].nickname)}</div>`;
             for(let gid in globalCache.groups) cont.innerHTML += `<div style="padding:10px; cursor:pointer;" onclick="executeForwardTo('${gid}','GROUP')">👥 ${escapeHTML(globalCache.groups[gid].name)}</div>`;
         }
         function executeForwardTo(id, type) {
@@ -724,12 +761,12 @@
         function executeTerminateSession(sid) { realtimeDb.ref(`users/${activeUserId}/sessions/${sid}`).remove().then(() => openMyProfileSettings()); }
         function executeClearAppCache() { if(confirm("Очистить локальный кэш и перезагрузить?")) { localStorage.clear(); location.reload(); } }
 
-        // ГРУППЫ И МОДЕРАЦИЯ
+        // МОДЕРАЦИЯ И УМНЫЙ ЧЕРНЫЙ СПИСОК (БЛОК / РАЗБЛОК)
         function changeUserGroupRole(uid, newRole) { if(currentActiveChat) { realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${uid}`).set(newRole).then(() => openActiveChatContextInfo()); } }
         function openActiveChatContextInfo() {
             if(!currentActiveChat) return;
             document.getElementById('ctxAv').src = currentActiveChat.type==='SAVED' ? `https://api.dicebear.com/7.x/initials/svg?seed=Saved&backgroundColor=2b5278` : (currentActiveChat.type==='USER' ? (globalCache.users[currentActiveChat.id].avatar||`https://api.dicebear.com/7.x/identicon/svg?seed=${currentActiveChat.id}`) : (globalCache.groups[currentActiveChat.id].avatar||`https://api.dicebear.com/7.x/shapes/svg?seed=${currentActiveChat.id}`));
-            document.getElementById('ctxTitle').innerText = currentActiveChat.type === 'SAVED' ? "Сохранённые" : currentActiveChat.name; document.getElementById('ctxDescriptionContainer').innerHTML = "";
+            document.getElementById('ctxTitle').innerText = currentActiveChat.type === 'SAVED' ? "Сохранённые" : currentActiveChat.name.replace(" [В чёрном списке 🚫]", ""); document.getElementById('ctxDescriptionContainer').innerHTML = "";
 
             if(currentActiveChat.type === 'SAVED') { document.getElementById('ctxSubtitle').innerText = "Личное облако заметок"; document.getElementById('ctxUserBlock').style.display = 'none'; document.getElementById('ctxGroupBlock').style.display = 'none'; } 
             else if(currentActiveChat.type === 'USER') {
@@ -738,6 +775,15 @@
                 const isContact = globalCache.contacts[currentActiveChat.id]; const btn = document.getElementById('addContactBtn');
                 btn.innerText = isContact ? "❌ Удалить из контактов" : "➕ Добавить в Контакты"; btn.className = isContact ? "danger" : "success";
                 document.getElementById('localCustomName').value = globalCache.customNames[currentActiveChat.id] || "";
+                
+                // РЕНДЕР КНОПКИ ЧС (Учитываем текущий статус блокировки)
+                const isBlocked = globalCache.blockedUsers[currentActiveChat.id];
+                const blockBtn = document.getElementById('blockToggleBtn');
+                if(isBlocked) {
+                    blockBtn.innerText = "🔓 Разблокировать юзера"; blockBtn.className = "success";
+                } else {
+                    blockBtn.innerText = "🚫 Блокировать"; blockBtn.className = "danger";
+                }
             } else {
                 const g = globalCache.groups[currentActiveChat.id] || {}; document.getElementById('ctxSubtitle').innerText = "Групповой чат"; document.getElementById('ctxDescriptionContainer').innerText = g.description || "Описание группы отсутствует.";
                 document.getElementById('ctxUserBlock').style.display = 'none'; document.getElementById('ctxGroupBlock').style.display = 'block';
@@ -769,7 +815,30 @@
 
         function executeToggleContact() { if(currentActiveChat) { if(globalCache.contacts[currentActiveChat.id]) { if(confirm("Удалить из контактов?")) { realtimeDb.ref(`users/${activeUserId}/contacts/${currentActiveChat.id}`).remove(); openActiveChatContextInfo(); } } else { realtimeDb.ref(`users/${activeUserId}/contacts/${currentActiveChat.id}`).set(true); alert("Добавлен!"); openActiveChatContextInfo(); } } }
         function saveLocalContactName() { if(currentActiveChat) { realtimeDb.ref(`users/${activeUserId}/customNames/${currentActiveChat.id}`).set(document.getElementById('localCustomName').value); closeModal('contextInfoModal'); renderChatLists(); } }
-        function executeToggleBlockUser() { if(currentActiveChat) { realtimeDb.ref(`users/${activeUserId}/blocked/${currentActiveChat.id}`).set(true); closeModal('contextInfoModal'); resetChatWindow(); } }
+        
+        // ФИКС ЧС: И ТУТ ТЕПЕРЬ ПОЛНЫЙ ПОРЯДОК
+        function executeToggleBlockUser() { 
+            if(currentActiveChat) { 
+                const isBlocked = globalCache.blockedUsers[currentActiveChat.id];
+                if(isBlocked) {
+                    // Разблокировка
+                    realtimeDb.ref(`users/${activeUserId}/blocked/${currentActiveChat.id}`).remove().then(() => {
+                        alert("Юзер успешно разблокирован, бро! 🎉");
+                        closeModal('contextInfoModal');
+                        executeSelectActiveChat(currentActiveChat.id, globalCache.users[currentActiveChat.id].nickname, 'USER');
+                    });
+                } else {
+                    // Блокировка
+                    if(confirm("Заблокировать челика и кинуть в ЧС?")) {
+                        realtimeDb.ref(`users/${activeUserId}/blocked/${currentActiveChat.id}`).set(true).then(() => {
+                            closeModal('contextInfoModal'); 
+                            resetChatWindow(); 
+                        });
+                    }
+                }
+            } 
+        }
+
         function saveMyProfileData() { realtimeDb.ref("users/"+activeUserId).update({ nickname: document.getElementById('myModalNick').value, avatar: document.getElementById('myModalAvUrl').value, bio: document.getElementById('myModalBio').value }); closeModal('myProfileModal'); }
         function openTargetUserProfile(uid) { if(uid === activeUserId) { executeSelectActiveChat('saved_messages', 'Сохранённые', 'SAVED'); return; } if(globalCache.users[uid]) { executeSelectActiveChat(uid, globalCache.users[uid].nickname, 'USER'); openActiveChatContextInfo(); } }
         function resetChatWindow() { document.getElementById('activeChatAv').style.display='none'; document.getElementById('activeChatTitle').innerText="Выберите чат"; document.getElementById('activeChatStatus').innerText=""; document.getElementById('chatMessagesBox').innerHTML=""; currentActiveChat=null; backToSidebarOnMobile(); renderChatLists(); }
