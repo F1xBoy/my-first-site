@@ -167,7 +167,7 @@
         .msg-media { max-width: 100%; border-radius: 8px; margin-bottom: 6px; cursor: pointer; }
         .msg-quote { background: rgba(0,0,0,0.15); padding: 6px 10px; border-left: 3px solid var(--accent); border-radius: 4px; margin-bottom: 6px; font-size: 12.5px; }
 
-        /* ИСПРАВЛЕННАЯ ПАНЕЛЬ ИНСТРУМЕНТОВ */
+        /* Панель инструментов сообщений */
         .msg-hover-tools { display: none; gap: 8px; position: absolute; top: -18px; right: 10px; background: var(--bg-card); padding: 6px 10px; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 100; white-space: nowrap; width: max-content; }
         .msg-bubble:hover .msg-hover-tools { display: flex; }
         .tool-ico { cursor: pointer; font-size: 13px; opacity: 0.7; transition: transform 0.15s; }
@@ -247,18 +247,9 @@
             <button class="danger" onclick="executeClearAppCache()" style="background:#dc2626;">🗑️ Очистить кэш приложения</button>
 
             <hr style="border-color:var(--border-color); margin:20px 0;">
-            <div style="text-align:center; color:var(--text-muted); font-size:12px; margin-bottom:10px;">Версия: VChat 1.0.3</div>
+            <div style="text-align:center; color:var(--text-muted); font-size:12px; margin-bottom:10px;">Версия: VChat 1.0.4</div>
             <button class="danger" onclick="executeSignOut()">Выйти из аккаунта</button>
             <button class="secondary" style="margin-top:8px;" onclick="closeModal('myProfileModal')">Закрыть</button>
-        </div>
-    </div>
-
-    <div id="groupAdminModal" class="modal-overlay">
-        <div class="modal-card">
-            <h3 style="margin-top:0; color:var(--warning);">👑 Админка Группы</h3>
-            <p style="font-size:12px; color:var(--text-muted); margin-top:-10px;">Управление ролями и участниками</p>
-            <div id="groupAdminMembersList" style="max-height:250px; overflow-y:auto; border:1px solid var(--border-color); border-radius:8px; padding:6px; background:var(--bg-main);"></div>
-            <button class="secondary" style="margin-top:15px;" onclick="closeModal('groupAdminModal')">Закрыть</button>
         </div>
     </div>
 
@@ -286,16 +277,14 @@
             </div>
 
             <div id="ctxGroupBlock" style="display:none; width: 100%;">
-                <button id="groupAdminPanelBtn" class="warning" style="display:none; width:auto; padding:8px 16px; margin:0 auto 15px auto; font-size:13px;" onclick="openGroupAdminPanel()">👑 Управление Группой (Админка)</button>
-
                 <h4 style="margin:10px 0 5px 0;">Настройки группы:</h4>
                 <input type="text" id="editGrpNameInp" placeholder="Изменить название группы">
                 <input type="text" id="editGrpAvInp" placeholder="Изменить URL аватарки">
                 <textarea id="editGrpDescInp" placeholder="Изменить описание группы" rows="2"></textarea>
                 <button class="success" onclick="executeUpdateGroupMeta()">Обновить данные группы</button>
                 
-                <h4 style="margin:15px 0 5px 0;">Участники:</h4>
-                <div id="groupMembersList" style="max-height:120px; overflow-y:auto; border:1px solid var(--border-color); border-radius:6px; padding:6px; margin-bottom:10px;"></div>
+                <h4 style="margin:15px 0 5px 0;">Участники и управление:</h4>
+                <div id="groupMembersList" style="max-height:180px; overflow-y:auto; border:1px solid var(--border-color); border-radius:6px; padding:6px; margin-bottom:10px; background:var(--bg-main);"></div>
                 
                 <input type="email" id="inviteEmailInp" placeholder="Email или Ник для приглашения">
                 <button class="success" onclick="inviteUserToGroup()">Пригласить участника</button>
@@ -440,8 +429,8 @@
                     renderTabsRow();
                     document.getElementById('authOverlay').style.display = 'none'; document.getElementById('appLayout').style.display = 'flex';
                 });
-                realtimeDb.ref("users").on("value", s => { globalCache.users = s.val() || {}; renderChatLists(); updateActiveChatStatus(); if(document.getElementById('groupAdminModal').style.display === 'flex') openGroupAdminPanel(); });
-                realtimeDb.ref("groups").on("value", s => { globalCache.groups = s.val() || {}; renderChatLists(); updateActiveChatStatus(); if(document.getElementById('groupAdminModal').style.display === 'flex') openGroupAdminPanel(); });
+                realtimeDb.ref("users").on("value", s => { globalCache.users = s.val() || {}; renderChatLists(); updateActiveChatStatus(); if(document.getElementById('contextInfoModal').style.display === 'flex') openActiveChatContextInfo(); });
+                realtimeDb.ref("groups").on("value", s => { globalCache.groups = s.val() || {}; renderChatLists(); updateActiveChatStatus(); if(document.getElementById('contextInfoModal').style.display === 'flex') openActiveChatContextInfo(); });
             } else {
                 document.getElementById('authOverlay').style.display = 'flex'; document.getElementById('appLayout').style.display = 'none';
             }
@@ -749,48 +738,12 @@
         function executeTerminateSession(sid) { realtimeDb.ref(`users/${activeUserId}/sessions/${sid}`).remove().then(() => openMyProfileSettings()); }
         function executeClearAppCache() { if(confirm("Очистить локальный кэш и перезагрузить приложение?")) { localStorage.clear(); location.reload(); } }
 
-        // АДМИНКА КОНКРЕТНОЙ ГРУППЫ (ЛОГИКА)
-        function openGroupAdminPanel() {
-            if(!currentActiveChat || currentActiveChat.type !== 'GROUP') return;
-            const g = globalCache.groups[currentActiveChat.id] || {};
-            const roles = g.roles || {};
-            const myRole = roles[activeUserId];
-            
-            if(myRole !== 'owner' && myRole !== 'admin') {
-                alert("У тебя нет прав админа в этой группе, бро!");
-                return;
-            }
-
-            const list = document.getElementById('groupAdminMembersList');
-            list.innerHTML = "";
-
-            for(let uid in roles) {
-                const uName = globalCache.users[uid]?.nickname || "Участник";
-                const uRole = roles[uid];
-                
-                let actionButtons = "";
-                if(uid !== activeUserId && uRole !== 'owner') {
-                    // Кнопки изменения ролей (Доступно овнеру или админ меняет обычного мембера)
-                    if(myRole === 'owner') {
-                        actionButtons += uRole === 'admin' 
-                            ? `<button class="warning" style="width:auto; padding:4px 8px; margin:0; font-size:11px;" onclick="changeUserGroupRole('${uid}', 'member')">Снять админа</button>`
-                            : `<button class="success" style="width:auto; padding:4px 8px; margin:0; font-size:11px;" onclick="changeUserGroupRole('${uid}', 'admin')">Сделать админом</button>`;
-                    }
-                    // Кикнуть участника
-                    actionButtons += `<button class="danger" style="width:auto; padding:4px 8px; margin:0; font-size:11px;" onclick="kickUser('${uid}')">❌ Кик</button>`;
-                }
-
-                list.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:8px; margin-bottom:6px; background:var(--bg-card); border-radius:6px; border:1px solid var(--border-color);">
-                    <div><b>${escapeHTML(uName)}</b> <br> <small style="color:var(--accent);">Роль: ${uRole}</small></div>
-                    <div style="display:flex; gap:6px;">${actionButtons}</div>
-                </div>`;
-            }
-            document.getElementById('groupAdminModal').style.display = 'flex';
-        }
-
+        // ИЗМЕНЕНИЕ РОЛИ (ПРЯМО ИЗ СПИСКА)
         function changeUserGroupRole(uid, newRole) {
             if(currentActiveChat) {
-                realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${uid}`).set(newRole);
+                realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${uid}`).set(newRole).then(() => {
+                    openActiveChatContextInfo();
+                });
             }
         }
 
@@ -827,16 +780,29 @@
                 document.getElementById('editGrpAvInp').value = g.avatar || "";
                 document.getElementById('editGrpDescInp').value = g.description || "";
                 
-                // Проверка прав для кнопки админки
                 const roles = g.roles || {};
                 const myRole = roles[activeUserId];
-                document.getElementById('groupAdminPanelBtn').style.display = (myRole === 'owner' || myRole === 'admin') ? 'flex' : 'none';
 
+                // Рендер участников с кнопками прямого администрирования
                 const mList = document.getElementById('groupMembersList'); mList.innerHTML = "";
                 for(let uid in roles) {
                     const uName = globalCache.users[uid]?.nickname || "Юзер";
-                    mList.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; font-size:13px;">
-                        <span><b>${escapeHTML(uName)}</b> (${roles[uid]})</span>
+                    const uRole = roles[uid];
+                    
+                    let actionButtons = "";
+                    // Если у текущего юзера есть админ-права, он не трогает себя и создателя
+                    if((myRole === 'owner' || myRole === 'admin') && uid !== activeUserId && uRole !== 'owner') {
+                        if(myRole === 'owner') {
+                            actionButtons += uRole === 'admin' 
+                                ? `<button class="warning" style="width:auto; padding:3px 8px; margin:0; font-size:11px;" onclick="changeUserGroupRole('${uid}', 'member')">Снять админа</button>`
+                                : `<button class="success" style="width:auto; padding:3px 8px; margin:0; font-size:11px;" onclick="changeUserGroupRole('${uid}', 'admin')">Сделать админом</button>`;
+                        }
+                        actionButtons += `<button class="danger" style="width:auto; padding:3px 8px; margin:0; font-size:11px;" onclick="kickUser('${uid}')">❌ Кик</button>`;
+                    }
+
+                    mList.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; font-size:13px; background:var(--bg-input); padding:6px; border-radius:6px; border:1px solid var(--border-color);">
+                        <span><b>${escapeHTML(uName)}</b> <small style="color:var(--text-muted);">(${uRole})</small></span>
+                        <div style="display:flex; gap:4px;">${actionButtons}</div>
                     </div>`;
                 }
             }
@@ -848,7 +814,11 @@
             const d = prompt("Описание группы:") || "";
             let r={}; r[activeUserId]="owner"; realtimeDb.ref("groups").push().set({name:n, avatar:"", description:d, roles:r});
         }
-        function kickUser(uid) { if(currentActiveChat && confirm("Исключить участника из группы?")) realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${uid}`).remove(); }
+        function kickUser(uid) { 
+            if(currentActiveChat && confirm("Исключить участника из группы?")) {
+                realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${uid}`).remove().then(() => openActiveChatContextInfo());
+            }
+        }
         function leaveCurrentGroup() { if(currentActiveChat && confirm("Выйти из группы?")) { realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${activeUserId}`).remove(); closeModal('contextInfoModal'); resetChatWindow(); } }
         function executeUpdateGroupMeta() { if(currentActiveChat) { realtimeDb.ref(`groups/${currentActiveChat.id}`).update({ name: document.getElementById('editGrpNameInp').value, avatar: document.getElementById('editGrpAvInp').value, description: document.getElementById('editGrpDescInp').value }).then(() => { executeSelectActiveChat(currentActiveChat.id, document.getElementById('editGrpNameInp').value, 'GROUP'); }); closeModal('contextInfoModal'); } }
         
