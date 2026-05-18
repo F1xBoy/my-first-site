@@ -91,6 +91,9 @@
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
             animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
+        @media (max-width: 480px) {
+            .modal-card { width: 90%; padding: 15px; }
+        }
 
         input, textarea, select {
             width: 100%; padding: 12px 16px; margin: 8px 0;
@@ -114,8 +117,8 @@
         button.secondary { background: var(--bg-input); color: var(--text-main); border: 1px solid var(--border-color); }
 
         /* Сетка Лэйаута */
-        .tg-layout { display: none; height: 100vh; width: 100vw; flex-direction: row; }
-        .tg-sidebar { width: 360px; background: var(--bg-card); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; }
+        .tg-layout { display: none; height: 100vh; width: 100vw; flex-direction: row; position: relative; overflow: hidden; }
+        .tg-sidebar { width: 360px; background: var(--bg-card); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; z-index: 10; height: 100%; }
         
         .sidebar-header { padding: 16px; background: var(--bg-hover); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); }
         .avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); cursor: pointer; }
@@ -144,7 +147,7 @@
         .chat-row.is-pinned { background: rgba(88, 166, 255, 0.02); }
 
         /* Правая часть чата */
-        .tg-body { flex: 1; display: flex; flex-direction: column; background: var(--bg-main); position: relative; }
+        .tg-body { flex: 1; display: flex; flex-direction: column; background: var(--bg-main); position: relative; height: 100%; }
         .body-header { padding: 10px 24px; background: var(--bg-card); display: flex; align-items: center; justify-content: space-between; height: 65px; border-bottom: 1px solid var(--border-color); }
         
         .messages-container { flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
@@ -194,11 +197,33 @@
         .clip-option:hover { background: var(--bg-hover); color: var(--accent); }
 
         .tab-manage-item { display: flex; align-items: center; justify-content: space-between; background: var(--bg-input); padding: 10px; margin: 6px 0; border-radius: 8px; }
+
+        .back-btn-mobile { display: none; background: transparent; border: none; font-size: 20px; color: var(--accent); cursor: pointer; padding: 0 10px 0 0; width: auto; margin: 0; }
+
+        /* ==========================================================================
+           📱 СТИЛИ ДЛЯ МОБИЛОК (Включаются ТОЛЬКО на экранах < 768px. ПК не трогают!)
+           ========================================================================== */
+        @media (max-width: 767px) {
+            .tg-sidebar { width: 100%; position: absolute; left: 0; top: 0; transition: transform 0.3s cubic-bezier(0.1, 0.8, 0.25, 1); }
+            .tg-body { width: 100%; position: absolute; left: 0; top: 0; transition: transform 0.3s cubic-bezier(0.1, 0.8, 0.25, 1); }
+            
+            /* Состояние: Открыт список чатов (скрываем окно переписки вправо) */
+            .tg-layout.mobile-view-sidebar .tg-sidebar { transform: translateX(0); }
+            .tg-layout.mobile-view-sidebar .tg-body { transform: translateX(100%); }
+            
+            /* Состояние: Открыта переписка (сдвигаем список чатов влево, выдвигаем чат) */
+            .tg-layout.mobile-view-chat .tg-sidebar { transform: translateX(-100%); }
+            .tg-layout.mobile-view-chat .tg-body { transform: translateX(0); }
+
+            .back-btn-mobile { display: block; }
+            .body-header { padding: 10px 15px; }
+            .messages-container { padding: 15px; }
+            .msg-bubble { max-width: 85%; }
+            .bottom-input-area { padding: 10px; gap: 8px; }
+        }
     </style>
 </head>
-<body>
-
-    <div id="authOverlay" class="modal-overlay" style="display: flex;">
+<body class="mobile-view-sidebar"> <div id="authOverlay" class="modal-overlay" style="display: flex;">
         <div class="modal-card" id="loginCard">
             <h2 style="text-align: center; color: var(--accent); margin-top: 0; font-size: 26px;">Войти в VChat</h2>
             <input type="email" id="authEmail" placeholder="Ваш Email">
@@ -247,7 +272,7 @@
             <button class="danger" onclick="executeClearAppCache()" style="background:#dc2626;">🗑️ Очистить кэш приложения</button>
 
             <hr style="border-color:var(--border-color); margin:20px 0;">
-            <div style="text-align:center; color:var(--text-muted); font-size:12px; margin-bottom:10px;">Версия: VChat 1.0.4</div>
+            <div style="text-align:center; color:var(--text-muted); font-size:12px; margin-bottom:10px;">Версия: VChat 1.0.5</div>
             <button class="danger" onclick="executeSignOut()">Выйти из аккаунта</button>
             <button class="secondary" style="margin-top:8px;" onclick="closeModal('myProfileModal')">Закрыть</button>
         </div>
@@ -315,7 +340,7 @@
     <div id="forwardModal" class="modal-overlay"><div class="modal-card"><h3>Переслать сообщение</h3><div id="forwardListContainer" style="max-height:200px; overflow-y:auto; border:1px solid var(--border-color); border-radius:8px;"></div><button class="secondary" style="margin-top:10px;" onclick="closeModal('forwardModal')">Отмена</button></div></div>
     <div id="mediaViewerModal" class="modal-overlay" onclick="closeModal('mediaViewerModal')" style="background:rgba(0,0,0,0.95);"><img id="fullSizeImg" src="" style="max-width:90%; max-height:90%; border-radius:8px;"></div>
 
-    <div id="appLayout" class="tg-layout">
+    <div id="appLayout" class="tg-layout mobile-view-sidebar">
         <aside class="tg-sidebar">
             <div class="sidebar-header">
                 <div style="display:flex; align-items:center; gap:12px; cursor:pointer;" onclick="openMyProfileSettings()">
@@ -338,9 +363,13 @@
 
         <main class="tg-body">
             <header class="body-header">
-                <div style="display:flex; align-items:center; gap:14px; cursor:pointer;" onclick="openActiveChatContextInfo()">
-                    <img id="activeChatAv" src="" style="width:42px; height:42px; border-radius:50%; display:none; object-fit:cover;">
-                    <div><b id="activeChatTitle">Выберите чат</b><small id="activeChatStatus" style="color:var(--text-muted); display:block; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></small></div>
+                <div style="display:flex; align-items:center; gap:14px; cursor:pointer; flex: 1; overflow: hidden;">
+                    <button class="back-btn-mobile" onclick="backToSidebarOnMobile()">⬅</button>
+                    
+                    <div style="display:flex; align-items:center; gap:14px;" onclick="openActiveChatContextInfo()">
+                        <img id="activeChatAv" src="" style="width:42px; height:42px; border-radius:50%; display:none; object-fit:cover;">
+                        <div><b id="activeChatTitle">Выберите чат</b><small id="activeChatStatus" style="color:var(--text-muted); display:block; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></small></div>
+                    </div>
                 </div>
             </header>
             <div id="chatMessagesBox" class="messages-container"></div>
@@ -404,7 +433,7 @@
                 
                 let rawDevice = navigator.userAgent.split(') ')[0].split(' (')[1] || "Браузер/Устройство";
                 if (rawDevice.includes("Windows NT 10.0")) {
-                    rawDevice = rawDevice.replace("Windows NT 10.0", "Windows 10/11");
+                    rawDevice = rawDevice.replace("Windows NT 10.0", "Windows 11 Pro"); // Фикс для Windows 11
                 }
 
                 const sessionRef = realtimeDb.ref(`users/${activeUserId}/sessions/${sessionId}`);
@@ -533,9 +562,22 @@
         }
         function executeTogglePinChat(id) { globalCache.pinnedChats[id] ? realtimeDb.ref(`users/${activeUserId}/pins/${id}`).remove() : realtimeDb.ref(`users/${activeUserId}/pins/${id}`).set(true); }
 
+        // НАВИГАЦИЯ ДЛЯ МОБИЛОК
+        function backToSidebarOnMobile() {
+            const layout = document.getElementById('appLayout');
+            layout.classList.remove('mobile-view-chat');
+            layout.classList.add('mobile-view-sidebar');
+        }
+
         // ОТКРЫТИЕ ЧАТА
         function executeSelectActiveChat(chatId, chatName, chatType) {
             currentActiveChat = { id: chatId, name: chatName, type: chatType }; cancelCurrentContextAction();
+            
+            // На мобилках переключаем экран на чат
+            const layout = document.getElementById('appLayout');
+            layout.classList.remove('mobile-view-sidebar');
+            layout.classList.add('mobile-view-chat');
+
             const av = document.getElementById('activeChatAv'); av.style.display = 'block';
             
             let path = "";
@@ -601,7 +643,7 @@
             } else if(currentActiveChat.type === 'USER') {
                 const u = globalCache.users[currentActiveChat.id] || {};
                 const isOnline = u.sessions && Object.keys(u.sessions).length > 0;
-                statusEl.innerText = isOnline ? "Онлайн 🟢" : "Оффлайн 🔴 (Был(а) недавно)";
+                statusEl.innerText = isOnline ? "Онлайн 🟢" : "Оффлайн 🔴";
             } else {
                 const g = globalCache.groups[currentActiveChat.id] || {};
                 statusEl.innerText = g.description ? `📋 ${g.description}` : "Групповой чат";
@@ -610,7 +652,7 @@
 
         function executeCopyMessageText(k) {
             const txt = loadedMessagesMap[k].code || loadedMessagesMap[k].txt;
-            navigator.clipboard.writeText(txt).then(() => alert("Скопировано в буфер обмена!"));
+            navigator.clipboard.writeText(txt).then(() => alert("Скопировано!"));
         }
 
         function openFullCodeViewer(k) {
@@ -736,9 +778,9 @@
         }
 
         function executeTerminateSession(sid) { realtimeDb.ref(`users/${activeUserId}/sessions/${sid}`).remove().then(() => openMyProfileSettings()); }
-        function executeClearAppCache() { if(confirm("Очистить локальный кэш и перезагрузить приложение?")) { localStorage.clear(); location.reload(); } }
+        function executeClearAppCache() { if(confirm("Очистить локальный кэш и перезагрузить?")) { localStorage.clear(); location.reload(); } }
 
-        // ИЗМЕНЕНИЕ РОЛИ (ПРЯМО ИЗ СПИСКА)
+        // ИЗМЕНЕНИЕ РОЛИ ПРЯМО ИЗ СПИСКА
         function changeUserGroupRole(uid, newRole) {
             if(currentActiveChat) {
                 realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${uid}`).set(newRole).then(() => {
@@ -783,14 +825,12 @@
                 const roles = g.roles || {};
                 const myRole = roles[activeUserId];
 
-                // Рендер участников с кнопками прямого администрирования
                 const mList = document.getElementById('groupMembersList'); mList.innerHTML = "";
                 for(let uid in roles) {
                     const uName = globalCache.users[uid]?.nickname || "Юзер";
                     const uRole = roles[uid];
                     
                     let actionButtons = "";
-                    // Если у текущего юзера есть админ-права, он не трогает себя и создателя
                     if((myRole === 'owner' || myRole === 'admin') && uid !== activeUserId && uRole !== 'owner') {
                         if(myRole === 'owner') {
                             actionButtons += uRole === 'admin' 
@@ -815,7 +855,7 @@
             let r={}; r[activeUserId]="owner"; realtimeDb.ref("groups").push().set({name:n, avatar:"", description:d, roles:r});
         }
         function kickUser(uid) { 
-            if(currentActiveChat && confirm("Исключить участника из группы?")) {
+            if(currentActiveChat && confirm("Исключить участника?")) {
                 realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${uid}`).remove().then(() => openActiveChatContextInfo());
             }
         }
@@ -838,25 +878,25 @@
             
             if (foundUid) {
                 realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${foundUid}`).set("member").then(() => {
-                    alert("Челик успешно добавлен в группу!");
+                    alert("Участник добавлен!");
                     document.getElementById('inviteEmailInp').value = "";
                     openActiveChatContextInfo();
                 });
             } else {
-                alert("Не получилось найти такого чела. Проверь ник или email!");
+                alert("Челик не найден. Проверь ник или email!");
             }
         }
 
         function executeToggleContact() { 
             if(currentActiveChat) { 
                 if(globalCache.contacts[currentActiveChat.id]) {
-                    if(confirm("Реально удалить челика из контактов?")) {
+                    if(confirm("Удалить из контактов?")) {
                         realtimeDb.ref(`users/${activeUserId}/contacts/${currentActiveChat.id}`).remove(); 
                         openActiveChatContextInfo(); 
                     }
                 } else {
                     realtimeDb.ref(`users/${activeUserId}/contacts/${currentActiveChat.id}`).set(true); 
-                    alert("Добавлен в контакты!"); 
+                    alert("Добавлен!"); 
                     openActiveChatContextInfo(); 
                 }
             } 
@@ -874,7 +914,15 @@
             }
             if(globalCache.users[uid]) { executeSelectActiveChat(uid, globalCache.users[uid].nickname, 'USER'); openActiveChatContextInfo(); } 
         }
-        function resetChatWindow() { document.getElementById('activeChatAv').style.display='none'; document.getElementById('activeChatTitle').innerText="Выберите чат"; document.getElementById('activeChatStatus').innerText=""; document.getElementById('chatMessagesBox').innerHTML=""; currentActiveChat=null; renderChatLists(); }
+        function resetChatWindow() { 
+            document.getElementById('activeChatAv').style.display='none'; 
+            document.getElementById('activeChatTitle').innerText="Выберите чат"; 
+            document.getElementById('activeChatStatus').innerText=""; 
+            document.getElementById('chatMessagesBox').innerHTML=""; 
+            currentActiveChat=null; 
+            backToSidebarOnMobile(); 
+            renderChatLists(); 
+        }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     </script>
 </body>
