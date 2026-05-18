@@ -740,10 +740,10 @@
                 document.getElementById('ctxDescriptionContainer').innerText = u.bio || "Статус «О себе» не заполнен.";
                 
                 document.getElementById('ctxUserBlock').style.display = 'block'; document.getElementById('ctxGroupBlock').style.display = 'none';
-const isContact = globalCache.contacts[currentActiveChat.id];
-const btn = document.getElementById('addContactBtn');
-btn.innerText = isContact ? "❌ Удалить из контактов" : "➕ Добавить в Контакты";
-btn.className = isContact ? "danger" : "success";                document.getElementById('localCustomName').value = globalCache.customNames[currentActiveChat.id] || "";
+                    const isContact = globalCache.contacts[currentActiveChat.id];
+                    const btn = document.getElementById('addContactBtn');
+                    btn.innerText = isContact ? "❌ Удалить из контактов" : "➕ Добавить в Контакты";
+                    btn.className = isContact ? "danger" : "success";                document.getElementById('localCustomName').value = globalCache.customNames[currentActiveChat.id] || "";
             } else {
                 const g = globalCache.groups[currentActiveChat.id] || {};
                 document.getElementById('ctxSubtitle').innerText = "Групповой чат";
