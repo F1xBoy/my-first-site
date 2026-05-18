@@ -252,7 +252,7 @@
         <div class="modal-card" style="width:600px; max-width:90vw;">
             <h3 style="margin-top:0; color:var(--accent);">Просмотр документа / кода 📝</h3>
             <pre id="fullCodeDisplay" style="background:var(--bg-input); padding:15px; border-radius:10px; overflow:auto; font-family:monospace; font-size:13px; max-height:350px; border:1px solid var(--border-color); white-space:pre-wrap; word-break:break-all;"></pre>
-            <button class="success" id="copyCodeModalBtn">📋 Скопировать весь текст</button>
+            <button class="success" id="copyCodeModalBtn">📋 Скопировать весь text</button>
             <button class="secondary" style="margin-top:8px;" onclick="closeModal('codeViewerModal')">Закрыть</button>
         </div>
     </div>
@@ -335,7 +335,7 @@
             <header class="body-header">
                 <div style="display:flex; align-items:center; gap:14px; cursor:pointer;" onclick="openActiveChatContextInfo()">
                     <img id="activeChatAv" src="" style="width:42px; height:42px; border-radius:50%; display:none; object-fit:cover;">
-                    <div><b id="activeChatTitle">Выберите чат</b><small id="activeChatStatus" style="color:var(--text-muted); display:block;"></small></div>
+                    <div><b id="activeChatTitle">Выберите чат</b><small id="activeChatStatus" style="color:var(--text-muted); display:block; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></small></div>
                 </div>
             </header>
             <div id="chatMessagesBox" class="messages-container"></div>
@@ -391,8 +391,14 @@
                 const sessionId = localStorage.getItem('vchat_session_id') || 'sess_' + Date.now();
                 localStorage.setItem('vchat_session_id', sessionId);
                 
+                // Фикс отображения Windows NT 10.0 -> Windows 10/11
+                let rawDevice = navigator.userAgent.split(') ')[0].split(' (')[1] || "Браузер/Устройство";
+                if (rawDevice.includes("Windows NT 10.0")) {
+                    rawDevice = rawDevice.replace("Windows NT 10.0", "Windows 10/11");
+                }
+
                 realtimeDb.ref(`users/${activeUserId}/sessions/${sessionId}`).set({
-                    device: navigator.userAgent.split(') ')[0].split(' (')[1] || "Браузер/Устройство",
+                    device: rawDevice,
                     lastActive: Date.now()
                 });
 
@@ -523,9 +529,11 @@
                 document.getElementById('activeChatStatus').innerText = "онлайн";
             } else {
                 path = chatId;
-                av.src = globalCache.groups[chatId].avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${chatId}`;
+                const g = globalCache.groups[chatId] || {};
+                av.src = g.avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${chatId}`;
                 document.getElementById('activeChatTitle').innerText = chatName;
-                document.getElementById('activeChatStatus').innerText = "групповое сообщество";
+                // ФИКС: Выводим описание группы прямо в шапку чата
+                document.getElementById('activeChatStatus').innerText = g.description ? `📋 ${g.description}` : "Групповой чат";
             }
 
             realtimeDb.ref("msgs/" + path).off();
@@ -595,7 +603,6 @@
             }; r.readAsDataURL(f);
         }
 
-        function openUrlAttachmentAttachment() {} 
         function openUrlAttachmentModal() { document.getElementById('urlAttachmentModal').style.display='flex'; }
         function executeConfirmUrlAttachment() {
             const url = document.getElementById('urlAttachInp').value.trim(); if(!url) return;
@@ -744,7 +751,7 @@
         }
         function kickUser(uid) { if(currentActiveChat && confirm("Исключить участника?")) realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${uid}`).remove().then(()=>openActiveChatContextInfo()); }
         function leaveCurrentGroup() { if(currentActiveChat && confirm("Выйти из группы?")) { realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${activeUserId}`).remove(); closeModal('contextInfoModal'); resetChatWindow(); } }
-        function executeUpdateGroupMeta() { if(currentActiveChat) { realtimeDb.ref(`groups/${currentActiveChat.id}`).update({ name: document.getElementById('editGrpNameInp').value, avatar: document.getElementById('editGrpAvInp').value, description: document.getElementById('editGrpDescInp').value }); closeModal('contextInfoModal'); } }
+        function executeUpdateGroupMeta() { if(currentActiveChat) { realtimeDb.ref(`groups/${currentActiveChat.id}`).update({ name: document.getElementById('editGrpNameInp').value, avatar: document.getElementById('editGrpAvInp').value, description: document.getElementById('editGrpDescInp').value }).then(() => { executeSelectActiveChat(currentActiveChat.id, document.getElementById('editGrpNameInp').value, 'GROUP'); }); closeModal('contextInfoModal'); } }
         
         function executeAddActiveToContacts() { if(currentActiveChat) { realtimeDb.ref(`users/${activeUserId}/contacts/${currentActiveChat.id}`).set(true); alert("Добавлен в контакты!"); openActiveChatContextInfo(); } }
         function saveLocalContactName() { if(currentActiveChat) { realtimeDb.ref(`users/${activeUserId}/customNames/${currentActiveChat.id}`).set(document.getElementById('localCustomName').value); closeModal('contextInfoModal'); renderChatLists(); } }
@@ -752,7 +759,6 @@
         
         function saveMyProfileData() { realtimeDb.ref("users/"+activeUserId).update({ nickname: document.getElementById('myModalNick').value, avatar: document.getElementById('myModalAvUrl').value, bio: document.getElementById('myModalBio').value }); closeModal('myProfileModal'); }
         
-        // Фикс клика по своему нику в чате
         function openTargetUserProfile(uid) { 
             if(uid === activeUserId) {
                 executeSelectActiveChat('saved_messages', 'Сохранённые', 'SAVED');
