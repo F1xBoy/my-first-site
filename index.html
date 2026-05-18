@@ -118,7 +118,7 @@
         .sidebar-header { padding: 16px; background: var(--bg-hover); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); }
         .avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); cursor: pointer; }
         
-        /* Вкладки и их кастомизация */
+        /* Вкладки */
         .tabs-wrapper { display: flex; align-items: center; border-bottom: 1px solid var(--border-color); background: var(--bg-card); padding-right: 8px; }
         .tabs-row { display: flex; flex: 1; overflow-x: auto; }
         .tabs-row::-webkit-scrollbar { display: none; }
@@ -177,7 +177,6 @@
 
         .bottom-input-area { padding: 16px 20px; background: var(--bg-card); display: flex; gap: 12px; align-items: flex-end; border-top: 1px solid var(--border-color); position: relative; }
         
-        /* Кнопка скрепки и её выпадающее мульти-меню */
         .clip-container { position: relative; display: flex; }
         .clip-label { font-size: 24px; cursor: pointer; padding: 8px; color: var(--text-muted); border-radius: 50%; }
         .clip-label:hover { color: var(--accent); background: rgba(88, 166, 255, 0.1); }
@@ -191,7 +190,6 @@
         .clip-option { padding: 12px 16px; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
         .clip-option:hover { background: var(--bg-hover); color: var(--accent); }
 
-        /* Настройка вкладок список */
         .tab-manage-item { display: flex; align-items: center; justify-content: space-between; background: var(--bg-input); padding: 10px; margin: 6px 0; border-radius: 8px; }
     </style>
 </head>
@@ -232,6 +230,7 @@
     <div id="myProfileModal" class="modal-overlay">
         <div class="modal-card">
             <h3 style="margin-top:0; text-align:center;">Мой Профиль</h3>
+            <p id="myModalEmailDisplay" style="text-align:center; color:var(--text-muted); font-size:13px; margin:-10px 0 15px 0;"></p>
             <img id="myModalAvPreview" src="" style="width:80px; height:80px; border-radius:50%; display:block; margin:0 auto 15px; object-fit:cover;">
             <input type="text" id="myModalNick" placeholder="Никнейм">
             <input type="text" id="myModalAvUrl" placeholder="URL аватарки">
@@ -262,7 +261,8 @@
         <div class="modal-card">
             <img id="ctxAv" style="width:90px; height:90px; border-radius:50%; display:block; margin:0 auto 15px; object-fit:cover;">
             <h3 id="ctxTitle" style="text-align:center; margin:0;"></h3>
-            <div id="ctxSubtitle" style="text-align:center; color:var(--text-muted); margin-bottom:15px;"></div>
+            <div id="ctxSubtitle" style="text-align:center; color:var(--text-muted); margin-top:5px; font-size:13.5px; line-height:1.4;"></div>
+            <div id="ctxDescriptionContainer" style="text-align:center; margin:10px 0; color:var(--text-main); font-style:italic; font-size:14px;"></div>
             
             <div id="ctxUserBlock" style="display:none;">
                 <button id="addContactBtn" class="success" onclick="executeAddActiveToContacts()">➕ Добавить в Контакты</button>
@@ -275,6 +275,7 @@
                 <h4 style="margin:10px 0 5px 0;">Управление группой (Для Админов):</h4>
                 <input type="text" id="editGrpNameInp" placeholder="Изменить название группы">
                 <input type="text" id="editGrpAvInp" placeholder="Изменить URL аватарки">
+                <textarea id="editGrpDescInp" placeholder="Изменить описание группы" rows="2"></textarea>
                 <button class="success" onclick="executeUpdateGroupMeta()">Обновить данные группы</button>
                 
                 <h4 style="margin:15px 0 5px 0;">Участники:</h4>
@@ -339,7 +340,13 @@
             </header>
             <div id="chatMessagesBox" class="messages-container"></div>
             <div id="contextActionBar" class="action-context-bar"><div style="display:flex; flex-direction:column;"><small id="contextActionTitle" style="color:var(--accent); font-weight:800;"></small><div id="contextActionText" style="font-size:13px; max-width:400px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div></div><button class="secondary" style="width:auto; padding:4px 10px; margin:0;" onclick="cancelCurrentContextAction()">✖</button></div>
-            <div id="attachmentPreviewBar" class="attachment-preview-bar"><img id="attachmentPreviewImg" src=""><div style="flex:1;"><b id="attachLabelType" style="font-size:13px; color:var(--success);">Файл готов</b></div><button class="danger" style="width:auto; padding:4px 10px; margin:0;" onclick="clearPendingAttachmentData()">🗑️</button></div>
+            
+            <div id="attachmentPreviewBar" class="attachment-preview-bar">
+                <div id="attachmentPreviewFileIcon" style="font-size:26px; display:none;">📄</div>
+                <img id="attachmentPreviewImg" src="" style="display:none; height:45px; border-radius:6px;">
+                <div style="flex:1;"><b id="attachLabelType" style="font-size:13px; color:var(--success);">Файл готов</b></div>
+                <button class="danger" style="width:auto; padding:4px 10px; margin:0;" onclick="clearPendingAttachmentData()">🗑️</button>
+            </div>
             
             <div class="bottom-input-area">
                 <div class="clip-container">
@@ -374,7 +381,6 @@
 
         function escapeHTML(str) { return str ? str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;") : ""; }
         
-        // Переключатель темы
         if(localStorage.getItem('vchat_theme')==='light') { document.body.classList.add('light-mode'); document.getElementById('themeBtn').innerText='🌞'; }
         function executeToggleTheme() { document.body.classList.toggle('light-mode'); const isL=document.body.classList.contains('light-mode'); localStorage.setItem('vchat_theme', isL?'light':'dark'); document.getElementById('themeBtn').innerText=isL?'🌞':'🌙'; }
 
@@ -382,18 +388,20 @@
         appAuth.onAuthStateChanged(user => {
             if (user) {
                 activeUserId = user.uid;
-                
-                // Логирование текущей сессии устройства
                 const sessionId = localStorage.getItem('vchat_session_id') || 'sess_' + Date.now();
                 localStorage.setItem('vchat_session_id', sessionId);
+                
                 realtimeDb.ref(`users/${activeUserId}/sessions/${sessionId}`).set({
                     device: navigator.userAgent.split(') ')[0].split(' (')[1] || "Браузер/Устройство",
                     lastActive: Date.now()
                 });
 
                 realtimeDb.ref("users/" + activeUserId).on("value", snap => {
-                    const d = snap.val() || { nickname: user.displayName||"Юзер", avatar: user.photoURL||"", bio: "Всем ку!" };
-                    if(!snap.exists()) realtimeDb.ref("users/"+activeUserId).set(d);
+                    const d = snap.val() || { nickname: user.displayName||"Юзер", avatar: user.photoURL||"", bio: "Всем ку!", email: user.email };
+                    if(!snap.exists() || !d.email) {
+                        d.email = user.email || "";
+                        realtimeDb.ref("users/"+activeUserId).set(d);
+                    }
                     document.getElementById('myNickDisplay').innerText = d.nickname;
                     document.getElementById('myAvatarDisplay').src = d.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${activeUserId}`;
                     
@@ -413,11 +421,11 @@
 
         function executeLogin() { appAuth.signInWithEmailAndPassword(document.getElementById('authEmail').value, document.getElementById('authPass').value).catch(e => alert(e.message)); }
         function executeGoogleAuth() { appAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e => alert(e.message)); }
-        function executeRegister() { appAuth.createUserWithEmailAndPassword(document.getElementById('regEmail').value, document.getElementById('regPass').value).then(res => realtimeDb.ref("users/"+res.user.uid).set({ nickname: document.getElementById('regNick').value, avatar: "", bio: "Новый аккаунт" })).catch(e => alert(e.message)); }
+        function executeRegister() { appAuth.createUserWithEmailAndPassword(document.getElementById('regEmail').value, document.getElementById('regPass').value).then(res => realtimeDb.ref("users/"+res.user.uid).set({ nickname: document.getElementById('regNick').value, avatar: "", bio: "Новый аккаунт", email: document.getElementById('regEmail').value })).catch(e => alert(e.message)); }
         function executeSignOut() { appAuth.signOut().then(() => location.reload()); }
         function switchAuthView(reg) { document.getElementById('loginCard').style.display = reg?'none':'block'; document.getElementById('registerCard').style.display = reg?'block':'none'; }
 
-        // УПРАВЛЕНИЕ ВКЛАДКАМИ (TABS ENGINE)
+        // УПРАВЛЕНИЕ ВКЛАДКАМИ
         function renderTabsRow() {
             const row = document.getElementById('tabsRowElement'); row.innerHTML = "";
             globalCache.tabs.forEach((t, index) => {
@@ -432,7 +440,7 @@
             const mList = document.getElementById('tabManageList'); mList.innerHTML = "";
             globalCache.tabs.forEach((t, i) => {
                 mList.innerHTML += `<div class="tab-manage-item">
-                    <span><b>${escapeHTML(t.name)}</b> (${t.id})</span>
+                    <span><b>${escapeHTML(t.name)}</b></span>
                     <div style="display:flex; gap:4px;">
                         <button style="padding:4px 8px; margin:0; width:auto;" onclick="moveTab(${i}, -1)">▲</button>
                         <button style="padding:4px 8px; margin:0; width:auto;" onclick="moveTab(${i}, 1)">▼</button>
@@ -448,20 +456,25 @@
         }
         function deleteTab(index) { let arr = [...globalCache.tabs]; arr.splice(index, 1); saveTabsStructure(arr); }
         function executeAddCustomTab() {
-            const name = document.getElementById('newTabNameInp').value.trim();
-            if(!name) return;
+            const name = document.getElementById('newTabNameInp').value.trim(); if(!name) return;
             const id = 'custom_' + Date.now();
             let arr = [...globalCache.tabs, {id, name}];
-            document.getElementById('newTabNameInp').value = "";
-            saveTabsStructure(arr);
+            document.getElementById('newTabNameInp').value = ""; saveTabsStructure(arr);
         }
         function saveTabsStructure(arr) { globalCache.tabs = arr; realtimeDb.ref(`users/${activeUserId}/tabs`).set(arr); openTabManagerModal(); }
 
-        // РЕНДЕР СПИСКА ЧАТОВ И КОНТАКТОВ
+        // РЕНДЕР ЧАТОВ
         function renderChatLists() {
             const container = document.getElementById('chatListContainer'); container.innerHTML = "";
             const search = document.getElementById('searchBarInp').value.toLowerCase();
             let items = [];
+
+            // Внедрение Избранного (Сохраненные)
+            if (activeSidebarTab === 'chats' || activeSidebarTab === 'global') {
+                if ("сохранённые".includes(search) || "избранное".includes(search) || !search) {
+                    items.push({ id: 'saved_messages', name: 'Сохранённые ⭐️', av: '', type: 'SAVED' });
+                }
+            }
 
             if (activeSidebarTab === 'groups' || activeSidebarTab === 'global' || activeSidebarTab.startsWith('custom_')) {
                 for (let gId in globalCache.groups) {
@@ -482,24 +495,39 @@
 
             items.sort((a,b) => (globalCache.pinnedChats[b.id]?1:0) - (globalCache.pinnedChats[a.id]?1:0)).forEach(i => {
                 const activeCls = (currentActiveChat && currentActiveChat.id === i.id) ? 'active-chat' : '';
+                const avatarSrc = i.type === 'SAVED' ? `https://api.dicebear.com/7.x/initials/svg?seed=Saved&backgroundColor=2b5278` : (i.av || `https://api.dicebear.com/7.x/${i.type==='USER'?'identicon':'shapes'}/svg?seed=${i.id}`);
                 container.innerHTML += `<div class="chat-row ${globalCache.pinnedChats[i.id]?'is-pinned':''} ${activeCls}" onclick="executeSelectActiveChat('${i.id}','${i.name}','${i.type}')">
-                    <img src="${i.av || `https://api.dicebear.com/7.x/${i.type==='USER'?'identicon':'shapes'}/svg?seed=${i.id}`}">
-                    <div class="chat-meta"><b>${escapeHTML(i.name)}</b><p>${i.type==='USER'?'Личный диалог':'Группа'}</p></div>
+                    <img src="${avatarSrc}">
+                    <div class="chat-meta"><b>${escapeHTML(i.name)}</b><p>${i.type==='USER'?'Личный диалог':i.type==='SAVED'?'Мои заметки':'Группа'}</p></div>
                     <button class="pin-action-btn" onclick="event.stopPropagation(); executeTogglePinChat('${i.id}')">📌</button>
                 </div>`;
             });
         }
         function executeTogglePinChat(id) { globalCache.pinnedChats[id] ? realtimeDb.ref(`users/${activeUserId}/pins/${id}`).remove() : realtimeDb.ref(`users/${activeUserId}/pins/${id}`).set(true); }
 
-        // ВЫБОР ЧАТА И ОТРИСОВКА СООБЩЕНИЙ
+        // ОТКРЫТИЕ ЧАТА
         function executeSelectActiveChat(chatId, chatName, chatType) {
             currentActiveChat = { id: chatId, name: chatName, type: chatType }; cancelCurrentContextAction();
             const av = document.getElementById('activeChatAv'); av.style.display = 'block';
-            av.src = chatType === 'USER' ? (globalCache.users[chatId].avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${chatId}`) : (globalCache.groups[chatId].avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${chatId}`);
-            document.getElementById('activeChatTitle').innerText = chatName;
-            document.getElementById('activeChatStatus').innerText = chatType === 'USER' ? "онлайн" : "групповое сообщество";
+            
+            let path = "";
+            if(chatType === 'SAVED') {
+                path = "saved_" + activeUserId;
+                av.src = `https://api.dicebear.com/7.x/initials/svg?seed=Saved&backgroundColor=2b5278`;
+                document.getElementById('activeChatTitle').innerText = "Сохранённые";
+                document.getElementById('activeChatStatus').innerText = "Облачное хранилище заметок";
+            } else if(chatType === 'USER') {
+                path = activeUserId < chatId ? activeUserId+"_"+chatId : chatId+"_"+activeUserId;
+                av.src = globalCache.users[chatId].avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${chatId}`;
+                document.getElementById('activeChatTitle').innerText = chatName;
+                document.getElementById('activeChatStatus').innerText = "онлайн";
+            } else {
+                path = chatId;
+                av.src = globalCache.groups[chatId].avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${chatId}`;
+                document.getElementById('activeChatTitle').innerText = chatName;
+                document.getElementById('activeChatStatus').innerText = "групповое сообщество";
+            }
 
-            const path = chatType === 'USER' ? (activeUserId < chatId ? activeUserId+"_"+chatId : chatId+"_"+activeUserId) : chatId;
             realtimeDb.ref("msgs/" + path).off();
             realtimeDb.ref("msgs/" + path).on("value", snap => {
                 const box = document.getElementById('chatMessagesBox'); box.innerHTML = ""; loadedMessagesMap = {};
@@ -510,7 +538,6 @@
                     let replyHtml = m.replyTo ? `<div class="msg-quote"><b>${escapeHTML(m.replyTo.author)}</b>:<br>${escapeHTML(m.replyTo.text)}</div>` : "";
                     let mediaHtml = m.img ? `<img src="${m.img}" class="msg-media" onclick="viewFullMedia('${m.img}')">` : "";
                     
-                    // Блок отображения кода/логов
                     let codeHtml = m.code ? `
                         <div style="background:rgba(0,0,0,0.25); padding:8px; border-radius:8px; margin:6px 0; font-family:monospace; font-size:12px; border:1px solid var(--border-color); max-height:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
                             <code>${escapeHTML(m.code)}</code>
@@ -538,23 +565,18 @@
             renderChatLists();
         }
 
-        // КОПИРОВАНИЕ ТЕКСТА
         function executeCopyMessageText(k) {
-            const textToCopy = loadedMessagesMap[k].code || loadedMessagesMap[k].txt;
-            navigator.clipboard.writeText(textToCopy).then(() => alert("Скопировано в буфер обмена!"));
+            const txt = loadedMessagesMap[k].code || loadedMessagesMap[k].txt;
+            navigator.clipboard.writeText(txt).then(() => alert("Скопировано в буфер обмена!"));
         }
 
-        // ПОЛНЫЙ ПРОСМОТР КОДА
         function openFullCodeViewer(k) {
-            const targetCode = loadedMessagesMap[k].code;
-            document.getElementById('fullCodeDisplay').innerText = targetCode;
-            document.getElementById('copyCodeModalBtn').onclick = () => {
-                navigator.clipboard.writeText(targetCode).then(() => alert("Весь код скопирован!"));
-            };
+            const c = loadedMessagesMap[k].code; document.getElementById('fullCodeDisplay').innerText = c;
+            document.getElementById('copyCodeModalBtn').onclick = () => { navigator.clipboard.writeText(c).then(() => alert("Код скопирован!")); };
             document.getElementById('codeViewerModal').style.display = 'flex';
         }
 
-        // РАСШИРЕННАЯ СИСТЕМА СКРЕПКИ
+        // СКРЕПКА И ПРЕВЬЮ
         function toggleClipDropdown(e) { e.stopPropagation(); const d = document.getElementById('clipDropdownMenu'); d.style.display = d.style.display === 'flex' ? 'none' : 'flex'; }
         document.addEventListener('click', () => document.getElementById('clipDropdownMenu').style.display = 'none');
 
@@ -565,41 +587,48 @@
                 const img = new Image(); img.onload = function() {
                     const canvas = document.createElement('canvas'); const MAX = 600; const scale = MAX / img.width;
                     canvas.width = MAX; canvas.height = img.height * scale;
-                    const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
                     base64CompressedAttachment = canvas.toDataURL('image/jpeg', 0.7);
-                    showAttachmentPreview(base64CompressedAttachment, "Фото с устройства");
+                    showAttachmentPreview(base64CompressedAttachment, "IMAGE");
                 }
                 img.src = evt.target.result;
             }; r.readAsDataURL(f);
         }
 
+        function openUrlAttachmentAttachment() {} 
         function openUrlAttachmentModal() { document.getElementById('urlAttachmentModal').style.display='flex'; }
         function executeConfirmUrlAttachment() {
             const url = document.getElementById('urlAttachInp').value.trim(); if(!url) return;
-            base64CompressedAttachment = url; showAttachmentPreview(url, "Медиа по ссылке");
+            base64CompressedAttachment = url; showAttachmentPreview(url, "IMAGE");
             document.getElementById('urlAttachInp').value = ""; closeModal('urlAttachmentModal');
         }
 
         function openTextAttachmentModal() { document.getElementById('textAttachmentModal').style.display='flex'; }
         function executeConfirmTextAttachment() {
             const codeTxt = document.getElementById('textAttachInp').value.trim(); if(!codeTxt) return;
-            pendingTextSnippet = codeTxt;
-            document.getElementById('textAttachInp').value = ""; closeModal('textAttachmentModal');
-            showAttachmentPreview("https://api.dicebear.com/7.x/initials/svg?seed=CODE", "Текст / Код / Логи");
+            pendingTextSnippet = codeTxt; document.getElementById('textAttachInp').value = "";
+            closeModal('textAttachmentModal'); showAttachmentPreview(null, "TEXT");
         }
 
-        function showAttachmentPreview(src, label) {
-            document.getElementById('attachmentPreviewImg').src = src;
-            document.getElementById('attachLabelType').innerText = label;
+        function showAttachmentPreview(src, type) {
+            const i = document.getElementById('attachmentPreviewImg');
+            const ico = document.getElementById('attachmentPreviewFileIcon');
+            if(type === "TEXT") {
+                i.style.display = 'none'; ico.style.display = 'block';
+                document.getElementById('attachLabelType').innerText = "Текст / Код / Логи";
+            } else {
+                ico.style.display = 'none'; i.src = src; i.style.display = 'block';
+                document.getElementById('attachLabelType').innerText = "Изображение";
+            }
             document.getElementById('attachmentPreviewBar').style.display = 'flex';
         }
-        function clearPendingAttachmentData() { base64CompressedAttachment = null; pendingTextSnippet = null; document.getElementById('attachmentPreviewBar').style.display = 'none'; document.getElementById('fileInputEngine').value=""; }
+        function clearPendingAttachmentData() { base64CompressedAttachment = null; pendingTextSnippet = null; document.getElementById('attachmentPreviewBar').style.display = 'none'; document.getElementById('fileInputEngine').value=""; document.getElementById('attachmentPreviewImg').style.display='none'; document.getElementById('attachmentPreviewFileIcon').style.display='none'; }
         function viewFullMedia(src) { document.getElementById('fullSizeImg').src = src; document.getElementById('mediaViewerModal').style.display = 'flex'; }
 
-        // ОТПРАВКА
+        // ОТПРАВКА СООБЩЕНИЙ
         function executeSendMessage() {
             const txt = document.getElementById('messageInputEngine').value.trim(); if(!txt && !base64CompressedAttachment && !pendingTextSnippet) return;
-            const path = currentActiveChat.type==='USER' ? (activeUserId<currentActiveChat.id ? activeUserId+"_"+currentActiveChat.id : currentActiveChat.id+"_"+activeUserId) : currentActiveChat.id;
+            let path = currentActiveChat.type === 'SAVED' ? "saved_" + activeUserId : (currentActiveChat.type === 'USER' ? (activeUserId < currentActiveChat.id ? activeUserId + "_" + currentActiveChat.id : currentActiveChat.id + "_" + activeUserId) : currentActiveChat.id);
             
             if(activeEditMessageKey) { 
                 realtimeDb.ref(`msgs/${path}/${activeEditMessageKey}`).update({ txt: txt }); 
@@ -607,7 +636,7 @@
                 let payload = { sid: activeUserId, snick: globalCache.users[activeUserId].nickname, txt: txt, ts: Date.now() };
                 if (pendingTextSnippet) {
                     payload.code = pendingTextSnippet;
-                    if(!txt) payload.txt = "📄 Отправлен текстовый документ/логи";
+                    if(!txt) payload.txt = "📄 Документ / Логи / Код";
                 } else if(base64CompressedAttachment) {
                     payload.img = base64CompressedAttachment;
                 }
@@ -636,80 +665,72 @@
             closeModal('forwardModal'); targetForwardMessageData = null; alert("Переслано!");
         }
 
-        function executeDeleteMessage(p, k) { if(confirm("Удалить?")) realtimeDb.ref(`msgs/${p}/${k}`).remove(); }
+        function executeDeleteMessage(p, k) { if(confirm("Удалить сообщение?")) realtimeDb.ref(`msgs/${p}/${k}`).remove(); }
         function handleInputKeyPress(e) { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); executeSendMessage(); } }
 
-        // СЕССИИ И ОЧИСТКА КЭША
+        // ПРОФИЛЬ, НАСТРОЙКИ СЕССИЙ И КЭША
         function openMyProfileSettings() { 
             const me=globalCache.users[activeUserId]||{}; 
             document.getElementById('myModalNick').value=me.nickname||""; 
             document.getElementById('myModalAvUrl').value=me.avatar||""; 
             document.getElementById('myModalBio').value=me.bio||""; 
             document.getElementById('myModalAvPreview').src=me.avatar||""; 
+            document.getElementById('myModalEmailDisplay').innerText = me.email || "Email не указан";
             
-            // Загрузка сессий
             const sContainer = document.getElementById('sessionsListContainer');
-            sContainer.innerHTML = "Загрузка активных сессий...";
+            sContainer.innerHTML = "Загрузка...";
             realtimeDb.ref(`users/${activeUserId}/sessions`).once('value', snap => {
                 sContainer.innerHTML = "";
                 snap.forEach(child => {
-                    const s = child.val();
-                    const currentId = localStorage.getItem('vchat_session_id');
-                    const isCurrent = child.key === currentId ? " (Текущая)" : "";
-                    sContainer.innerHTML += `
-                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; margin-bottom:4px; background:var(--bg-hover); padding:6px; border-radius:6px;">
-                            <span>💻 <b>${escapeHTML(s.device)}</b>${isCurrent}</span>
-                            ${child.key !== currentId ? `<button class="danger" style="width:auto; padding:2px 6px; margin:0; font-size:10px;" onclick="executeTerminateSession('${child.key}')">✖</button>` : ''}
-                        </div>
-                    `;
+                    const s = child.val(); const currentId = localStorage.getItem('vchat_session_id');
+                    const isCurrent = child.key === currentId ? " (Текущее)" : "";
+                    sContainer.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; margin-bottom:4px; background:var(--bg-hover); padding:6px; border-radius:6px;">
+                        <span>💻 <b>${escapeHTML(s.device)}</b>${isCurrent}</span>
+                        ${child.key !== currentId ? `<button class="danger" style="width:auto; padding:2px 6px; margin:0; font-size:10px;" onclick="executeTerminateSession('${child.key}')">✖</button>` : ''}
+                    </div>`;
                 });
             });
             document.getElementById('myProfileModal').style.display='flex'; 
         }
 
-        function executeTerminateSession(sid) {
-            realtimeDb.ref(`users/${activeUserId}/sessions/${sid}`).remove().then(() => openMyProfileSettings());
-        }
+        function executeTerminateSession(sid) { realtimeDb.ref(`users/${activeUserId}/sessions/${sid}`).remove().then(() => openMyProfileSettings()); }
+        function executeClearAppCache() { if(confirm("Очистить локальный кэш и перезагрузить приложение?")) { localStorage.clear(); location.reload(); } }
 
-        function executeClearAppCache() {
-            if(confirm("Вы уверены, что хотите очистить локальный кэш и настройки приложения?")) {
-                localStorage.clear();
-                alert("Кэш очищен! Страница будет перезагружена.");
-                location.reload();
-            }
-        }
-
-        // АДМИНКА ГРУПП И НАСТРОЙКИ ЧЕЛОВ
+        // ПОДРОБНЕЕ О СОБЕСЕДНИКЕ / ГРУППЕ
         function openActiveChatContextInfo() {
             if(!currentActiveChat) return;
-            document.getElementById('ctxAv').src = currentActiveChat.type==='USER'?(globalCache.users[currentActiveChat.id].avatar||`https://api.dicebear.com/7.x/identicon/svg?seed=${currentActiveChat.id}`):(globalCache.groups[currentActiveChat.id].avatar||`https://api.dicebear.com/7.x/shapes/svg?seed=${currentActiveChat.id}`);
-            document.getElementById('ctxTitle').innerText = currentActiveChat.name;
-            
-            if(currentActiveChat.type === 'USER') {
-                document.getElementById('ctxSubtitle').innerText = "Личный профиль";
+            document.getElementById('ctxAv').src = currentActiveChat.type==='SAVED' ? `https://api.dicebear.com/7.x/initials/svg?seed=Saved&backgroundColor=2b5278` : (currentActiveChat.type==='USER' ? (globalCache.users[currentActiveChat.id].avatar||`https://api.dicebear.com/7.x/identicon/svg?seed=${currentActiveChat.id}`) : (globalCache.groups[currentActiveChat.id].avatar||`https://api.dicebear.com/7.x/shapes/svg?seed=${currentActiveChat.id}`));
+            document.getElementById('ctxTitle').innerText = currentActiveChat.type === 'SAVED' ? "Сохранённые" : currentActiveChat.name;
+            document.getElementById('ctxDescriptionContainer').innerHTML = "";
+
+            if(currentActiveChat.type === 'SAVED') {
+                document.getElementById('ctxSubtitle').innerText = "Личное облако заметок";
+                document.getElementById('ctxUserBlock').style.display = 'none'; document.getElementById('ctxGroupBlock').style.display = 'none';
+            } else if(currentActiveChat.type === 'USER') {
+                const u = globalCache.users[currentActiveChat.id] || {};
+                document.getElementById('ctxSubtitle').innerText = u.email || "Email скрыт";
+                document.getElementById('ctxDescriptionContainer').innerText = u.bio || "Статус «О себе» не заполнен.";
+                
                 document.getElementById('ctxUserBlock').style.display = 'block'; document.getElementById('ctxGroupBlock').style.display = 'none';
                 document.getElementById('addContactBtn').innerText = globalCache.contacts[currentActiveChat.id] ? "⭐️ В контактах" : "➕ Добавить в Контакты";
                 document.getElementById('localCustomName').value = globalCache.customNames[currentActiveChat.id] || "";
             } else {
-                document.getElementById('ctxSubtitle').innerText = "Групповое управление";
+                const g = globalCache.groups[currentActiveChat.id] || {};
+                document.getElementById('ctxSubtitle').innerText = "Групповой чат";
+                document.getElementById('ctxDescriptionContainer').innerText = g.description || "Описание группы отсутствует.";
+                
                 document.getElementById('ctxUserBlock').style.display = 'none'; document.getElementById('ctxGroupBlock').style.display = 'block';
-                document.getElementById('editGrpNameInp').value = globalCache.groups[currentActiveChat.id].name;
-                document.getElementById('editGrpAvInp').value = globalCache.groups[currentActiveChat.id].avatar || "";
+                document.getElementById('editGrpNameInp').value = g.name;
+                document.getElementById('editGrpAvInp').value = g.avatar || "";
+                document.getElementById('editGrpDescInp').value = g.description || "";
                 
                 const mList = document.getElementById('groupMembersList'); mList.innerHTML = "";
-                const roles = globalCache.groups[currentActiveChat.id].roles || {};
-                const myRole = roles[activeUserId];
-
+                const roles = g.roles || {}; const myRole = roles[activeUserId];
                 for(let uid in roles) {
                     const uName = globalCache.users[uid]?.nickname || "Юзер";
-                    mList.innerHTML += `<div style="display:flex; justify-content:between; align-items:center; margin-bottom:4px; font-size:13px;">
+                    mList.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; font-size:13px;">
                         <span><b>${escapeHTML(uName)}</b> (${roles[uid]})</span>
-                        ${(myRole==='owner' || myRole==='admin') && uid!==activeUserId ? `
-                            <div style="display:flex; gap:2px; margin-left:auto;">
-                                <button style="padding:2px 4px; font-size:10px; width:auto; margin:0;" onclick="changeRole('${uid}','admin')">Админ</button>
-                                <button class="danger" style="padding:2px 4px; font-size:10px; width:auto; margin:0;" onclick="kickUser('${uid}')">Кик</button>
-                            </div>
-                        ` : ''}
+                        ${(myRole==='owner' || myRole==='admin') && uid!==activeUserId ? `<button class="danger" style="padding:2px 4px; font-size:10px; width:auto; margin:0;" onclick="kickUser('${uid}')">Кик</button>` : ''}
                     </div>`;
                 }
             }
@@ -717,20 +738,28 @@
         }
 
         function openGroupCreationDirectly() {
-            const n = prompt("Введите название новой группы:"); if(!n) return;
-            let r={}; r[activeUserId]="owner"; realtimeDb.ref("groups").push().set({name:n, avatar:"", roles:r});
+            const n = prompt("Название новой группы:"); if(!n) return;
+            const d = prompt("Описание группы:") || "";
+            let r={}; r[activeUserId]="owner"; realtimeDb.ref("groups").push().set({name:n, avatar:"", description:d, roles:r});
         }
-        function changeRole(uid, role) { if(currentActiveChat) realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${uid}`).set(role).then(()=>openActiveChatContextInfo()); }
-        function kickUser(uid) { if(currentActiveChat && confirm("Кикнуть юзера?")) realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${uid}`).remove().then(()=>openActiveChatContextInfo()); }
-        function leaveCurrentGroup() { if(currentActiveChat && confirm("Выйти?")) { realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${activeUserId}`).remove(); closeModal('contextInfoModal'); resetChatWindow(); } }
-        function executeUpdateGroupMeta() { if(currentActiveChat) { realtimeDb.ref(`groups/${currentActiveChat.id}`).update({ name: document.getElementById('editGrpNameInp').value, avatar: document.getElementById('editGrpAvInp').value }); closeModal('contextInfoModal'); } }
+        function kickUser(uid) { if(currentActiveChat && confirm("Исключить участника?")) realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${uid}`).remove().then(()=>openActiveChatContextInfo()); }
+        function leaveCurrentGroup() { if(currentActiveChat && confirm("Выйти из группы?")) { realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${activeUserId}`).remove(); closeModal('contextInfoModal'); resetChatWindow(); } }
+        function executeUpdateGroupMeta() { if(currentActiveChat) { realtimeDb.ref(`groups/${currentActiveChat.id}`).update({ name: document.getElementById('editGrpNameInp').value, avatar: document.getElementById('editGrpAvInp').value, description: document.getElementById('editGrpDescInp').value }); closeModal('contextInfoModal'); } }
         
         function executeAddActiveToContacts() { if(currentActiveChat) { realtimeDb.ref(`users/${activeUserId}/contacts/${currentActiveChat.id}`).set(true); alert("Добавлен в контакты!"); openActiveChatContextInfo(); } }
         function saveLocalContactName() { if(currentActiveChat) { realtimeDb.ref(`users/${activeUserId}/customNames/${currentActiveChat.id}`).set(document.getElementById('localCustomName').value); closeModal('contextInfoModal'); renderChatLists(); } }
         function executeToggleBlockUser() { if(currentActiveChat) { realtimeDb.ref(`users/${activeUserId}/blocked/${currentActiveChat.id}`).set(true); closeModal('contextInfoModal'); resetChatWindow(); } }
         
         function saveMyProfileData() { realtimeDb.ref("users/"+activeUserId).update({ nickname: document.getElementById('myModalNick').value, avatar: document.getElementById('myModalAvUrl').value, bio: document.getElementById('myModalBio').value }); closeModal('myProfileModal'); }
-        function openTargetUserProfile(uid) { if(globalCache.users[uid]) { executeSelectActiveChat(uid, globalCache.users[uid].nickname, 'USER'); openActiveChatContextInfo(); } }
+        
+        // Фикс клика по своему нику в чате
+        function openTargetUserProfile(uid) { 
+            if(uid === activeUserId) {
+                executeSelectActiveChat('saved_messages', 'Сохранённые', 'SAVED');
+                return;
+            }
+            if(globalCache.users[uid]) { executeSelectActiveChat(uid, globalCache.users[uid].nickname, 'USER'); openActiveChatContextInfo(); } 
+        }
         function resetChatWindow() { document.getElementById('activeChatAv').style.display='none'; document.getElementById('activeChatTitle').innerText="Выберите чат"; document.getElementById('chatMessagesBox').innerHTML=""; currentActiveChat=null; renderChatLists(); }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     </script>
