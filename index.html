@@ -257,7 +257,8 @@
         </div>
     </div>
 
-<button id="addContactBtn" class="success" onclick="executeToggleContact()">➕ Добавить в Контакты</button>        <div class="modal-card">
+    <div id="contextInfoModal" class="modal-overlay">
+        <div class="modal-card">
             <img id="ctxAv" style="width:90px; height:90px; border-radius:50%; display:block; margin:0 auto 15px; object-fit:cover;">
             <h3 id="ctxTitle" style="text-align:center; margin:0;"></h3>
             <div id="ctxSubtitle" style="text-align:center; color:var(--text-muted); margin-top:5px; font-size:13.5px; line-height:1.4;"></div>
@@ -384,17 +385,8 @@
         function executeToggleTheme() { document.body.classList.toggle('light-mode'); const isL=document.body.classList.contains('light-mode'); localStorage.setItem('vchat_theme', isL?'light':'dark'); document.getElementById('themeBtn').innerText=isL?'🌞':'🌙'; }
 
         // СЛУШАТЕЛЬ СЕССИИ
-       appAuth.onAuthStateChanged(user => {
+        appAuth.onAuthStateChanged(user => {
             if (user) {
-
-                if (!user.emailVerified) {
-                    alert("Чел, ты ещё не подтвердил email! Проверь почту (и папку Спам).");
-                    appAuth.signOut();
-                    return;
-                }
-
-                activeUserId = user.uid;
-                
                 activeUserId = user.uid;
                 const sessionId = localStorage.getItem('vchat_session_id') || 'sess_' + Date.now();
                 localStorage.setItem('vchat_session_id', sessionId);
@@ -435,20 +427,7 @@
 
         function executeLogin() { appAuth.signInWithEmailAndPassword(document.getElementById('authEmail').value, document.getElementById('authPass').value).catch(e => alert(e.message)); }
         function executeGoogleAuth() { appAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e => alert(e.message)); }
-        function executeRegister() {
-    appAuth.createUserWithEmailAndPassword(document.getElementById('regEmail').value, document.getElementById('regPass').value)
-    .then(res => {
-        // Сохраняем профиль
-        realtimeDb.ref("users/"+res.user.uid).set({ nickname: document.getElementById('regNick').value, avatar: "", bio: "Новый аккаунт", email: document.getElementById('regEmail').value });
-        
-        // Отправляем письмо с подтверждением
-        res.user.sendEmailVerification().then(() => {
-            alert("Бро, на твою почту отправлена ссылка! Подтверди email, чтобы войти.");
-            appAuth.signOut(); // Выкидываем юзера, пока не подтвердит
-            switchAuthView(false); // Кидаем обратно на окно логина
-        });
-    }).catch(e => alert(e.message));
-}
+        function executeRegister() { appAuth.createUserWithEmailAndPassword(document.getElementById('regEmail').value, document.getElementById('regPass').value).then(res => realtimeDb.ref("users/"+res.user.uid).set({ nickname: document.getElementById('regNick').value, avatar: "", bio: "Новый аккаунт", email: document.getElementById('regEmail').value })).catch(e => alert(e.message)); }
         function executeSignOut() { appAuth.signOut().then(() => location.reload()); }
         function switchAuthView(reg) { document.getElementById('loginCard').style.display = reg?'none':'block'; document.getElementById('registerCard').style.display = reg?'block':'none'; }
 
@@ -740,10 +719,8 @@
                 document.getElementById('ctxDescriptionContainer').innerText = u.bio || "Статус «О себе» не заполнен.";
                 
                 document.getElementById('ctxUserBlock').style.display = 'block'; document.getElementById('ctxGroupBlock').style.display = 'none';
-                    const isContact = globalCache.contacts[currentActiveChat.id];
-                    const btn = document.getElementById('addContactBtn');
-                    btn.innerText = isContact ? "❌ Удалить из контактов" : "➕ Добавить в Контакты";
-                    btn.className = isContact ? "danger" : "success";                document.getElementById('localCustomName').value = globalCache.customNames[currentActiveChat.id] || "";
+                document.getElementById('addContactBtn').innerText = globalCache.contacts[currentActiveChat.id] ? "⭐️ В контактах" : "➕ Добавить в Контакты";
+                document.getElementById('localCustomName').value = globalCache.customNames[currentActiveChat.id] || "";
             } else {
                 const g = globalCache.groups[currentActiveChat.id] || {};
                 document.getElementById('ctxSubtitle').innerText = "Групповой чат";
@@ -776,22 +753,7 @@
         function leaveCurrentGroup() { if(currentActiveChat && confirm("Выйти из группы?")) { realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${activeUserId}`).remove(); closeModal('contextInfoModal'); resetChatWindow(); } }
         function executeUpdateGroupMeta() { if(currentActiveChat) { realtimeDb.ref(`groups/${currentActiveChat.id}`).update({ name: document.getElementById('editGrpNameInp').value, avatar: document.getElementById('editGrpAvInp').value, description: document.getElementById('editGrpDescInp').value }).then(() => { executeSelectActiveChat(currentActiveChat.id, document.getElementById('editGrpNameInp').value, 'GROUP'); }); closeModal('contextInfoModal'); } }
         
-        function executeToggleContact() { 
-    if(currentActiveChat) { 
-        // Если уже в контактах — удаляем
-        if(globalCache.contacts[currentActiveChat.id]) {
-            if(confirm("Точно удалить из контактов?")) {
-                realtimeDb.ref(`users/${activeUserId}/contacts/${currentActiveChat.id}`).remove(); 
-                openActiveChatContextInfo(); 
-            }
-        } else {
-            // Если нет в контактах — добавляем
-            realtimeDb.ref(`users/${activeUserId}/contacts/${currentActiveChat.id}`).set(true); 
-            alert("Добавлен в контакты!"); 
-            openActiveChatContextInfo(); 
-        }
-    } 
-}
+        function executeAddActiveToContacts() { if(currentActiveChat) { realtimeDb.ref(`users/${activeUserId}/contacts/${currentActiveChat.id}`).set(true); alert("Добавлен в контакты!"); openActiveChatContextInfo(); } }
         function saveLocalContactName() { if(currentActiveChat) { realtimeDb.ref(`users/${activeUserId}/customNames/${currentActiveChat.id}`).set(document.getElementById('localCustomName').value); closeModal('contextInfoModal'); renderChatLists(); } }
         function executeToggleBlockUser() { if(currentActiveChat) { realtimeDb.ref(`users/${activeUserId}/blocked/${currentActiveChat.id}`).set(true); closeModal('contextInfoModal'); resetChatWindow(); } }
         
