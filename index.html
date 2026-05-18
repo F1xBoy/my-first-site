@@ -244,8 +244,6 @@
             <h4 style="margin:0 0 10px 0; color:var(--accent);">Активные сессии и безопасность 🖥️</h4>
             <div id="sessionsListContainer" style="max-height:120px; overflow-y:auto; margin-bottom:10px; border:1px solid var(--border-color); padding:6px; border-radius:8px;"></div>
             
-            <button id="adminPanelBtn" class="warning" style="display:none; margin-bottom:10px;" onclick="openAdminPanel()">👑 Админ-панель</button>
-
             <button class="danger" onclick="executeClearAppCache()" style="background:#dc2626;">🗑️ Очистить кэш приложения</button>
 
             <hr style="border-color:var(--border-color); margin:20px 0;">
@@ -255,12 +253,12 @@
         </div>
     </div>
 
-    <div id="adminPanelModal" class="modal-overlay">
+    <div id="groupAdminModal" class="modal-overlay">
         <div class="modal-card">
-            <h3 style="margin-top:0; color:var(--warning);">👑 Админ-панель</h3>
-            <p style="font-size:12px; color:var(--text-muted); margin-top:-10px;">Управление пользователями системы</p>
-            <div id="adminUsersList" style="max-height:300px; overflow-y:auto; border:1px solid var(--border-color); border-radius:8px; padding:4px;"></div>
-            <button class="secondary" style="margin-top:15px;" onclick="closeModal('adminPanelModal')">Закрыть</button>
+            <h3 style="margin-top:0; color:var(--warning);">👑 Админка Группы</h3>
+            <p style="font-size:12px; color:var(--text-muted); margin-top:-10px;">Управление ролями и участниками</p>
+            <div id="groupAdminMembersList" style="max-height:250px; overflow-y:auto; border:1px solid var(--border-color); border-radius:8px; padding:6px; background:var(--bg-main);"></div>
+            <button class="secondary" style="margin-top:15px;" onclick="closeModal('groupAdminModal')">Закрыть</button>
         </div>
     </div>
 
@@ -288,7 +286,9 @@
             </div>
 
             <div id="ctxGroupBlock" style="display:none;">
-                <h4 style="margin:10px 0 5px 0;">Управление группой (Для Админов):</h4>
+                <button id="groupAdminPanelBtn" class="warning" style="display:none; margin-bottom:15px;" onclick="openGroupAdminPanel()">👑 Управление Группой (Админка)</button>
+
+                <h4 style="margin:10px 0 5px 0;">Настройки группы:</h4>
                 <input type="text" id="editGrpNameInp" placeholder="Изменить название группы">
                 <input type="text" id="editGrpAvInp" placeholder="Изменить URL аватарки">
                 <textarea id="editGrpDescInp" placeholder="Изменить описание группы" rows="2"></textarea>
@@ -403,7 +403,6 @@
         // СЛУШАТЕЛЬ СЕССИИ
         appAuth.onAuthStateChanged(user => {
             if (user) {
-                // ПРОВЕРКА ВЕРИФИКАЦИИ ПОЧТЫ
                 if (!user.emailVerified) {
                     alert("Чел, сначала подтверди свой email! Мы отправили ссылку на почту.");
                     appAuth.signOut();
@@ -420,23 +419,12 @@
                 }
 
                 const sessionRef = realtimeDb.ref(`users/${activeUserId}/sessions/${sessionId}`);
-                sessionRef.set({
-                    device: rawDevice,
-                    lastActive: Date.now()
-                });
-                // ИСПРАВЛЕНИЕ ОНЛАЙНА: удаляем сессию, когда чел закрывает окно/теряет инет
+                sessionRef.set({ device: rawDevice, lastActive: Date.now() });
                 sessionRef.onDisconnect().remove();
 
                 realtimeDb.ref("users/" + activeUserId).on("value", snap => {
                     const d = snap.val() || { nickname: user.displayName||"Юзер", avatar: user.photoURL||"", bio: "Всем ку!", email: user.email };
                     
-                    // ПРОВЕРКА БАНА ДЛЯ АДМИНКИ
-                    if(d.isBanned) {
-                        alert("Твой аккаунт был заблокирован администратором.");
-                        appAuth.signOut();
-                        return;
-                    }
-
                     if(!snap.exists() || !d.email) {
                         d.email = user.email || "";
                         realtimeDb.ref("users/"+activeUserId).set(d);
@@ -445,9 +433,6 @@
                     document.getElementById('myNickDisplay').innerText = d.nickname;
                     document.getElementById('myAvatarDisplay').src = d.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${activeUserId}`;
                     
-                    // ПОКАЗЫВАЕМ АДМИНКУ, ЕСЛИ ЮЗЕР АДМИН
-                    document.getElementById('adminPanelBtn').style.display = d.isAdmin ? 'block' : 'none';
-
                     globalCache.blockedUsers = d.blocked || {}; globalCache.pinnedChats = d.pins || {};
                     globalCache.customNames = d.customNames || {}; globalCache.contacts = d.contacts || {};
                     globalCache.tabs = d.tabs || defaultTabs;
@@ -455,8 +440,8 @@
                     renderTabsRow();
                     document.getElementById('authOverlay').style.display = 'none'; document.getElementById('appLayout').style.display = 'flex';
                 });
-                realtimeDb.ref("users").on("value", s => { globalCache.users = s.val() || {}; renderChatLists(); updateActiveChatStatus(); });
-                realtimeDb.ref("groups").on("value", s => { globalCache.groups = s.val() || {}; renderChatLists(); updateActiveChatStatus(); });
+                realtimeDb.ref("users").on("value", s => { globalCache.users = s.val() || {}; renderChatLists(); updateActiveChatStatus(); if(document.getElementById('groupAdminModal').style.display === 'flex') openGroupAdminPanel(); });
+                realtimeDb.ref("groups").on("value", s => { globalCache.groups = s.val() || {}; renderChatLists(); updateActiveChatStatus(); if(document.getElementById('groupAdminModal').style.display === 'flex') openGroupAdminPanel(); });
             } else {
                 document.getElementById('authOverlay').style.display = 'flex'; document.getElementById('appLayout').style.display = 'none';
             }
@@ -465,7 +450,6 @@
         function executeLogin() { appAuth.signInWithEmailAndPassword(document.getElementById('authEmail').value, document.getElementById('authPass').value).catch(e => alert(e.message)); }
         function executeGoogleAuth() { appAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e => alert(e.message)); }
         
-        // РЕГИСТРАЦИЯ С ВЕРИФИКАЦИЕЙ ПОЧТЫ
         function executeRegister() { 
             appAuth.createUserWithEmailAndPassword(document.getElementById('regEmail').value, document.getElementById('regPass').value)
             .then(res => {
@@ -581,7 +565,7 @@
                 document.getElementById('activeChatTitle').innerText = chatName;
             }
 
-            updateActiveChatStatus(); // Вызываем новую функцию для обновления статуса
+            updateActiveChatStatus();
 
             realtimeDb.ref("msgs/" + path).off();
             realtimeDb.ref("msgs/" + path).on("value", snap => {
@@ -620,7 +604,6 @@
             renderChatLists();
         }
         
-        // ФУНКЦИЯ ДЛЯ ОБНОВЛЕНИЯ СТАТУСА ОНЛАЙН / ОФФЛАЙН
         function updateActiveChatStatus() {
             if(!currentActiveChat) return;
             const statusEl = document.getElementById('activeChatStatus');
@@ -628,7 +611,6 @@
                 statusEl.innerText = "Облачное хранилище заметок";
             } else if(currentActiveChat.type === 'USER') {
                 const u = globalCache.users[currentActiveChat.id] || {};
-                // Проверяем есть ли у челика хотя бы одна активная сессия
                 const isOnline = u.sessions && Object.keys(u.sessions).length > 0;
                 statusEl.innerText = isOnline ? "Онлайн 🟢" : "Оффлайн 🔴 (Был(а) недавно)";
             } else {
@@ -764,31 +746,53 @@
             document.getElementById('myProfileModal').style.display='flex'; 
         }
 
-        // АДМИН ПАНЕЛЬ ЛОГИКА
-        function openAdminPanel() {
-            const list = document.getElementById('adminUsersList');
-            list.innerHTML = "";
-            for(let uid in globalCache.users) {
-                const u = globalCache.users[uid];
-                const isBanned = u.isBanned;
-                list.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:8px; border-bottom:1px solid var(--border-color); font-size:13px;">
-                    <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-right:10px;">
-                        <b>${escapeHTML(u.nickname)}</b> <br><small style="color:var(--text-muted);">${escapeHTML(u.email || 'Нет email')}</small>
-                    </span>
-                    <button class="${isBanned ? 'success' : 'danger'}" style="width:auto; padding:6px 12px; margin:0; font-size:12px; flex-shrink:0;" onclick="toggleUserBan('${uid}', ${!isBanned})">${isBanned ? '✅ Разбанить' : '🔨 Забанить'}</button>
-                </div>`;
-            }
-            document.getElementById('adminPanelModal').style.display = 'flex';
-        }
-
-        function toggleUserBan(uid, banStatus) {
-            if(confirm(banStatus ? "Точно хочешь забанить этого челика?" : "Разбанить юзера?")) {
-                realtimeDb.ref(`users/${uid}/isBanned`).set(banStatus).then(() => openAdminPanel());
-            }
-        }
-
         function executeTerminateSession(sid) { realtimeDb.ref(`users/${activeUserId}/sessions/${sid}`).remove().then(() => openMyProfileSettings()); }
         function executeClearAppCache() { if(confirm("Очистить локальный кэш и перезагрузить приложение?")) { localStorage.clear(); location.reload(); } }
+
+        // АДМИНКА КОНКРЕТНОЙ ГРУППЫ (ЛОГИКА)
+        function openGroupAdminPanel() {
+            if(!currentActiveChat || currentActiveChat.type !== 'GROUP') return;
+            const g = globalCache.groups[currentActiveChat.id] || {};
+            const roles = g.roles || {};
+            const myRole = roles[activeUserId];
+            
+            if(myRole !== 'owner' && myRole !== 'admin') {
+                alert("У тебя нет прав админа в этой группе, бро!");
+                return;
+            }
+
+            const list = document.getElementById('groupAdminMembersList');
+            list.innerHTML = "";
+
+            for(let uid in roles) {
+                const uName = globalCache.users[uid]?.nickname || "Участник";
+                const uRole = roles[uid];
+                
+                let actionButtons = "";
+                if(uid !== activeUserId && uRole !== 'owner') {
+                    // Кнопки изменения ролей (Доступно овнеру или админ меняет обычного мембера)
+                    if(myRole === 'owner') {
+                        actionButtons += uRole === 'admin' 
+                            ? `<button class="warning" style="width:auto; padding:4px 8px; margin:0; font-size:11px;" onclick="changeUserGroupRole('${uid}', 'member')">Снять админа</button>`
+                            : `<button class="success" style="width:auto; padding:4px 8px; margin:0; font-size:11px;" onclick="changeUserGroupRole('${uid}', 'admin')">Сделать админом</button>`;
+                    }
+                    // Кикнуть участника
+                    actionButtons += `<button class="danger" style="width:auto; padding:4px 8px; margin:0; font-size:11px;" onclick="kickUser('${uid}')">❌ Кик</button>`;
+                }
+
+                list.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding:8px; margin-bottom:6px; background:var(--bg-card); border-radius:6px; border:1px solid var(--border-color);">
+                    <div><b>${escapeHTML(uName)}</b> <br> <small style="color:var(--accent);">Роль: ${uRole}</small></div>
+                    <div style="display:flex; gap:6px;">${actionButtons}</div>
+                </div>`;
+            }
+            document.getElementById('groupAdminModal').style.display = 'flex';
+        }
+
+        function changeUserGroupRole(uid, newRole) {
+            if(currentActiveChat) {
+                realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${uid}`).set(newRole);
+            }
+        }
 
         // ПОДРОБНЕЕ О СОБЕСЕДНИКЕ / ГРУППЕ
         function openActiveChatContextInfo() {
@@ -807,7 +811,6 @@
                 
                 document.getElementById('ctxUserBlock').style.display = 'block'; document.getElementById('ctxGroupBlock').style.display = 'none';
                 
-                // СМАРТ КНОПКА ДОБАВЛЕНИЯ/УДАЛЕНИЯ КОНТАКТА
                 const isContact = globalCache.contacts[currentActiveChat.id];
                 const btn = document.getElementById('addContactBtn');
                 btn.innerText = isContact ? "❌ Удалить из контактов" : "➕ Добавить в Контакты";
@@ -824,13 +827,16 @@
                 document.getElementById('editGrpAvInp').value = g.avatar || "";
                 document.getElementById('editGrpDescInp').value = g.description || "";
                 
+                // Проверка прав для кнопки админки
+                const roles = g.roles || {};
+                const myRole = roles[activeUserId];
+                document.getElementById('groupAdminPanelBtn').style.display = (myRole === 'owner' || myRole === 'admin') ? 'block' : 'none';
+
                 const mList = document.getElementById('groupMembersList'); mList.innerHTML = "";
-                const roles = g.roles || {}; const myRole = roles[activeUserId];
                 for(let uid in roles) {
                     const uName = globalCache.users[uid]?.nickname || "Юзер";
                     mList.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; font-size:13px;">
                         <span><b>${escapeHTML(uName)}</b> (${roles[uid]})</span>
-                        ${(myRole==='owner' || myRole==='admin') && uid!==activeUserId ? `<button class="danger" style="padding:2px 4px; font-size:10px; width:auto; margin:0;" onclick="kickUser('${uid}')">Кик</button>` : ''}
                     </div>`;
                 }
             }
@@ -842,7 +848,7 @@
             const d = prompt("Описание группы:") || "";
             let r={}; r[activeUserId]="owner"; realtimeDb.ref("groups").push().set({name:n, avatar:"", description:d, roles:r});
         }
-        function kickUser(uid) { if(currentActiveChat && confirm("Исключить участника?")) realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${uid}`).remove().then(()=>openActiveChatContextInfo()); }
+        function kickUser(uid) { if(currentActiveChat && confirm("Исключить участника из группы?")) realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${uid}`).remove(); }
         function leaveCurrentGroup() { if(currentActiveChat && confirm("Выйти из группы?")) { realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${activeUserId}`).remove(); closeModal('contextInfoModal'); resetChatWindow(); } }
         function executeUpdateGroupMeta() { if(currentActiveChat) { realtimeDb.ref(`groups/${currentActiveChat.id}`).update({ name: document.getElementById('editGrpNameInp').value, avatar: document.getElementById('editGrpAvInp').value, description: document.getElementById('editGrpDescInp').value }).then(() => { executeSelectActiveChat(currentActiveChat.id, document.getElementById('editGrpNameInp').value, 'GROUP'); }); closeModal('contextInfoModal'); } }
         
