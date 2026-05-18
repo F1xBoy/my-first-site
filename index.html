@@ -247,7 +247,7 @@
             <button class="danger" onclick="executeClearAppCache()" style="background:#dc2626;">🗑️ Очистить кэш приложения</button>
 
             <hr style="border-color:var(--border-color); margin:20px 0;">
-            <div style="text-align:center; color:var(--text-muted); font-size:12px; margin-bottom:10px;">Версия: VChat 1.0.2</div>
+            <div style="text-align:center; color:var(--text-muted); font-size:12px; margin-bottom:10px;">Версия: VChat 1.0.3</div>
             <button class="danger" onclick="executeSignOut()">Выйти из аккаунта</button>
             <button class="secondary" style="margin-top:8px;" onclick="closeModal('myProfileModal')">Закрыть</button>
         </div>
@@ -272,7 +272,7 @@
     </div>
 
     <div id="contextInfoModal" class="modal-overlay">
-        <div class="modal-card">
+        <div class="modal-card" style="display: flex; flex-direction: column;">
             <img id="ctxAv" style="width:90px; height:90px; border-radius:50%; display:block; margin:0 auto 15px; object-fit:cover;">
             <h3 id="ctxTitle" style="text-align:center; margin:0;"></h3>
             <div id="ctxSubtitle" style="text-align:center; color:var(--text-muted); margin-top:5px; font-size:13.5px; line-height:1.4;"></div>
@@ -285,8 +285,8 @@
                 <button id="blockToggleBtn" class="danger" onclick="executeToggleBlockUser()">Блокировать</button>
             </div>
 
-            <div id="ctxGroupBlock" style="display:none;">
-                <button id="groupAdminPanelBtn" class="warning" style="display:none; margin-bottom:15px;" onclick="openGroupAdminPanel()">👑 Управление Группой (Админка)</button>
+            <div id="ctxGroupBlock" style="display:none; width: 100%;">
+                <button id="groupAdminPanelBtn" class="warning" style="display:none; width:auto; padding:8px 16px; margin:0 auto 15px auto; font-size:13px;" onclick="openGroupAdminPanel()">👑 Управление Группой (Админка)</button>
 
                 <h4 style="margin:10px 0 5px 0;">Настройки группы:</h4>
                 <input type="text" id="editGrpNameInp" placeholder="Изменить название группы">
@@ -830,7 +830,7 @@
                 // Проверка прав для кнопки админки
                 const roles = g.roles || {};
                 const myRole = roles[activeUserId];
-                document.getElementById('groupAdminPanelBtn').style.display = (myRole === 'owner' || myRole === 'admin') ? 'block' : 'none';
+                document.getElementById('groupAdminPanelBtn').style.display = (myRole === 'owner' || myRole === 'admin') ? 'flex' : 'none';
 
                 const mList = document.getElementById('groupMembersList'); mList.innerHTML = "";
                 for(let uid in roles) {
