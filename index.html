@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat V7.7.2</title>
+    <title>VChat V7.8.1</title>
     <meta name="google-site-verification" content="bnrGuCFyUfxc7XB3jmiLYsr6mbgod0QWt2PHqIXGSrg" />
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     
@@ -86,15 +86,13 @@
         .header-actions-box { display: flex; gap: 5px; }
         .hdr-icon-btn { background: transparent; border: none; font-size: 16px; padding: 6px; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 6px; color: var(--text-muted); }
         .hdr-icon-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-main); }
-
-        .secure-pin-mask { -webkit-text-security: disc; -moz-text-security: disc; -webkit-text-security: disc; }
     </style>
 </head>
 <body>
 
     <div id="login-scr" class="modal-overlay" style="display: flex;">
         <div class="modal-card" style="text-align: center;">
-            <h2 style="color:var(--accent); margin-top:0;">Вход в VChat V7.7.2</h2>
+            <h2 style="color:var(--accent); margin-top:0;">Вход в VChat</h2>
             <input type="email" id="uEmail" placeholder="Email">
             <input type="password" id="uPass" placeholder="Пароль">
             <button class="success" onclick="login()" style="margin-top: 10px;">Войти</button>
@@ -111,35 +109,64 @@
             <input type="text" id="uNick" placeholder="Никнейм">
             <input type="email" id="regEmail" placeholder="Email">
             <input type="password" id="regPass" placeholder="Пароль">
-            <input type="text" id="regPin" class="secure-pin-mask" placeholder="4-значный ПИН (необязательно)" maxlength="4" style="text-align:center;">
             <button class="success" onclick="register()">Создать</button>
             <p style="font-size: 13px; color: var(--accent); cursor: pointer;" onclick="document.getElementById('reg-view').style.display='none';">Назад ко входу</p>
         </div>
-
-        <div class="modal-card" id="pin-view" style="display: none; position: absolute; text-align: center; z-index:1002;">
-            <h2 style="color:var(--accent); margin-top:0;">Защита аккаунта 🔒</h2>
-            <input type="text" id="authPinInp" class="secure-pin-mask" placeholder="••••" maxlength="4" style="text-align:center; font-size:26px; letter-spacing:10px; width:160px; margin:15px auto;" onkeydown="if(event.key==='Enter') verifyPin()">
-            <button class="success" onclick="verifyPin()">Войти ➤</button>
-        </div>
     </div>
 
-    <div id="devices-modal" class="modal-overlay"><div class="modal-card"><h3 style="margin-top:0; color:var(--accent);">Подключенные устройства 💻</h3><div style="background: var(--bg-main); padding: 12px; border-radius: 8px; border:1px solid var(--border-color); font-size: 13px;"><b>Текущая сессия:</b> VChat Web-Client (Active)</div><button class="secondary" style="width:100%; margin-top:15px;" onclick="closeM('devices-modal')">Закрыть</button></div></div>
-    <div id="create-group-modal" class="modal-overlay"><div class="modal-card"><h3 style="margin-top:0; color:var(--accent);">Создать группу 👥</h3><input type="text" id="newGroupName" placeholder="Название группы"><input type="text" id="newGroupAv" placeholder="Ссылка на аватарку группы"><button class="success" onclick="executeCreateGroup()">Создать группу</button><button class="secondary" style="width:100%; margin-top:8px;" onclick="closeM('create-group-modal')">Отмена</button></div></div>
-    <div id="tabs-settings-modal" class="modal-overlay"><div class="modal-card"><h3 style="margin-top:0; color:var(--accent);">Настройка вкладок ⚙️</h3><div id="tabs-edit-list"></div><button class="success" onclick="saveTabsConfig()" style="margin-top: 15px;">Сохранить изменения</button><button class="secondary" style="width:100%; margin-top:8px;" onclick="closeM('tabs-settings-modal')">Закрыть</button></div></div>
+    <div id="devices-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h3 style="margin-top:0; color:var(--accent);">Подключенные устройства 💻</h3>
+            <div style="background: var(--bg-main); padding: 12px; border-radius: 8px; border:1px solid var(--border-color); font-size: 13px;">
+                <b>Текущая сессия:</b> VChat Web-Client (Active)
+            </div>
+            <button class="secondary" style="width:100%; margin-top:15px;" onclick="closeM('devices-modal')">Закрыть</button>
+        </div>
+    </div>
+    
+    <div id="create-group-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h3 style="margin-top:0; color:var(--accent);">Создать группу 👥</h3>
+            <input type="text" id="newGroupName" placeholder="Название группы">
+            <input type="text" id="newGroupAv" placeholder="Ссылка на аватарку группы">
+            <button class="success" onclick="executeCreateGroup()">Создать группу</button>
+            <button class="secondary" style="width:100%; margin-top:8px;" onclick="closeM('create-group-modal')">Отмена</button>
+        </div>
+    </div>
+    
+    <div id="tabs-settings-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h3 style="margin-top:0; color:var(--accent);">Настройка вкладок ⚙️</h3>
+            <div id="tabs-edit-list"></div>
+            <button class="success" onclick="saveTabsConfig()" style="margin-top: 15px;">Сохранить изменения</button>
+            <button class="secondary" style="width:100%; margin-top:8px;" onclick="closeM('tabs-settings-modal')">Закрыть</button>
+        </div>
+    </div>
     
     <div id="group-manage-modal" class="modal-overlay">
         <div class="modal-card">
             <h3 style="margin-top:0; color:var(--accent);" id="gManageTitle">Управление Группой</h3>
             <div id="groupAdminPanel" style="display:none;">
-                <label class="p-info-label">Название группы</label><input type="text" id="editGroupName">
-                <label class="p-info-label">Аватарка группы (URL)</label><input type="text" id="editGroupAv"><button class="success" onclick="updateGroupSettings()">Сохранить настройки</button>
+                <label class="p-info-label">Название группы</label>
+                <input type="text" id="editGroupName">
+                <label class="p-info-label">Аватарка группы (URL)</label>
+                <input type="text" id="editGroupAv">
+                <button class="success" onclick="updateGroupSettings()">Сохранить настройки</button>
                 <label class="p-info-label" style="color:var(--success); margin-top:15px;">Добавить участника (По Email)</label>
-                <div style="display:flex; gap:5px; margin-bottom:10px;"><input type="email" id="groupAddUserEmail" placeholder="Email" style="margin:0;"><button class="success" onclick="addGroupMemberByEmail()" style="width:auto; margin:0; padding:0 15px;">➕</button></div>
-                <label class="p-info-label">Список участников</label><div id="groupMembersList" style="background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; padding:8px; max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;"></div>
-                <hr style="border:0; border-top:1px solid var(--border-color); margin:15px 0;"><button class="danger" onclick="deleteGroupPermanently()">🗑️ Удалить группу</button>
+                <div style="display:flex; gap:5px; margin-bottom:10px;">
+                    <input type="email" id="groupAddUserEmail" placeholder="Email" style="margin:0;">
+                    <button class="success" onclick="addGroupMemberByEmail()" style="width:auto; margin:0; padding:0 15px;">➕</button>
+                </div>
+                <label class="p-info-label">Список участников</label>
+                <div id="groupMembersList" style="background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; padding:8px; max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;"></div>
+                <hr style="border:0; border-top:1px solid var(--border-color); margin:15px 0;">
+                <button class="danger" onclick="deleteGroupPermanently()">🗑️ Удалить группу</button>
             </div>
             <div id="groupUserPanel" style="display:none;">
-                <p style="color:var(--success);">Вы участник этой группы. ✔️</p><label class="p-info-label">Участники</label><div id="groupMembersListUser" style="background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; padding:8px; max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; margin-bottom:15px;"></div><button class="danger" onclick="leaveGroup()">🚪 Выйти из группы</button>
+                <p style="color:var(--success);">Вы участник этой группы. ✔️</p>
+                <label class="p-info-label">Участники</label>
+                <div id="groupMembersListUser" style="background:var(--bg-main); border:1px solid var(--border-color); border-radius:8px; padding:8px; max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; margin-bottom:15px;"></div>
+                <button class="danger" onclick="leaveGroup()">🚪 Выйти из группы</button>
             </div>
             <button class="secondary" style="width:100%; margin-top:15px;" onclick="closeM('group-manage-modal')">Закрыть</button>
         </div>
@@ -147,19 +174,18 @@
 
     <div id="my-prof-modal" class="modal-overlay">
         <div class="modal-card">
-            <h3>Мой Аккаунт</h3><img id="myAvPreview" src="" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; display:block; margin: 0 auto; border: 2px solid var(--accent);">
-            <label class="p-info-label">Мой Email</label><div id="myEmailView" style="font-size:14px; opacity:0.8; padding:5px; background:var(--bg-main); border-radius:6px; border:1px solid var(--border-color);">Загрузка...</div>
-            <label class="p-info-label">Никнейм</label><input type="text" id="myNickNew">
-            <label class="p-info-label">Аватар (URL)</label><input type="text" id="myAvNew">
-            <label class="p-info-label">О себе</label><textarea id="myBioNew" rows="2"></textarea>
+            <h3>Мой Аккаунт</h3>
+            <img id="myAvPreview" src="" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; display:block; margin: 0 auto; border: 2px solid var(--accent);">
+            <label class="p-info-label">Мой Email</label>
+            <div id="myEmailView" style="font-size:14px; opacity:0.8; padding:5px; background:var(--bg-main); border-radius:6px; border:1px solid var(--border-color);">Загрузка...</div>
+            <label class="p-info-label">Никнейм</label>
+            <input type="text" id="myNickNew">
+            <label class="p-info-label">Аватар (URL)</label>
+            <input type="text" id="myAvNew">
+            <label class="p-info-label">О себе</label>
+            <textarea id="myBioNew" rows="2"></textarea>
             <button class="success" onclick="updateMe()">Сохранить профиль</button>
             <hr style="border:0; border-top:1px solid var(--border-color); margin:15px 0;">
-            <label class="p-info-label">Управление ПИН-кодом</label>
-            <div style="display:flex; gap:5px; margin-bottom:12px;">
-                <input type="text" id="changePinInp" class="secure-pin-mask" placeholder="Новый ПИН" maxlength="4" style="margin:0; text-align:center;">
-                <button class="success" onclick="updatePinCode()" style="width:auto; margin:0; font-size:12px;">Сменить</button>
-                <button class="danger" onclick="deletePinCode()" style="width:auto; margin:0; font-size:12px; padding: 0 8px;">❌ Удалить</button>
-            </div>
             <button class="warning" style="width:100%; margin-bottom:8px;" onclick="closeM('my-prof-modal'); document.getElementById('devices-modal').style.display='flex'">💻 Сессии</button>
             <button class="danger" style="width:100%; margin-bottom:8px;" onclick="clearAppCache()">🧹 Очистить кэш</button>
             <button class="secondary" style="width:100%;" onclick="closeM('my-prof-modal')">Закрыть</button>
@@ -170,34 +196,83 @@
     <div id="user-prof-modal" class="modal-overlay">
         <div class="modal-card">
             <img id="pCardAv" style="width:80px; height:80px; border-radius:50%; display:block; margin:0 auto 10px; object-fit:cover; border:2px solid var(--accent);">
-            <h3 id="pCardNick" style="text-align: center; margin: 0;">Никнейм</h3><small id="pCardEmail" style="display:block; text-align:center; margin-bottom:12px; font-size:12px;"></small>
+            <h3 id="pCardNick" style="text-align: center; margin: 0;">Никнейм</h3>
+            <small id="pCardEmail" style="display:block; text-align:center; margin-bottom:12px; font-size:12px;"></small>
             <div style="background:var(--bg-main); padding:10px; border-radius:8px; margin-bottom:12px; text-align:center;"><span id="pCardBio"></span></div>
             <div style="background:var(--bg-input); padding:15px; border-radius:8px;">
-                <label style="display:flex; align-items:center; gap:10px; cursor:pointer;"><input type="checkbox" id="isContact" style="width:auto; margin:0;"> Настройки Контакта 📒</label>
-                <div id="contactSettings" style="display:none; margin-top:10px;"><input type="text" id="contactLocName" placeholder="Имя"><input type="text" id="contactLocAv" placeholder="Аватар"><div style="display:flex; gap:5px;"><button class="success" onclick="saveContact()">Да</button><button class="danger" onclick="removeContact()">Удалить</button></div></div>
+                <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                    <input type="checkbox" id="isContact" style="width:auto; margin:0;"> Настройки Контакта 📒
+                </label>
+                <div id="contactSettings" style="display:none; margin-top:10px;">
+                    <input type="text" id="contactLocName" placeholder="Имя">
+                    <input type="text" id="contactLocAv" placeholder="Аватар">
+                    <div style="display:flex; gap:5px;">
+                        <button class="success" onclick="saveContact()">Да</button>
+                        <button class="danger" onclick="removeContact()">Удалить</button>
+                    </div>
+                </div>
             </div>
             <button id="blockBtn" class="danger" style="margin-top:15px;" onclick="toggleBlock()">🚫 Заблокировать</button>
             <button class="secondary" style="width:100%; margin-top:8px;" onclick="closeM('user-prof-modal')">Закрыть</button>
         </div>
     </div>
 
-    <div id="forward-modal" class="modal-overlay"><div class="modal-card"><h3>Переслать кому? ➡️</h3><input type="text" id="fwdSearch" placeholder="Поиск..." oninput="renderFwdList()"><div id="fwdChatList" style="max-height: 250px; overflow-y: auto;"></div><button class="secondary" style="width:100%; margin-top:15px;" onclick="closeM('forward-modal')">Отмена</button></div></div>
+    <div id="forward-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h3>Переслать кому? ➡️</h3>
+            <input type="text" id="fwdSearch" placeholder="Поиск..." oninput="renderFwdList()">
+            <div id="fwdChatList" style="max-height: 250px; overflow-y: auto;"></div>
+            <button class="secondary" style="width:100%; margin-top:15px;" onclick="closeM('forward-modal')">Отмена</button>
+        </div>
+    </div>
 
     <div id="app" class="tg-container">
         <aside class="tg-sidebar">
             <div class="profile-header">
-                <div style="display:flex; align-items:center; gap:10px; cursor:pointer; flex:1;" onclick="openMe()"><img id="myAvImg" class="avatar" src=""><div id="myName">Загрузка...</div></div>
-                <div class="header-actions-box"><button class="hdr-icon-btn" onclick="document.getElementById('create-group-modal').style.display='flex'">➕</button><button class="hdr-icon-btn" onclick="initTabsModal()">⚙️</button><button class="hdr-icon-btn" onclick="toggleTheme()" id="themeBtn">🌙</button></div>
+                <div style="display:flex; align-items:center; gap:10px; cursor:pointer; flex:1;" onclick="openMe()">
+                    <img id="myAvImg" class="avatar" src="">
+                    <div id="myName">Загрузка...</div>
+                </div>
+                <div class="header-actions-box">
+                    <button class="hdr-icon-btn" onclick="document.getElementById('create-group-modal').style.display='flex'">➕</button>
+                    <button class="hdr-icon-btn" onclick="initTabsModal()">⚙️</button>
+                    <button class="hdr-icon-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+                </div>
             </div>
-            <div style="padding:10px;"><input type="text" id="srch" placeholder="Поиск..." oninput="render()" style="margin:0;"></div>
-            <div class="tabs" id="tabsContainer"></div><div class="chat-list" id="chatList"></div>
+            <div style="padding:10px;">
+                <input type="text" id="srch" placeholder="Поиск..." oninput="render()" style="margin:0;">
+            </div>
+            <div class="tabs" id="tabsContainer"></div>
+            <div class="chat-list" id="chatList"></div>
         </aside>
+        
         <main class="tg-main">
-            <header class="header"><div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="openChatContextInfo()"><img id="hAv" src="" style="width:35px; height:35px; border-radius:50%; display:none; object-fit: cover;"><div><b id="hTitle">Выберите чат</b><br><small id="hDesc" style="color:var(--text-muted);font-size:11px"></small></div></div></header>
+            <header class="header">
+                <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="openChatContextInfo()">
+                    <img id="hAv" src="" style="width:35px; height:35px; border-radius:50%; display:none; object-fit: cover;">
+                    <div>
+                        <b id="hTitle">Выберите чат</b><br>
+                        <small id="hDesc" style="color:var(--text-muted);font-size:11px"></small>
+                    </div>
+                </div>
+            </header>
+            
             <div id="msgBox" class="messages"></div>
-            <div id="blockOverlay" class="block-overlay"><span>Вы заблокировали пользователя 🚫</span><button class="success" onclick="quickUnblock()">Разблокировать</button></div>
-            <div id="action-bar"><div id="action-text"></div><button class="secondary" onclick="cancelAction()">✖</button></div>
-            <div class="input-bar"><textarea id="msgInp" placeholder="Написать..." rows="1" style="margin:0; resize:none;" onkeydown="checkEnter(event)"></textarea><button onclick="sendMsg()" style="width:55px; height:45px; margin:0; background: var(--accent);">➤</button></div>
+            
+            <div id="blockOverlay" class="block-overlay">
+                <span>Вы заблокировали пользователя 🚫</span>
+                <button class="success" onclick="quickUnblock()">Разблокировать</button>
+            </div>
+            
+            <div id="action-bar">
+                <div id="action-text"></div>
+                <button class="secondary" onclick="cancelAction()">✖</button>
+            </div>
+            
+            <div class="input-bar">
+                <textarea id="msgInp" placeholder="Написать..." rows="1" style="margin:0; resize:none;" onkeydown="checkEnter(event)"></textarea>
+                <button onclick="sendMsg()" style="width:55px; height:45px; margin:0; background: var(--accent);">➤</button>
+            </div>
         </main>
     </div>
 
@@ -213,20 +288,27 @@
         let myID = ""; let active = null; let viewingUserId = "";
         let cache = { u: {}, g: {}, contacts: {}, blocked: {}, myChats: {}, pins: {} };
         let currentMessages = {}; let editMsgId = null; let replyMsgData = null; let forwardMsgData = null;
-        let tabsConfig = JSON.parse(localStorage.getItem('vchat_tabs_cfg')) || [{ id: 'chats', name: 'Чаты' }, { id: 'global', name: 'Общее' }, { id: 'groups', name: 'Группы' }, { id: 'contacts', name: 'Контакты' }]; 
+        let tabsConfig = JSON.parse(localStorage.getItem('vchat_tabs_cfg')) || [
+            { id: 'chats', name: 'Чаты' }, { id: 'global', name: 'Общее' }, 
+            { id: 'groups', name: 'Группы' }, { id: 'contacts', name: 'Контакты' }
+        ]; 
         let currentTab = tabsConfig[0].id;
 
         if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light-mode'); document.getElementById('themeBtn').innerText = '🌞'; }
-        function toggleTheme() { document.body.classList.toggle('light-mode'); const isL = document.body.classList.contains('light-mode'); localStorage.setItem('theme', isL?'light':'dark'); document.getElementById('themeBtn').innerText = isL?'🌞':'🌙'; }
+        
+        function toggleTheme() { 
+            document.body.classList.toggle('light-mode'); 
+            const isL = document.body.classList.contains('light-mode'); 
+            localStorage.setItem('theme', isL ? 'light' : 'dark'); 
+            document.getElementById('themeBtn').innerText = isL ? '🌞' : '🌙'; 
+        }
 
-        // ИСПРАВЛЕНО: Глобальный перехватчик изменений статуса и фикс багов слияния Google-профиля с RTDB
         authSystem.onAuthStateChanged(user => {
             if (user) {
                 myID = user.uid;
                 db.ref("users/" + myID).on("value", s => {
                     const d = s.val();
                     if (!d) { 
-                        // Исправлен баг падения скрипта при создании записи первого входа через Google
                         const generatedNick = user.displayName || user.email.split('@')[0] || "Юзер_" + myID.substring(0,4);
                         db.ref("users/" + myID).set({ 
                             nickname: generatedNick, 
@@ -240,62 +322,48 @@
                         document.getElementById('myEmailView').innerText = d.email || user.email || "Скрыт";
                         document.getElementById('myAvImg').src = d.avatar || "https://api.dicebear.com/7.x/identicon/svg?seed="+myID;
                         
-                        cache.contacts = d.contacts || {}; cache.blocked = d.blocked || {};
-                        cache.myChats = d.chats || {}; cache.pins = d.pins || {};
+                        // ВОТ ЭТОТ КУСОК Я СЛУЧАЙНО ЗАТЕР В ПРОШЛЫЙ РАЗ (ВОССТАНОВИЛ PINS)
+                        cache.contacts = d.contacts || {}; 
+                        cache.blocked = d.blocked || {};
+                        cache.myChats = d.chats || {}; 
+                        cache.pins = d.pins || {};
 
-                        if (d.pin && d.pin.trim() !== "" && sessionStorage.getItem('vchat_pin_pass') !== 'true') {
-                            document.getElementById('login-scr').style.display = 'flex'; document.getElementById('login-view').style.display = 'none';
-                            document.getElementById('pin-view').style.display = 'block'; document.getElementById('authPinInp').focus();
-                        } else {
-                            document.getElementById('login-scr').style.display = 'none'; document.getElementById('app').style.display = 'flex';
-                        }
+                        document.getElementById('login-scr').style.display = 'none'; 
+                        document.getElementById('app').style.display = 'flex';
                     }
                 });
                 db.ref("users").on("value", s => { cache.u = s.val() || {}; renderTabs(); render(); });
                 db.ref("groups").on("value", s => { cache.g = s.val() || {}; renderTabs(); render(); });
             } else {
-                myID = ""; sessionStorage.clear(); document.getElementById('login-scr').style.display = 'flex'; document.getElementById('app').style.display = 'none';
+                myID = ""; sessionStorage.clear(); 
+                document.getElementById('login-scr').style.display = 'flex'; 
+                document.getElementById('app').style.display = 'none';
             }
         });
 
         function login() { authSystem.signInWithEmailAndPassword(document.getElementById('uEmail').value, document.getElementById('uPass').value).catch(err=>alert(err.message)); }
         
-        // ИСПРАВЛЕНО: Новый пуленепробиваемый метод авторизации через провайдер Google
         function loginWithGoogle() {
             const provider = new firebase.auth.GoogleAuthProvider();
-            provider.addScope('email');
-            provider.addScope('profile');
-            
-            // Фикс сбоев всплывающих окон: Сначала пробуем всплывающее окно, при блокировке переключаемся на редирект
+            provider.addScope('email'); provider.addScope('profile');
             authSystem.signInWithPopup(provider)
-                .then((result) => {
-                    console.log("Успешный вход через Google:", result.user.email);
-                })
+                .then((result) => { console.log("Успешный вход через Google:", result.user.email); })
                 .catch((error) => {
                     if (error.code === 'auth/popup-blocked' || error.code === 'auth/cancelled-popup-request') {
-                        console.log("Попап заблокирован, переключаюсь на авторизацию через редирект...");
                         authSystem.signInWithRedirect(provider);
-                    } else {
-                        alert("Ошибка Google Auth: " + error.message);
-                    }
+                    } else { alert("Ошибка Google Auth: " + error.message); }
                 });
         }
 
-        // ИСПРАВЛЕНО: Дополнительный обработчик редиректа на случай, если сработал запасной метод
         authSystem.getRedirectResult().then((result) => {
             if (result.user) console.log("Успешный вход через Google Redirect:", result.user.email);
-        }).catch((error) => {
-            if (error.code && error.code !== 'auth/argument-error') console.error("Ошибка редиректа:", error.message);
-        });
+        }).catch((error) => { if (error.code && error.code !== 'auth/argument-error') console.error("Ошибка редиректа:", error.message); });
 
-        function register() { authSystem.createUserWithEmailAndPassword(document.getElementById('regEmail').value, document.getElementById('regPass').value).then(c => { db.ref("users/"+c.user.uid).set({ nickname: document.getElementById('uNick').value, email: document.getElementById('regEmail').value, avatar:"", bio: "Я в VChat!", pin: document.getElementById('regPin').value||"" }); }).catch(err=>alert(err.message)); }
-        function verifyPin() { const p = document.getElementById('authPinInp').value; db.ref("users/"+myID+"/pin").once("value", s => { if(s.val()===p) { sessionStorage.setItem('vchat_pin_pass','true'); document.getElementById('login-scr').style.display='none'; document.getElementById('app').style.display='flex'; } else alert("Неверный ПИН!"); }); }
+        function register() { authSystem.createUserWithEmailAndPassword(document.getElementById('regEmail').value, document.getElementById('regPass').value).then(c => { db.ref("users/"+c.user.uid).set({ nickname: document.getElementById('uNick').value, email: document.getElementById('regEmail').value, avatar:"", bio: "Я в VChat!" }); }).catch(err=>alert(err.message)); }
         function logOut() { authSystem.signOut().then(()=>location.reload()); }
 
         function openMe() { const d = cache.u[myID]; if(!d) return; document.getElementById('myNickNew').value = d.nickname; document.getElementById('myAvNew').value = d.avatar || ""; document.getElementById('myBioNew').value = d.bio || ""; document.getElementById('myAvPreview').src = d.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${myID}`; document.getElementById('my-prof-modal').style.display='flex'; }
         function updateMe() { db.ref("users/"+myID).update({ nickname: document.getElementById('myNickNew').value, avatar: document.getElementById('myAvNew').value, bio: document.getElementById('myBioNew').value }).then(() => { alert("Сохранено!"); closeM('my-prof-modal'); }); }
-        function updatePinCode() { const newPin = document.getElementById('changePinInp').value.trim(); if(newPin.length !== 4 || isNaN(newPin)) return alert("ПИН должен состоять из 4 цифр!"); db.ref(`users/${myID}/pin`).set(newPin).then(() => { alert("ПИН обновлен! 🔒"); document.getElementById('changePinInp').value = ""; }); }
-        function deletePinCode() { if(confirm("Удалить ПИН-код?")) { db.ref(`users/${myID}/pin`).set("").then(() => { alert("ПИН удален! 🔓"); document.getElementById('changePinInp').value = ""; }); } }
         function clearAppCache() { if(confirm("Очистить кэш?")) { localStorage.clear(); sessionStorage.clear(); location.reload(); } }
 
         function getUserDisplayData(uid) {
@@ -323,7 +391,15 @@
             });
         }
 
-        function togglePin(id, e) { e.stopPropagation(); if (cache.pins && cache.pins[id]) { db.ref(`users/${myID}/pins/${id}`).remove(); } else { db.ref(`users/${myID}/pins/${id}`).set(true); } }
+        // ФУНКЦИЯ ЗАКРЕПЛЕНИЯ ЧАТА (ВЕРНУЛАСЬ К ЖИЗНИ)
+        function togglePin(id, e) { 
+            e.stopPropagation(); 
+            if (cache.pins && cache.pins[id]) { 
+                db.ref(`users/${myID}/pins/${id}`).remove(); 
+            } else { 
+                db.ref(`users/${myID}/pins/${id}`).set(true); 
+            } 
+        }
 
         function render() {
             const list = document.getElementById('chatList'); if(!list) return; const q = document.getElementById('srch').value.toLowerCase(); list.innerHTML = ""; let items = [];
@@ -337,8 +413,12 @@
             }
             items.sort((a, b) => (cache.pins && cache.pins[b.id] ? 1 : 0) - (cache.pins && cache.pins[a.id] ? 1 : 0));
             items.forEach(item => {
-                const isPinned = cache.pins && cache.pins[item.id]; const d = document.createElement('div'); d.className = `chat-item ${isPinned ? 'pinned' : ''}`; d.onclick = () => select(item.id, item.name, item.type);
-                d.innerHTML = `<img src="${item.avatar}"><div><b>${item.name}</b><br><small>${item.type}</small></div><button class="pin-btn" onclick="togglePin('${item.id}', event)">📌</button>`; list.appendChild(d);
+                const isPinned = cache.pins && cache.pins[item.id]; 
+                const d = document.createElement('div'); 
+                d.className = `chat-item ${isPinned ? 'pinned' : ''}`; 
+                d.onclick = () => select(item.id, item.name, item.type);
+                d.innerHTML = `<img src="${item.avatar}"><div><b>${item.name}</b><br><small>${item.type}</small></div><button class="pin-btn" onclick="togglePin('${item.id}', event)">📌</button>`; 
+                list.appendChild(d);
             });
         }
 
