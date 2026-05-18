@@ -282,12 +282,13 @@
             <h4 style="margin:0 0 10px 0; color:var(--accent);">Active сессии 🖥️</h4>
             <div id="sessionsListContainer" style="max-height:120px; overflow-y:auto; margin-bottom:10px; border:1px solid var(--border-color); padding:6px; border-radius:8px;"></div>
             
-            <button class="danger" onclick="executeClearAppCache()" style="background:#dc2626;">🗑️ Очистить кэш приложения</button>
+            <button class="danger" onclick="executeClearAppCache()" style="background:#dc2626; margin-bottom: 5px;">🗑️ Очистить кэш приложения</button>
 
             <hr style="border-color:var(--border-color); margin:20px 0;">
-            <div style="text-align:center; color:var(--text-muted); font-size:12px; margin-bottom:10px;">Версия: VChat 1.0.6</div>
-            <button class="danger" onclick="executeSignOut()">Выйти из аккаунта</button>
-            <button class="secondary" style="margin-top:8px;" onclick="closeModal('myProfileModal')">Закрыть</button>
+            <div style="text-align:center; color:var(--text-muted); font-size:12px; margin-bottom:10px;">Версия: VChat 1.0.7</div>
+            <button class="secondary" onclick="executeSignOut()">Выйти из аккаунта</button>
+            <button class="danger" onclick="executeDeleteAccountPermanently()" style="background: #b91c1c; margin-top: 8px;">⚠️ УДАЛИТЬ АККАУНТ НАВСЕГДА</button>
+            <button class="secondary" style="margin-top:12px;" onclick="closeModal('myProfileModal')">Закрыть</button>
         </div>
     </div>
 
@@ -434,7 +435,6 @@
         appAuth.onAuthStateChanged(user => {
             if (user) {
                 if (!user.emailVerified) {
-                    // Если зашли, но мыло не подтверждено — выбиваем на страницу входа
                     appAuth.signOut();
                     return;
                 }
@@ -484,7 +484,6 @@
             .then(res => {
                 realtimeDb.ref("users/"+res.user.uid).set({ nickname: nick, avatar: "", bio: "Новый аккаунт", email: email });
                 res.user.sendEmailVerification().then(() => {
-                    // Скрываем инпуты, показываем красивое предупреждение
                     document.getElementById('regFormInputs').style.display = 'none';
                     document.getElementById('verifyAlertBox').style.display = 'block';
                     document.getElementById('regBackBtn').innerText = "Вернуться к логину";
@@ -494,11 +493,40 @@
         }
         
         function executeSignOut() { appAuth.signOut().then(() => location.reload()); }
+
+        // ХАРДКОРНОЕ УДАЛЕНИЕ АККАУНТА
+        function executeDeleteAccountPermanently() {
+            const currentUser = appAuth.currentUser;
+            if (!currentUser) return;
+
+            if (confirm("🚨 БРО, ТЫ УВЕРЕН?! Это действие сотрет твой профиль, контакты и настройки НАВСЕГДА без возможности восстановления!")) {
+                const userPath = `users/${activeUserId}`;
+                
+                // 1. Сначала сносим все упоминания и данные из Realtime Database
+                realtimeDb.ref(userPath).remove()
+                .then(() => {
+                    // 2. Сносим саму учетку из Firebase Authentication
+                    return currentUser.delete();
+                })
+                .then(() => {
+                    alert("Твой аккаунт успешно удален. Жаль терять такого бойца! 🫡");
+                    localStorage.clear();
+                    location.reload();
+                })
+                .catch(error => {
+                    // Перехват ошибки безопасности авторизации
+                    if (error.code === 'auth/requires-recent-login') {
+                        alert("⚠️ Ошибка безопасности Firebase!\n\nУдаление аккаунта — критическая операция. Пожалуйста, выйди из аккаунта, зайди заново (чтобы обновить сессию) и повтори удаление.");
+                    } else {
+                        alert("Кринж, что-то пошло не так: " + error.message);
+                    }
+                });
+            }
+        }
         
         function switchAuthView(reg) { 
             document.getElementById('loginCard').style.display = reg?'none':'block'; 
             document.getElementById('registerCard').style.display = reg?'block':'none'; 
-            // Сбрасываем стейт формы регистрации при переключении
             document.getElementById('regFormInputs').style.display = 'block';
             document.getElementById('verifyAlertBox').style.display = 'none';
             document.getElementById('regBackBtn').innerText = "Назад";
