@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VChat</title>
+    <title>VChat 1.0.1</title>
     
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     
@@ -165,7 +165,7 @@
         .msg-media { max-width: 100%; border-radius: 8px; margin-bottom: 6px; cursor: pointer; }
         .msg-quote { background: rgba(0,0,0,0.15); padding: 6px 10px; border-left: 3px solid var(--accent); border-radius: 4px; margin-bottom: 6px; font-size: 12.5px; }
 
-        .msg-hover-tools { display: none; gap: 8px; position: absolute; top: -15px; right: 10px; background: var(--bg-card); padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .msg-hover-tools { display: none; gap: 8px; position: absolute; top: -18px; right: 10px; background: var(--bg-card); padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 100; }
         .msg-bubble:hover .msg-hover-tools { display: flex; }
         .tool-ico { cursor: pointer; font-size: 13px; opacity: 0.7; transition: transform 0.15s; }
         .tool-ico:hover { opacity: 1; transform: scale(1.25); }
@@ -265,7 +265,7 @@
             <div id="ctxDescriptionContainer" style="text-align:center; margin:10px 0; color:var(--text-main); font-style:italic; font-size:14px;"></div>
             
             <div id="ctxUserBlock" style="display:none;">
-                <button id="addContactBtn" class="success" onclick="executeAddActiveToContacts()">➕ Добавить в Контакты</button>
+                <button id="addContactBtn" class="success" onclick="executeToggleContact()">➕ Добавить в Контакты</button>
                 <input type="text" id="localCustomName" placeholder="Локальное имя контакта">
                 <button class="secondary" onclick="saveLocalContactName()">Сохранить имя</button>
                 <button id="blockToggleBtn" class="danger" onclick="executeToggleBlockUser()">Блокировать</button>
@@ -387,11 +387,17 @@
         // СЛУШАТЕЛЬ СЕССИИ
         appAuth.onAuthStateChanged(user => {
             if (user) {
+                // ПРОВЕРКА ВЕРИФИКАЦИИ ПОЧТЫ
+                if (!user.emailVerified) {
+                    alert("Чел, сначала подтверди свой email! Мы отправили ссылку на почту.");
+                    appAuth.signOut();
+                    return;
+                }
+
                 activeUserId = user.uid;
                 const sessionId = localStorage.getItem('vchat_session_id') || 'sess_' + Date.now();
                 localStorage.setItem('vchat_session_id', sessionId);
                 
-                // Фикс отображения Windows NT 10.0 -> Windows 10/11
                 let rawDevice = navigator.userAgent.split(') ')[0].split(' (')[1] || "Браузер/Устройство";
                 if (rawDevice.includes("Windows NT 10.0")) {
                     rawDevice = rawDevice.replace("Windows NT 10.0", "Windows 10/11");
@@ -427,7 +433,20 @@
 
         function executeLogin() { appAuth.signInWithEmailAndPassword(document.getElementById('authEmail').value, document.getElementById('authPass').value).catch(e => alert(e.message)); }
         function executeGoogleAuth() { appAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e => alert(e.message)); }
-        function executeRegister() { appAuth.createUserWithEmailAndPassword(document.getElementById('regEmail').value, document.getElementById('regPass').value).then(res => realtimeDb.ref("users/"+res.user.uid).set({ nickname: document.getElementById('regNick').value, avatar: "", bio: "Новый аккаунт", email: document.getElementById('regEmail').value })).catch(e => alert(e.message)); }
+        
+        // РЕГИСТРАЦИЯ С ВЕРИФИКАЦИЕЙ ПОЧТЫ
+        function executeRegister() { 
+            appAuth.createUserWithEmailAndPassword(document.getElementById('regEmail').value, document.getElementById('regPass').value)
+            .then(res => {
+                realtimeDb.ref("users/"+res.user.uid).set({ nickname: document.getElementById('regNick').value, avatar: "", bio: "Новый аккаунт", email: document.getElementById('regEmail').value });
+                res.user.sendEmailVerification().then(() => {
+                    alert("Бро, на твою почту отправлена ссылка! Подтверди email, чтобы войти в аккаунт.");
+                    appAuth.signOut();
+                    switchAuthView(false);
+                });
+            }).catch(e => alert(e.message)); 
+        }
+        
         function executeSignOut() { appAuth.signOut().then(() => location.reload()); }
         function switchAuthView(reg) { document.getElementById('loginCard').style.display = reg?'none':'block'; document.getElementById('registerCard').style.display = reg?'block':'none'; }
 
@@ -475,7 +494,6 @@
             const search = document.getElementById('searchBarInp').value.toLowerCase();
             let items = [];
 
-            // Внедрение Избранного (Сохраненные)
             if (activeSidebarTab === 'chats' || activeSidebarTab === 'global') {
                 if ("сохранённые".includes(search) || "избранное".includes(search) || !search) {
                     items.push({ id: 'saved_messages', name: 'Сохранённые ⭐️', av: '', type: 'SAVED' });
@@ -532,7 +550,6 @@
                 const g = globalCache.groups[chatId] || {};
                 av.src = g.avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${chatId}`;
                 document.getElementById('activeChatTitle').innerText = chatName;
-                // ФИКС: Выводим описание группы прямо в шапку чата
                 document.getElementById('activeChatStatus').innerText = g.description ? `📋 ${g.description}` : "Групповой чат";
             }
 
@@ -719,7 +736,13 @@
                 document.getElementById('ctxDescriptionContainer').innerText = u.bio || "Статус «О себе» не заполнен.";
                 
                 document.getElementById('ctxUserBlock').style.display = 'block'; document.getElementById('ctxGroupBlock').style.display = 'none';
-                document.getElementById('addContactBtn').innerText = globalCache.contacts[currentActiveChat.id] ? "⭐️ В контактах" : "➕ Добавить в Контакты";
+                
+                // СМАРТ КНОПКА ДОБАВЛЕНИЯ/УДАЛЕНИЯ КОНТАКТА
+                const isContact = globalCache.contacts[currentActiveChat.id];
+                const btn = document.getElementById('addContactBtn');
+                btn.innerText = isContact ? "❌ Удалить из контактов" : "➕ Добавить в Контакты";
+                btn.className = isContact ? "danger" : "success";
+                
                 document.getElementById('localCustomName').value = globalCache.customNames[currentActiveChat.id] || "";
             } else {
                 const g = globalCache.groups[currentActiveChat.id] || {};
@@ -753,7 +776,48 @@
         function leaveCurrentGroup() { if(currentActiveChat && confirm("Выйти из группы?")) { realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${activeUserId}`).remove(); closeModal('contextInfoModal'); resetChatWindow(); } }
         function executeUpdateGroupMeta() { if(currentActiveChat) { realtimeDb.ref(`groups/${currentActiveChat.id}`).update({ name: document.getElementById('editGrpNameInp').value, avatar: document.getElementById('editGrpAvInp').value, description: document.getElementById('editGrpDescInp').value }).then(() => { executeSelectActiveChat(currentActiveChat.id, document.getElementById('editGrpNameInp').value, 'GROUP'); }); closeModal('contextInfoModal'); } }
         
-        function executeAddActiveToContacts() { if(currentActiveChat) { realtimeDb.ref(`users/${activeUserId}/contacts/${currentActiveChat.id}`).set(true); alert("Добавлен в контакты!"); openActiveChatContextInfo(); } }
+        // ФУНКЦИЯ ПРИГЛАШЕНИЯ ПОЛЬЗОВАТЕЛЯ В ГРУППУ
+        function inviteUserToGroup() {
+            if (!currentActiveChat || currentActiveChat.type !== 'GROUP') return;
+            const input = document.getElementById('inviteEmailInp').value.trim().toLowerCase();
+            if (!input) return;
+            
+            let foundUid = null;
+            for (let uid in globalCache.users) {
+                const u = globalCache.users[uid];
+                if ((u.email && u.email.toLowerCase() === input) || (u.nickname && u.nickname.toLowerCase() === input)) {
+                    foundUid = uid;
+                    break;
+                }
+            }
+            
+            if (foundUid) {
+                realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${foundUid}`).set("member").then(() => {
+                    alert("Челик успешно добавлен в группу!");
+                    document.getElementById('inviteEmailInp').value = "";
+                    openActiveChatContextInfo();
+                });
+            } else {
+                alert("Не получилось найти такого чела. Проверь ник или email!");
+            }
+        }
+
+        // УМНЫЙ ПЕРЕКЛЮЧАТЕЛЬ КОНТАКТОВ (ДОБАВЛЕНИЕ / УДАЛЕНИЕ)
+        function executeToggleContact() { 
+            if(currentActiveChat) { 
+                if(globalCache.contacts[currentActiveChat.id]) {
+                    if(confirm("Реально удалить челика из контактов?")) {
+                        realtimeDb.ref(`users/${activeUserId}/contacts/${currentActiveChat.id}`).remove(); 
+                        openActiveChatContextInfo(); 
+                    }
+                } else {
+                    realtimeDb.ref(`users/${activeUserId}/contacts/${currentActiveChat.id}`).set(true); 
+                    alert("Добавлен в контакты!"); 
+                    openActiveChatContextInfo(); 
+                }
+            } 
+        }
+
         function saveLocalContactName() { if(currentActiveChat) { realtimeDb.ref(`users/${activeUserId}/customNames/${currentActiveChat.id}`).set(document.getElementById('localCustomName').value); closeModal('contextInfoModal'); renderChatLists(); } }
         function executeToggleBlockUser() { if(currentActiveChat) { realtimeDb.ref(`users/${activeUserId}/blocked/${currentActiveChat.id}`).set(true); closeModal('contextInfoModal'); resetChatWindow(); } }
         
