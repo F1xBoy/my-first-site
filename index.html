@@ -140,6 +140,10 @@
         .back-btn-mobile { display: none; background: transparent; border: none; font-size: 20px; color: var(--accent); cursor: pointer; padding: 0 10px 0 0; width: auto; margin: 0; }
         .verify-alert-box { background: rgba(234, 179, 8, 0.1); border: 1px solid var(--warning); border-radius: 10px; padding: 14px; margin: 15px 0 5px 0; font-size: 13.5px; line-height: 1.4; display: none; animation: fadeInUp 0.3s ease; }
 
+        /* ТОСТ УВЕДОМЛЕНИЯ */
+        #toastBox { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--bg-hover); color: var(--text-main); padding: 12px 24px; border-radius: 20px; border: 1px solid var(--accent); box-shadow: 0 10px 25px rgba(0,0,0,0.5); z-index: 2000; opacity: 0; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; font-size: 14px; font-weight: bold; }
+        #toastBox.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
         @media (max-width: 767px) {
             .tg-sidebar { width: 100% !important; min-width: 100% !important; max-width: 100% !important; position: absolute; left: 0; top: 0; transition: transform 0.3s cubic-bezier(0.1, 0.8, 0.25, 1); }
             .tg-body { width: 100%; position: absolute; left: 0; top: 0; transition: transform 0.3s cubic-bezier(0.1, 0.8, 0.25, 1); }
@@ -157,6 +161,8 @@
     </style>
 </head>
 <body class="mobile-view-sidebar">
+
+    <div id="toastBox">Уведомление</div>
 
     <div id="authOverlay" class="modal-overlay" style="display: flex;">
         <div class="modal-card" id="loginCard">
@@ -208,7 +214,7 @@
             <button class="danger" onclick="executeClearAppCache()" style="background:#dc2626; margin-bottom: 5px;">🗑️ Очистить кэш приложения</button>
 
             <hr style="border-color:var(--border-color); margin:20px 0;">
-            <div style="text-align:center; color:var(--text-muted); font-size:12px; margin-bottom:10px;">Версия: VChat 1.1.0</div>
+            <div style="text-align:center; color:var(--text-muted); font-size:12px; margin-bottom:10px;">Версия: VChat 1.2.0</div>
             <button class="secondary" onclick="executeSignOut()">Выйти из аккаунта</button>
             <button class="danger" onclick="executeDeleteAccountPermanently()" style="background: #b91c1c; margin-top: 8px;">⚠️ УДАЛИТЬ АККАУНТ НАВСЕГДА</button>
             <button class="secondary" style="margin-top:12px;" onclick="closeModal('myProfileModal')">Закрыть</button>
@@ -241,13 +247,15 @@
                 <input type="text" id="editGrpBannedWordsInp" placeholder="Запрещенные слова (через запятую)">
                 
                 <label style="font-size:12px; color:var(--text-muted); display:block; margin-top:8px;">Замедление чата (анти-спам кулдаун):</label>
-                <select id="editGrpCooldownSel" style="margin-top:2px;">
+                <select id="editGrpCooldownSel" style="margin-top:2px; border-radius: 15px;" onchange="toggleCustomCooldown(this.value)">
                     <option value="0">Выкл</option>
                     <option value="5">5 секунд</option>
                     <option value="10">10 секунд</option>
                     <option value="30">30 секунд</option>
                     <option value="60">1 минута</option>
+                    <option value="custom">Свое время...</option>
                 </select>
+                <input type="number" id="editGrpCooldownCustom" style="display:none; border-radius: 15px; margin-top: 6px;" placeholder="Введи секунды (например 120)">
 
                 <div id="ownerAdminPermsBlock" style="display:none; background:var(--bg-main); padding:12px; border-radius:10px; border:1px solid var(--border-color); margin:10px 0; text-align:left;">
                     <h4 style="margin:0 0 8px 0; color:var(--accent); font-size:14px;">Права Админов 🛡️</h4>
@@ -334,7 +342,7 @@
                 </div>
                 <input type="file" id="fileInputEngine" accept="image/*" style="display:none;" onchange="processLocalFileSelection(event)">
                 <textarea id="messageInputEngine" placeholder="Напишите сообщение..." rows="1" style="margin:0; resize:none;" onkeydown="handleInputKeyPress(event)"></textarea>
-                <button onclick="executeSendMessage()" style="width:50px; height:42px; margin:0; background:var(--accent); border-radius:10px;">➤</button>
+                <button id="sendMsgBtn" onclick="executeSendMessage()" style="width:50px; height:42px; margin:0; background:var(--accent); border-radius:10px;">➤</button>
             </div>
         </main>
     </div>
@@ -356,6 +364,12 @@
 
         function escapeHTML(str) { return str ? str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;") : ""; }
         
+        let toastTimeout;
+        function showToast(msg) {
+            const t = document.getElementById('toastBox'); t.innerText = msg; t.classList.add('show');
+            clearTimeout(toastTimeout); toastTimeout = setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
         if(localStorage.getItem('vchat_theme')==='light') { document.body.classList.add('light-mode'); document.getElementById('themeBtn').innerText='🌞'; }
         function executeToggleTheme() { document.body.classList.toggle('light-mode'); const isL=document.body.classList.contains('light-mode'); localStorage.setItem('vchat_theme', isL?'light':'dark'); document.getElementById('themeBtn').innerText=isL?'🌞':'🌙'; }
 
@@ -454,8 +468,18 @@
                 snap.forEach(child => {
                     const key = child.key, m = child.val(); loadedMessagesMap[key] = m;
                     const bubble = document.createElement('div'); bubble.className = `msg-bubble ${m.sid === activeUserId ? 'from-me' : 'from-he'}`;
+                    
+                    // Проверка прав на удаление (Только свои, либо админ удаляет чужие)
+                    let canDel = (m.sid === activeUserId);
+                    if (!canDel && currentActiveChat && currentActiveChat.type === 'GROUP') {
+                        const mr = (globalCache.groups[currentActiveChat.id].roles || {})[activeUserId];
+                        if (mr === 'owner' || mr === 'admin') canDel = true;
+                    }
+
                     let replyHtml = m.replyTo ? `<div class="msg-quote"><b>${escapeHTML(m.replyTo.author)}</b>:<br>${escapeHTML(m.replyTo.text)}</div>` : ""; let mediaHtml = m.img ? `<img src="${m.img}" class="msg-media" onclick="viewFullMedia('${m.img}')">` : ""; let codeHtml = m.code ? `<div style="background:rgba(0,0,0,0.25); padding:8px; border-radius:8px; margin:6px 0; font-family:monospace; font-size:12px; border:1px solid var(--border-color); max-height:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"><code>${escapeHTML(m.code)}</code></div><button class="secondary" style="padding:4px 8px; font-size:11px; margin:0 0 6px 0; width:auto;" onclick="openFullCodeViewer('${key}')">👁️ Смотреть код полностью</button>` : "";
-                    bubble.innerHTML = `<div class="msg-author" onclick="openTargetUserProfile('${m.sid}')">${escapeHTML(m.sid===activeUserId?"Вы":m.snick)}</div>${replyHtml} ${mediaHtml} ${codeHtml}<div class="msg-text">${escapeHTML(m.txt)}</div><div class="msg-time-stamp">${new Date(m.ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div><div class="msg-hover-tools"><span class="tool-ico" title="Скопировать" onclick="executeCopyMessageText('${key}')">📋</span><span class="tool-ico" title="Ответить" onclick="initReplyMessageContext('${key}')">↩️</span><span class="tool-ico" title="Переслать" onclick="initForwardMessageContext('${key}')">➡️</span>${m.sid === activeUserId ? `<span class="tool-ico" title="Редактировать" onclick="initEditMessageContext('${key}')">✏️</span>` : ''}<span class="tool-ico" title="Удалить" onclick="executeDeleteMessage('${path}','${key}')">🗑️</span></div>`;
+                    const delHtml = canDel ? `<span class="tool-ico" title="Удалить" onclick="executeDeleteMessage('${path}','${key}')">🗑️</span>` : '';
+                    
+                    bubble.innerHTML = `<div class="msg-author" onclick="openTargetUserProfile('${m.sid}')">${escapeHTML(m.sid===activeUserId?"Вы":m.snick)}</div>${replyHtml} ${mediaHtml} ${codeHtml}<div class="msg-text">${escapeHTML(m.txt)}</div><div class="msg-time-stamp">${new Date(m.ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div><div class="msg-hover-tools"><span class="tool-ico" title="Скопировать" onclick="executeCopyMessageText('${key}')">📋</span><span class="tool-ico" title="Ответить" onclick="initReplyMessageContext('${key}')">↩️</span><span class="tool-ico" title="Переслать" onclick="initForwardMessageContext('${key}')">➡️</span>${m.sid === activeUserId ? `<span class="tool-ico" title="Редактировать" onclick="initEditMessageContext('${key}')">✏️</span>` : ''}${delHtml}</div>`;
                     box.appendChild(bubble);
                 }); box.scrollTop = box.scrollHeight;
             }); renderChatLists();
@@ -469,13 +493,36 @@
                 const u = globalCache.users[currentActiveChat.id] || {}; statusEl.innerText = u.status === 'online' ? "Онлайн 🟢" : "Оффлайн 🔴"; 
             } else { 
                 const g = globalCache.groups[currentActiveChat.id] || {}; 
-                const cdLabel = g.cooldown > 0 ? ` [SlowMode: ${g.cooldown}s]` : "";
-                statusEl.innerText = g.description ? `📋 ${g.description}${cdLabel}` : `Групповой чат${cdLabel}`; 
+                // Убрали текст про кулдаун в шапке, как просил бро
+                statusEl.innerText = g.description ? `📋 ${g.description}` : `Групповой чат`; 
             }
         }
 
-        function executeCopyMessageText(k) { const txt = loadedMessagesMap[k].code || loadedMessagesMap[k].txt; navigator.clipboard.writeText(txt).then(() => alert("Скопировано!")); }
-        function openFullCodeViewer(k) { const c = loadedMessagesMap[k].code; document.getElementById('fullCodeDisplay').innerText = c; document.getElementById('copyCodeModalBtn').onclick = () => { navigator.clipboard.writeText(c).then(() => alert("Код скопирован!")); }; document.getElementById('codeViewerModal').style.display = 'flex'; }
+        // ТАЙМЕР АНТИСПАМА НА КНОПКЕ
+        setInterval(() => {
+            const btn = document.getElementById('sendMsgBtn');
+            if(!btn) return;
+            if(!currentActiveChat || currentActiveChat.type !== 'GROUP') {
+                if(btn.innerText !== "➤") { btn.innerText = "➤"; btn.style.background = "var(--accent)"; }
+                return;
+            }
+            const g = globalCache.groups[currentActiveChat.id] || {};
+            const myRole = (g.roles || {})[activeUserId] || 'member';
+            if(myRole === 'member' && g.cooldown && g.cooldown > 0) {
+                const lastSent = groupLastSentMap[currentActiveChat.id] || 0;
+                const diff = (Date.now() - lastSent) / 1000;
+                if(diff < g.cooldown) {
+                    const remaining = Math.ceil(g.cooldown - diff);
+                    btn.innerText = remaining + "s";
+                    btn.style.background = "var(--bg-hover)";
+                    return;
+                }
+            }
+            if(btn.innerText !== "➤") { btn.innerText = "➤"; btn.style.background = "var(--accent)"; }
+        }, 200);
+
+        function executeCopyMessageText(k) { const txt = loadedMessagesMap[k].code || loadedMessagesMap[k].txt; navigator.clipboard.writeText(txt).then(() => showToast("Скопировано!")); }
+        function openFullCodeViewer(k) { const c = loadedMessagesMap[k].code; document.getElementById('fullCodeDisplay').innerText = c; document.getElementById('copyCodeModalBtn').onclick = () => { navigator.clipboard.writeText(c).then(() => showToast("Код скопирован!")); }; document.getElementById('codeViewerModal').style.display = 'flex'; }
 
         function toggleClipDropdown(e) { e.stopPropagation(); const d = document.getElementById('clipDropdownMenu'); d.style.display = d.style.display === 'flex' ? 'none' : 'flex'; }
         document.addEventListener('click', () => document.getElementById('clipDropdownMenu').style.display = 'none');
@@ -491,7 +538,7 @@
 
         // ОТПРАВКА С АВТОМОДЕРАЦИЕЙ И АНТИСПАМОМ
         function executeSendMessage() {
-            if(currentActiveChat && currentActiveChat.type === 'USER' && globalCache.blockedUsers[currentActiveChat.id]) return alert("Разблокируй челика перед отправкой!");
+            if(currentActiveChat && currentActiveChat.type === 'USER' && globalCache.blockedUsers[currentActiveChat.id]) return showToast("Разблокируй челика перед отправкой!");
             const txt = document.getElementById('messageInputEngine').value.trim(); if(!txt && !base64CompressedAttachment && !pendingTextSnippet) return;
             
             // Фильтр слов и Кулдаун для групп
@@ -499,19 +546,20 @@
                 const g = globalCache.groups[currentActiveChat.id] || {};
                 const myRole = (g.roles || {})[activeUserId] || 'member';
                 
-                // Проверка кулдауна только на обычных участников
+                // Проверка кулдауна
                 if(myRole === 'member' && g.cooldown && g.cooldown > 0) {
                     const lastSent = groupLastSentMap[currentActiveChat.id] || 0;
                     const diff = (Date.now() - lastSent) / 1000;
                     if(diff < g.cooldown) {
                         const remaining = Math.ceil(g.cooldown - diff);
-                        return alert(`Анти-спам! Подожди еще ${remaining} сек перед отправкой, бро.`);
+                        showToast(`⏳ Бро, анти-спам! Подожди еще ${remaining} сек.`);
+                        return; // Блокируем отправку
                     }
                 }
 
                 if(g.bannedWords && txt) {
                     const forbidden = g.bannedWords.split(',').map(w => w.trim().toLowerCase()).filter(w => w);
-                    if(forbidden.some(w => txt.toLowerCase().includes(w))) return alert("Бро, в этой группе запрещены некоторые слова! Сообщение не отправлено.");
+                    if(forbidden.some(w => txt.toLowerCase().includes(w))) return showToast("🚫 Бро, тут запрещены некоторые слова!");
                 }
             }
 
@@ -532,8 +580,8 @@
         function initEditMessageContext(k) { activeEditMessageKey = k; document.getElementById('contextActionBar').style.display='flex'; document.getElementById('contextActionTitle').innerText="РЕДАКТИРОВАНИЕ"; document.getElementById('contextActionText').innerText=loadedMessagesMap[k].txt; document.getElementById('messageInputEngine').value=loadedMessagesMap[k].txt; }
         function initReplyMessageContext(k) { activeReplyMessageData = { msgKey: k, author: loadedMessagesMap[k].snick, text: loadedMessagesMap[k].txt || "[Вложение]" }; document.getElementById('contextActionBar').style.display='flex'; document.getElementById('contextActionTitle').innerText=`ОТВЕТ ДЛЯ ${activeReplyMessageData.author.toUpperCase()}`; document.getElementById('contextActionText').innerText=activeReplyMessageData.text; }
         function initForwardMessageContext(k) { targetForwardMessageData = loadedMessagesMap[k]; document.getElementById('forwardModal').style.display='flex'; const cont = document.getElementById('forwardListContainer'); cont.innerHTML = ""; for(let uid in globalCache.users) if(uid!==activeUserId && !globalCache.blockedUsers[uid]) cont.innerHTML += `<div style="padding:10px; cursor:pointer;" onclick="executeForwardTo('${uid}','USER')">👤 ${escapeHTML(globalCache.users[uid].nickname)}</div>`; for(let gid in globalCache.groups) cont.innerHTML += `<div style="padding:10px; cursor:pointer;" onclick="executeForwardTo('${gid}','GROUP')">👥 ${escapeHTML(globalCache.groups[gid].name)}</div>`; }
-        function executeForwardTo(id, type) { const path = type==='USER' ? (activeUserId<id ? activeUserId+"_"+id : id+"_"+activeUserId) : id; let fPayload = { sid: activeUserId, snick: globalCache.users[activeUserId].nickname, txt: `[Переслано]: ${targetForwardMessageData.txt||''}`, ts: Date.now() }; if (targetForwardMessageData.code) fPayload.code = targetForwardMessageData.code; if (targetForwardMessageData.img) fPayload.img = targetForwardMessageData.img; realtimeDb.ref("msgs/"+path).push().set(fPayload); closeModal('forwardModal'); targetForwardMessageData = null; alert("Переслано!"); }
-        function executeDeleteMessage(p, k) { if(confirm("Удалить сообщение?")) realtimeDb.ref(`msgs/${p}/${k}`).remove(); }
+        function executeForwardTo(id, type) { const path = type==='USER' ? (activeUserId<id ? activeUserId+"_"+id : id+"_"+activeUserId) : id; let fPayload = { sid: activeUserId, snick: globalCache.users[activeUserId].nickname, txt: `[Переслано]: ${targetForwardMessageData.txt||''}`, ts: Date.now() }; if (targetForwardMessageData.code) fPayload.code = targetForwardMessageData.code; if (targetForwardMessageData.img) fPayload.img = targetForwardMessageData.img; realtimeDb.ref("msgs/"+path).push().set(fPayload); closeModal('forwardModal'); targetForwardMessageData = null; showToast("Успешно переслано!"); }
+        function executeDeleteMessage(p, k) { if(confirm("Снести сообщение?")) realtimeDb.ref(`msgs/${p}/${k}`).remove(); }
         function handleInputKeyPress(e) { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); executeSendMessage(); } }
 
         // ПРОФИЛЬ С ЧЕРНЫМ СПИСКОМ
@@ -552,13 +600,15 @@
             
             document.getElementById('myProfileModal').style.display='flex'; 
         }
-        function executeUnblockFromProfile(uid) { realtimeDb.ref(`users/${activeUserId}/blocked/${uid}`).remove().then(() => { alert("Разблокирован!"); openMyProfileSettings(); renderChatLists(); }); }
+        function executeUnblockFromProfile(uid) { realtimeDb.ref(`users/${activeUserId}/blocked/${uid}`).remove().then(() => { showToast("Разблокирован!"); openMyProfileSettings(); renderChatLists(); }); }
         function executeTerminateSession(sid) { realtimeDb.ref(`users/${activeUserId}/sessions/${sid}`).remove().then(() => openMyProfileSettings()); }
         function executeClearAppCache() { if(confirm("Очистить локальный кэш?")) { localStorage.clear(); location.reload(); } }
 
         function changeUserGroupRole(uid, newRole) { if(currentActiveChat) { realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${uid}`).set(newRole).then(() => openActiveChatContextInfo()); } }
         
         // МОДЕРАЦИЯ И ОГРАНИЧЕНИЕ АДМИНОВ
+        function toggleCustomCooldown(val) { document.getElementById('editGrpCooldownCustom').style.display = val === 'custom' ? 'block' : 'none'; }
+
         function openActiveChatContextInfo() {
             if(!currentActiveChat) return;
             document.getElementById('ctxAv').src = currentActiveChat.type==='SAVED' ? `https://api.dicebear.com/7.x/initials/svg?seed=Saved&backgroundColor=2b5278` : (currentActiveChat.type==='USER' ? (globalCache.users[currentActiveChat.id].avatar||`https://api.dicebear.com/7.x/identicon/svg?seed=${currentActiveChat.id}`) : (globalCache.groups[currentActiveChat.id].avatar||`https://api.dicebear.com/7.x/shapes/svg?seed=${currentActiveChat.id}`));
@@ -575,7 +625,16 @@
                 const g = globalCache.groups[currentActiveChat.id] || {}; document.getElementById('ctxSubtitle').innerText = "Группа"; document.getElementById('ctxDescriptionContainer').innerText = g.description || "Нет описания";
                 document.getElementById('ctxUserBlock').style.display = 'none'; document.getElementById('ctxGroupBlock').style.display = 'block';
                 document.getElementById('editGrpNameInp').value = g.name; document.getElementById('editGrpAvInp').value = g.avatar || ""; document.getElementById('editGrpDescInp').value = g.description || ""; document.getElementById('editGrpBannedWordsInp').value = g.bannedWords || "";
-                document.getElementById('editGrpCooldownSel').value = g.cooldown || "0";
+                
+                // Настройка селекта времени
+                const cd = g.cooldown || 0;
+                const sel = document.getElementById('editGrpCooldownSel');
+                const cust = document.getElementById('editGrpCooldownCustom');
+                if ([0, 5, 10, 30, 60].includes(cd)) {
+                    sel.value = cd; cust.style.display = 'none';
+                } else {
+                    sel.value = 'custom'; cust.style.display = 'block'; cust.value = cd;
+                }
 
                 const roles = g.roles || {}, myRole = roles[activeUserId], mList = document.getElementById('groupMembersList'), bList = document.getElementById('groupBannedList'); mList.innerHTML = ""; bList.innerHTML = "";
                 document.getElementById('deleteGroupBtn').style.display = myRole === 'owner' ? 'block' : 'none';
@@ -620,7 +679,7 @@
                 const g = globalCache.groups[currentActiveChat.id] || {};
                 const myRole = (g.roles || {})[activeUserId];
                 const perms = g.adminPermissions || { canKick: true };
-                if(myRole !== 'owner' && !(myRole === 'admin' && perms.canKick)) return alert("Админам запрещено кикать в этой группе, бро!");
+                if(myRole !== 'owner' && !(myRole === 'admin' && perms.canKick)) return showToast("Админам запрещено кикать в этой группе, бро!");
                 if(confirm("Исключить участника?")) realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${uid}`).remove().then(() => openActiveChatContextInfo()); 
             } 
         }
@@ -630,7 +689,7 @@
                 const g = globalCache.groups[currentActiveChat.id] || {};
                 const myRole = (g.roles || {})[activeUserId];
                 const perms = g.adminPermissions || { canBan: true };
-                if(myRole !== 'owner' && !(myRole === 'admin' && perms.canBan)) return alert("Админам запрещено банить в этой группе, бро!");
+                if(myRole !== 'owner' && !(myRole === 'admin' && perms.canBan)) return showToast("Админам запрещено банить в этой группе, бро!");
                 if(confirm("Забанить в группе?")) { realtimeDb.ref(`groups/${currentActiveChat.id}/bannedUsers/${uid}`).set(true); realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${uid}`).remove().then(() => openActiveChatContextInfo()); } 
             } 
         }
@@ -640,7 +699,7 @@
                 const g = globalCache.groups[currentActiveChat.id] || {};
                 const myRole = (g.roles || {})[activeUserId];
                 const perms = g.adminPermissions || { canBan: true };
-                if(myRole !== 'owner' && !(myRole === 'admin' && perms.canBan)) return alert("Нет прав на разбан, бро!");
+                if(myRole !== 'owner' && !(myRole === 'admin' && perms.canBan)) return showToast("Нет прав на разбан, бро!");
                 realtimeDb.ref(`groups/${currentActiveChat.id}/bannedUsers/${uid}`).remove().then(() => openActiveChatContextInfo()); 
             }
         }
@@ -660,15 +719,18 @@
                 const perms = g.adminPermissions || { canEditMeta: true };
                 
                 if (myRole !== 'owner' && !(myRole === 'admin' && perms.canEditMeta)) {
-                    return alert("Админам нельзя редактировать настройки этой группы, бро!");
+                    return showToast("Тебе нельзя редактировать настройки этой группы, бро!");
                 }
+
+                let cdVal = document.getElementById('editGrpCooldownSel').value;
+                let finalCd = cdVal === 'custom' ? parseInt(document.getElementById('editGrpCooldownCustom').value) || 0 : parseInt(cdVal) || 0;
 
                 let updateData = { 
                     name: document.getElementById('editGrpNameInp').value, 
                     avatar: document.getElementById('editGrpAvInp').value, 
                     description: document.getElementById('editGrpDescInp').value, 
                     bannedWords: document.getElementById('editGrpBannedWordsInp').value,
-                    cooldown: parseInt(document.getElementById('editGrpCooldownSel').value) || 0
+                    cooldown: finalCd
                 };
 
                 if (myRole === 'owner') {
@@ -694,23 +756,23 @@
             const perms = g.adminPermissions || { canInvite: true };
             
             if (myRole !== 'owner' && !(myRole === 'admin' && perms.canInvite)) {
-                return alert("Админам запрещено инвайтить в этой группе, бро!");
+                return showToast("Запрещено инвайтить в этой группе, чел!");
             }
 
             const input = document.getElementById('inviteEmailInp').value.trim().toLowerCase(); if (!input) return;
             let foundUid = null; for (let uid in globalCache.users) { const u = globalCache.users[uid]; if ((u.email && u.email.toLowerCase() === input) || (u.nickname && u.nickname.toLowerCase() === input)) { foundUid = uid; break; } }
             if (foundUid) {
-                if(g.bannedUsers && g.bannedUsers[foundUid]) return alert("Этот чел в чёрном списке группы! Сначала разбань.");
-                realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${foundUid}`).set("member").then(() => { alert("Участник добавлен!"); document.getElementById('inviteEmailInp').value = ""; openActiveChatContextInfo(); });
-            } else { alert("Челик не найден."); }
+                if(g.bannedUsers && g.bannedUsers[foundUid]) return showToast("Чел в чёрном списке группы! Разбань сначала.");
+                realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${foundUid}`).set("member").then(() => { showToast("Участник добавлен!"); document.getElementById('inviteEmailInp').value = ""; openActiveChatContextInfo(); });
+            } else { showToast("Челик не найден."); }
         }
 
-        function executeToggleContact() { if(currentActiveChat) { if(globalCache.contacts[currentActiveChat.id]) { if(confirm("Удалить из контактов?")) { realtimeDb.ref(`users/${activeUserId}/contacts/${currentActiveChat.id}`).remove(); openActiveChatContextInfo(); } } else { realtimeDb.ref(`users/${activeUserId}/contacts/${currentActiveChat.id}`).set(true); alert("Добавлен!"); openActiveChatContextInfo(); } } }
+        function executeToggleContact() { if(currentActiveChat) { if(globalCache.contacts[currentActiveChat.id]) { if(confirm("Удалить из контактов?")) { realtimeDb.ref(`users/${activeUserId}/contacts/${currentActiveChat.id}`).remove(); openActiveChatContextInfo(); } } else { realtimeDb.ref(`users/${activeUserId}/contacts/${currentActiveChat.id}`).set(true); showToast("Добавлен!"); openActiveChatContextInfo(); } } }
         function saveLocalContactName() { if(currentActiveChat) { realtimeDb.ref(`users/${activeUserId}/customNames/${currentActiveChat.id}`).set(document.getElementById('localCustomName').value); closeModal('contextInfoModal'); renderChatLists(); } }
         
         function executeToggleBlockUser() { 
             if(currentActiveChat) { 
-                if(globalCache.blockedUsers[currentActiveChat.id]) { realtimeDb.ref(`users/${activeUserId}/blocked/${currentActiveChat.id}`).remove().then(() => { alert("Разблокирован!"); closeModal('contextInfoModal'); executeSelectActiveChat(currentActiveChat.id, globalCache.users[currentActiveChat.id].nickname, 'USER'); }); } 
+                if(globalCache.blockedUsers[currentActiveChat.id]) { realtimeDb.ref(`users/${activeUserId}/blocked/${currentActiveChat.id}`).remove().then(() => { showToast("Разблокирован!"); closeModal('contextInfoModal'); executeSelectActiveChat(currentActiveChat.id, globalCache.users[currentActiveChat.id].nickname, 'USER'); }); } 
                 else { if(confirm("Кинуть в ЧС?")) { realtimeDb.ref(`users/${activeUserId}/blocked/${currentActiveChat.id}`).set(true).then(() => { closeModal('contextInfoModal'); resetChatWindow(); }); } }
             } 
         }
