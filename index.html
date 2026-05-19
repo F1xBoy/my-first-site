@@ -271,7 +271,7 @@
             <button class="success" onclick="saveMyProfileData()">Сохранить профиль</button>
             
             <hr style="border-color:var(--border-color); margin:20px 0;">
-            <h4 style="margin:0 0 10px 0; color:var(--accent);">Active сессии 🖥️</h4>
+            <h4 style="margin:0 0 10px 0; color:var(--accent);">Активные сессии 🖥️</h4>
             <div id="sessionsListContainer" style="max-height:120px; overflow-y:auto; margin-bottom:10px; border:1px solid var(--border-color); padding:6px; border-radius:8px;"></div>
             
             <h4 style="margin:10px 0 5px 0; color:var(--danger);">Чёрный список 🚫</h4>
@@ -460,7 +460,7 @@
                 
                 const sessionId = localStorage.getItem('vchat_session_id') || 'sess_' + Date.now(); localStorage.setItem('vchat_session_id', sessionId);
                 let rawDevice = navigator.userAgent.split(') ')[0].split(' (')[1] || "Браузер";
-                if (rawDevice.includes("Windows NT 10.0")) rawDevice = "Windows 11 Pro";
+                if (rawDevice.includes("Windows NT 10.0")) rawDevice = "Windows 10"; else if (rawDevice.includes("Windows NT 6.1")) rawDevice = "Windows 7"; else if (rawDevice.includes("Macintosh")) rawDevice = "Mac"; else if (rawDevice.includes("Android")) rawDevice = "Android"; else if (rawDevice.includes("iPhone")) rawDevice = "iPhone"; else if (rawDevice.includes("iPad")) rawDevice = "iPad";
                 realtimeDb.ref(`users/${activeUserId}/sessions/${sessionId}`).set({ device: rawDevice, lastActive: Date.now() });
 
                 const connectedRef = realtimeDb.ref('.info/connected');
