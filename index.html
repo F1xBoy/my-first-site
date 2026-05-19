@@ -10,22 +10,35 @@
     
     <style>
         /* --- ДИНАМИЧЕСКИЕ ТЕМЫ --- */
-        #editGrpCooldownSel {
-    appearance: none !important; /* Убираем системный стиль */
-    -webkit-appearance: none !important;
-    border-radius: 20px !important; /* Твои кругляши */
-    padding: 10px 20px !important;
-    background-color: var(--bg-input) !important;
-    color: white !important;
-    border: 1px solid var(--border-color) !important;
-    cursor: pointer;
-    transition: all 0.3s ease !important;
+        .custom-dropdown { position: relative; width: 200px; cursor: pointer; }
+
+.dropdown-selected {
+    background: #242f3d;
+    padding: 10px 20px;
+    border-radius: 20px; /* Твои кругляши */
+    color: white;
+    border: 1px solid #2b5278;
 }
 
-#editGrpCooldownSel:hover {
-    filter: brightness(1.2);
-    transform: scale(1.02);
+.dropdown-options {
+    position: absolute;
+    top: 110%;
+    left: 0;
+    width: 100%;
+    background: #242f3d;
+    border-radius: 20px; /* Скругление списка */
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease; /* Анимация появления */
+    border: 1px solid #2b5278;
+    z-index: 100;
 }
+
+.dropdown-options.show { opacity: 1; visibility: visible; transform: translateY(0); }
+
+.dropdown-options div { padding: 10px 20px; }
+.dropdown-options div:hover { background: #1c2936; }
         :root {
             --bg-main: #0e1621;
             --bg-card: #17212b;
@@ -283,14 +296,14 @@
                 <input type="text" id="editGrpBannedWordsInp" placeholder="Запрещенные слова (через запятую)">
                 
                 <label style="font-size:12px; color:var(--text-muted); display:block; margin-top:8px;">Замедление чата (анти-спам кулдаун):</label>
-                <select id="editGrpCooldownSel" style="margin-top:2px; border-radius: 15px;" onchange="toggleCustomCooldown(this.value)">
-                    <option value="0">Выкл</option>
-                    <option value="5">5 секунд</option>
-                    <option value="10">10 секунд</option>
-                    <option value="30">30 секунд</option>
-                    <option value="60">1 минута</option>
-                    <option value="custom">Свое время...</option>
-                </select>
+                <div class="custom-dropdown" id="myDropdown">
+    <div class="dropdown-selected" onclick="toggleMenu()">Выберите время</div>
+    <div class="dropdown-options" id="dropdownOptions">
+        <div onclick="selectOption(5)">5 сек</div>
+        <div onclick="selectOption(10)">10 сек</div>
+        <div onclick="selectOption(30)">30 сек</div>
+    </div>
+</div>
                 <input type="number" id="editGrpCooldownCustom" style="display:none; border-radius: 15px; margin-top: 6px;" placeholder="Введи секунды (например 120)">
 
                 <div id="ownerAdminPermsBlock" style="display:none; background:var(--bg-main); padding:12px; border-radius:10px; border:1px solid var(--border-color); margin:10px 0; text-align:left;">
@@ -674,6 +687,14 @@
 
                 const roles = g.roles || {}, myRole = roles[activeUserId], mList = document.getElementById('groupMembersList'), bList = document.getElementById('groupBannedList'); mList.innerHTML = ""; bList.innerHTML = "";
                 document.getElementById('deleteGroupBtn').style.display = myRole === 'owner' ? 'block' : 'none';
+                function toggleMenu() {
+    document.getElementById('dropdownOptions').classList.toggle('show');
+}
+
+function selectOption(val) {
+    console.log("Выбрано:", val);
+    toggleMenu(); // Закрыть после выбора
+}
 
                 // Загружаем и выставляем чекбоксы прав
                 const perms = g.adminPermissions || { canKick: true, canBan: true, canEditMeta: true, canInvite: true };
