@@ -203,6 +203,22 @@
             .msg-bubble { max-width: 85%; }
             .bottom-input-area { padding: 10px; gap: 8px; }
         }
+        select {
+    /* Секретные строки, которые ломают системный вид */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+
+    /* Теперь твои стили заработают */
+    border-radius: 20px !important; 
+    border: 1px solid var(--border-color) !important;
+    background: var(--bg-input) !important;
+    color: white !important;
+    padding: 10px 15px !important;
+    cursor: pointer;
+    
+    /* Чтобы стрелочка не исчезла совсем, можешь добавить свою через background-image */
+}
     </style>
 </head>
 <body class="mobile-view-sidebar">
