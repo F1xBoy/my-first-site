@@ -45,6 +45,26 @@
             --warning: #ca8a04;
             --overlay: rgba(15, 23, 42, 0.45);
         }
+        /* Кнопка отправки */
+        #sendMsgBtn {
+            border-radius: 20px !important; /* Округляем */
+            transition: all 0.2s ease !important; /* Анимация */
+            max-width: 80px !important; /* Фиксируем ширину, чтобы не раздувало */
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+            cursor: pointer;
+        }
+
+        /* Эффект при нажатии (анимация) */
+        #sendMsgBtn:active {
+            transform: scale(0.9) !important;
+            }
+
+        /* Эффект при наведении */
+        #sendMsgBtn:hover {
+            filter: brightness(1.1) !important;
+            transform: translateY(-2px) !important;}
 
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes modalPop { from { opacity: 0; transform: scale(0.9) translateY(-20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
