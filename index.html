@@ -178,6 +178,52 @@
             .msg-bubble { max-width: 85%; }
             .bottom-input-area { padding: 10px; gap: 8px; }
         }
+
+        /* Кастомный выпадающий список */
+        .custom-select-wrapper { position: relative; width: 100%; user-select: none; }
+        .custom-select-trigger {
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            padding: 12px 20px;
+            border-radius: 20px !important;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+            margin-top: 2px;
+            margin-bottom: 8px;
+        }
+        .custom-select-trigger:hover { border-color: var(--accent); transform: scale(1.01); }
+        .custom-select-trigger .arrow { transition: transform 0.2s; }
+        .custom-select-trigger.open .arrow { transform: rotate(180deg); }
+        .custom-options {
+            position: absolute;
+            top: 110%;
+            left: 0;
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px !important;
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 999;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .custom-options.show { opacity: 1; visibility: visible; transform: translateY(0); }
+        .custom-options div {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .custom-options div:hover { background: var(--bg-hover); }
+        .custom-options div.selected { background: var(--accent); color: var(--bg-main); font-weight: 600; }
     </style>
 </head>
 <body class="mobile-view-sidebar">
@@ -267,14 +313,20 @@
                 <input type="text" id="editGrpBannedWordsInp" placeholder="Запрещенные слова (через запятую)">
                 
                 <label style="font-size:12px; color:var(--text-muted); display:block; margin-top:8px;">Замедление чата (анти-спам кулдаун):</label>
-                <select id="editGrpCooldownSel" style="margin-top:2px; border-radius: 15px;" onchange="toggleCustomCooldown(this.value)">
-                    <option value="0">Выкл</option>
-                    <option value="5">5 секунд</option>
-                    <option value="10">10 секунд</option>
-                    <option value="30">30 секунд</option>
-                    <option value="60">1 минута</option>
-                    <option value="custom">Свое время...</option>
-                </select>
+                <div class="custom-select-wrapper">
+                    <div class="custom-select-trigger" id="cooldownTrigger" onclick="toggleCustomDropdown()">
+                        <span id="selectedCooldown">Выкл</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="custom-options" id="cooldownOptions">
+                        <div onclick="selectCooldown(0, 'Выкл')">Выкл</div>
+                        <div onclick="selectCooldown(5, '5 секунд')">5 секунд</div>
+                        <div onclick="selectCooldown(10, '10 секунд')">10 секунд</div>
+                        <div onclick="selectCooldown(30, '30 секунд')">30 секунд</div>
+                        <div onclick="selectCooldown(60, '1 минута')">1 минута</div>
+                        <div onclick="selectCooldown(-1, 'Свое время...')">Свое время...</div>
+                    </div>
+                </div>
                 <input type="number" id="editGrpCooldownCustom" style="display:none; border-radius: 15px; margin-top: 6px;" placeholder="Введи секунды (например 120)">
 
                 <div id="ownerAdminPermsBlock" style="display:none; background:var(--bg-main); padding:12px; border-radius:10px; border:1px solid var(--border-color); margin:10px 0; text-align:left;">
@@ -626,8 +678,43 @@
 
         function changeUserGroupRole(uid, newRole) { if(currentActiveChat) { realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${uid}`).set(newRole).then(() => openActiveChatContextInfo()); } }
         
-        // МОДЕРАЦИЯ И ОГРАНИЧЕНИЕ АДМИНОВ
-        function toggleCustomCooldown(val) { document.getElementById('editGrpCooldownCustom').style.display = val === 'custom' ? 'block' : 'none'; }
+        // КАСТОМНЫЙ DROPDOWN И ЛОГИКА КУЛДАУНА
+        function toggleCustomDropdown() {
+            document.getElementById('cooldownOptions').classList.toggle('show');
+            document.getElementById('cooldownTrigger').classList.toggle('open');
+        }
+
+        function selectCooldown(seconds, label) {
+            // Обновляем текст на кнопке
+            document.getElementById('selectedCooldown').innerText = label;
+            // Закрываем меню
+            toggleCustomDropdown();
+            
+            // Показываем/скрываем кастомный input если нужно
+            if (seconds === -1) {
+                document.getElementById('editGrpCooldownCustom').style.display = 'block';
+            } else {
+                document.getElementById('editGrpCooldownCustom').style.display = 'none';
+                document.getElementById('editGrpCooldownCustom').value = seconds;
+            }
+        }
+
+        // Закрытие при клике вне меню
+        window.onclick = function(event) {
+            if (!event.target.closest('.custom-select-wrapper')) {
+                const dropdowns = document.getElementsByClassName("custom-options");
+                for (let i = 0; i < dropdowns.length; i++) {
+                    let openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+                const triggers = document.getElementsByClassName("custom-select-trigger");
+                for (let i = 0; i < triggers.length; i++) {
+                    triggers[i].classList.remove('open');
+                }
+            }
+        }
 
         function openActiveChatContextInfo() {
             if(!currentActiveChat) return;
@@ -646,14 +733,19 @@
                 document.getElementById('ctxUserBlock').style.display = 'none'; document.getElementById('ctxGroupBlock').style.display = 'block';
                 document.getElementById('editGrpNameInp').value = g.name; document.getElementById('editGrpAvInp').value = g.avatar || ""; document.getElementById('editGrpDescInp').value = g.description || ""; document.getElementById('editGrpBannedWordsInp').value = g.bannedWords || "";
                 
-                // Настройка селекта времени
+                // Настройка кастомного dropdown для кулдауна
                 const cd = g.cooldown || 0;
-                const sel = document.getElementById('editGrpCooldownSel');
+                const labelMap = { 0: 'Выкл', 5: '5 секунд', 10: '10 секунд', 30: '30 секунд', 60: '1 минута' };
                 const cust = document.getElementById('editGrpCooldownCustom');
+                
                 if ([0, 5, 10, 30, 60].includes(cd)) {
-                    sel.value = cd; cust.style.display = 'none';
+                    document.getElementById('selectedCooldown').innerText = labelMap[cd];
+                    cust.style.display = 'none';
+                    cust.value = '';
                 } else {
-                    sel.value = 'custom'; cust.style.display = 'block'; cust.value = cd;
+                    document.getElementById('selectedCooldown').innerText = 'Свое время...';
+                    cust.style.display = 'block';
+                    cust.value = cd;
                 }
 
                 const roles = g.roles || {}, myRole = roles[activeUserId], mList = document.getElementById('groupMembersList'), bList = document.getElementById('groupBannedList'); mList.innerHTML = ""; bList.innerHTML = "";
@@ -742,8 +834,12 @@
                     return showToast("Тебе нельзя редактировать настройки этой группы, бро!");
                 }
 
-                let cdVal = document.getElementById('editGrpCooldownSel').value;
-                let finalCd = cdVal === 'custom' ? parseInt(document.getElementById('editGrpCooldownCustom').value) || 0 : parseInt(cdVal) || 0;
+                let finalCd = parseInt(document.getElementById('editGrpCooldownCustom').value) || 0;
+                if (!document.getElementById('editGrpCooldownCustom').value || document.getElementById('editGrpCooldownCustom').style.display === 'none') {
+                    const labelText = document.getElementById('selectedCooldown').innerText;
+                    const valueMap = { 'Выкл': 0, '5 секунд': 5, '10 секунд': 10, '30 секунд': 30, '1 минута': 60 };
+                    finalCd = valueMap[labelText] || 0;
+                }
 
                 let updateData = { 
                     name: document.getElementById('editGrpNameInp').value, 
