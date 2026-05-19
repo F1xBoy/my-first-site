@@ -54,32 +54,7 @@
             text-overflow: ellipsis !important;
             white-space: nowrap !important;
             cursor: pointer;
-        
-        /* Скругляем сам селект и добавляем анимацию при наведении */
-        select {
-            border-radius: 20px !important;
-            padding: 8px 12px;
-            background: var(--bg-input); /* Цвет фона из твоего стиля */
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            outline: none;
-            font-size: 16px;
-            margin-right: 10px;
-            margin-left: 10px;
         }
-
-        /* Эффект, когда наводишь курсор */
-        select:hover {
-            transform: scale(1.02);
-            border-color: var(--accent);
-        }
-
-        /* Эффект при клике */
-        select:focus {
-            box-shadow: 0 0 5px var(--accent);
-            border-color: var(--accent);}}
 
         /* Эффект при нажатии (анимация) */
         #sendMsgBtn:active {
@@ -203,22 +178,6 @@
             .msg-bubble { max-width: 85%; }
             .bottom-input-area { padding: 10px; gap: 8px; }
         }
-        select {
-    /* Секретные строки, которые ломают системный вид */
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-
-    /* Теперь твои стили заработают */
-    border-radius: 20px !important; 
-    border: 1px solid var(--border-color) !important;
-    background: var(--bg-input) !important;
-    color: white !important;
-    padding: 10px 15px !important;
-    cursor: pointer;
-    
-    /* Чтобы стрелочка не исчезла совсем, можешь добавить свою через background-image */
-}
     </style>
 </head>
 <body class="mobile-view-sidebar">
