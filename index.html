@@ -10,6 +10,22 @@
     
     <style>
         /* --- ДИНАМИЧЕСКИЕ ТЕМЫ --- */
+        #editGrpCooldownSel {
+    appearance: none !important; /* Убираем системный стиль */
+    -webkit-appearance: none !important;
+    border-radius: 20px !important; /* Твои кругляши */
+    padding: 10px 20px !important;
+    background-color: var(--bg-input) !important;
+    color: white !important;
+    border: 1px solid var(--border-color) !important;
+    cursor: pointer;
+    transition: all 0.3s ease !important;
+}
+
+#editGrpCooldownSel:hover {
+    filter: brightness(1.2);
+    transform: scale(1.02);
+}
         :root {
             --bg-main: #0e1621;
             --bg-card: #17212b;
