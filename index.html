@@ -137,12 +137,60 @@
         .msg-bubble pre, .msg-bubble code { max-width: 100% !important; white-space: pre-wrap !important; word-break: break-all !important; overflow-x: auto !important; }
         .msg-bubble.from-me { align-self: flex-end; background: var(--msg-me); border-bottom-right-radius: 4px; }
         .msg-bubble.from-he { align-self: flex-start; background: var(--msg-he); border: 1px solid var(--border-color); border-bottom-left-radius: 4px; }
-        .msg-author { font-size: 11px; color: var(--accent); font-weight: 800; margin-bottom: 4px; cursor: pointer; }
-        .msg-text { word-break: break-word; }
-        .msg-time-stamp { font-size: 10px; color: var(--text-muted); text-align: right; margin-top: 4px; }
-        .msg-media { max-width: 100%; border-radius: 8px; margin-bottom: 6px; cursor: pointer; }
-        .msg-quote { background: rgba(0,0,0,0.15); padding: 6px 10px; border-left: 3px solid var(--accent); border-radius: 4px; margin-bottom: 6px; font-size: 12.5px; }
-        .msg-hover-tools { display: none; gap: 8px; position: absolute; top: -18px; right: 10px; background: var(--bg-card); padding: 6px 10px; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 100; white-space: nowrap; width: max-content; }
+        .msg-author { 
+            font-size: 11px; 
+            color: var(--accent); 
+            font-weight: 800; 
+            margin-bottom: 6px; 
+            cursor: pointer;
+            display: block;
+        }
+        .msg-text { 
+            word-break: break-word;
+            margin-bottom: 6px;
+            display: block;
+        }
+        .msg-time-stamp { 
+            font-size: 10px; 
+            color: var(--text-muted); 
+            text-align: right; 
+            margin-top: 4px;
+            display: block;
+        }
+        .msg-media { 
+            max-width: 100%; 
+            border-radius: 8px; 
+            margin-bottom: 6px; 
+            cursor: pointer;
+            display: block;
+        }
+        .msg-quote { 
+            background: rgba(0,0,0,0.15); 
+            padding: 6px 10px; 
+            border-left: 3px solid var(--accent); 
+            border-radius: 4px; 
+            margin-bottom: 6px; 
+            font-size: 12.5px;
+            display: block;
+        }
+        .msg-hover-tools { 
+            display: none; 
+            gap: 8px; 
+            position: absolute; 
+            bottom: 100%;
+            right: 0;
+            left: auto;
+            background: var(--bg-card); 
+            padding: 8px 12px; 
+            border-radius: 20px; 
+            border: 1px solid var(--border-color); 
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4); 
+            z-index: 1001; 
+            white-space: nowrap; 
+            width: max-content;
+            margin-bottom: 8px;
+            animation: dropdownSlideDown 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
         .msg-bubble:hover .msg-hover-tools { display: flex; }
         .tool-ico { cursor: pointer; font-size: 13px; opacity: 0.7; transition: transform 0.15s; }
         .tool-ico:hover { opacity: 1; transform: scale(1.25); }
@@ -153,8 +201,25 @@
 
         .bottom-input-area { padding: 16px 20px; background: var(--bg-card); display: flex; gap: 12px; align-items: flex-end; border-top: 1px solid var(--border-color); position: relative; }
         .clip-container { position: relative; display: flex; }
-        .clip-label { font-size: 24px; cursor: pointer; padding: 8px; color: var(--text-muted); border-radius: 50%; }
-        .clip-label:hover { color: var(--accent); background: rgba(88, 166, 255, 0.1); }
+        .clip-label { 
+            font-size: 24px; 
+            cursor: pointer; 
+            padding: 8px 10px; 
+            color: var(--text-muted); 
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .clip-label:hover { 
+            color: var(--accent); 
+            background: rgba(88, 166, 255, 0.15);
+            transform: rotate(20deg) scale(1.15);
+        }
+        .clip-label:active {
+            transform: rotate(20deg) scale(1.05);
+        }
         .clip-dropdown { display: none; position: absolute; bottom: 55px; left: 0; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; width: 220px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); flex-direction: column; overflow: hidden; z-index: 100; }
         .clip-option { padding: 12px 16px; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
         .clip-option:hover { background: var(--bg-hover); color: var(--accent); }
@@ -228,7 +293,7 @@
         .custom-options div.selected { background: var(--accent); color: var(--bg-main); font-weight: 600; }
     </style>
 </head>
-<body class="mobile-view-sidebar">
+<body>
 
     <div id="toastBox">Уведомление</div>
 
@@ -461,9 +526,51 @@
                 activeUserId = user.uid;
                 
                 const sessionId = localStorage.getItem('vchat_session_id') || 'sess_' + Date.now(); localStorage.setItem('vchat_session_id', sessionId);
-                let rawDevice = navigator.userAgent.split(') ')[0].split(' (')[1] || "Браузер";
-                if (rawDevice.includes("Windows NT 10.0")) rawDevice = "Windows 10"; else if (rawDevice.includes("Windows NT 6.1")) rawDevice = "Windows 7"; else if (rawDevice.includes("Macintosh")) rawDevice = "Mac"; else if (rawDevice.includes("Android")) rawDevice = "Android"; else if (rawDevice.includes("iPhone")) rawDevice = "iPhone"; else if (rawDevice.includes("iPad")) rawDevice = "iPad";
-                realtimeDb.ref(`users/${activeUserId}/sessions/${sessionId}`).set({ device: rawDevice, lastActive: Date.now() });
+                
+                // Улучшенное определение ОС
+                const ua = navigator.userAgent;
+                let deviceName = "Браузер";
+                
+                if (ua.includes("Windows")) {
+                    if (ua.includes("Windows NT 10.0")) {
+                        // Для различения Windows 10 и 11 используем Chrome версию или другие маркеры
+                        if (ua.includes("Windows NT 10.0; Win64; x64") && ua.includes("Chrome")) {
+                            // Windows 11 может быть определена по наличию Edge Chromium или других признаков
+                            deviceName = ua.includes("EdgHTML") ? "Windows 10" : "Windows 11";
+                        } else if (ua.includes("rv:")) {
+                            // Firefox показывает Windows 10 для обеих версий
+                            deviceName = "Windows 10+";
+                        } else {
+                            deviceName = "Windows 10";
+                        }
+                    } else if (ua.includes("Windows NT 6.3")) {
+                        deviceName = "Windows 8.1";
+                    } else if (ua.includes("Windows NT 6.2")) {
+                        deviceName = "Windows 8";
+                    } else if (ua.includes("Windows NT 6.1")) {
+                        deviceName = "Windows 7";
+                    } else if (ua.includes("Windows NT 5.1")) {
+                        deviceName = "Windows XP";
+                    } else {
+                        deviceName = "Windows";
+                    }
+                } else if (ua.includes("Mac OS X")) {
+                    if (ua.includes("iPhone")) deviceName = "iPhone";
+                    else if (ua.includes("iPad")) deviceName = "iPad";
+                    else deviceName = "macOS";
+                } else if (ua.includes("Android")) {
+                    deviceName = "Android";
+                } else if (ua.includes("Linux")) {
+                    deviceName = "Linux";
+                } else if (ua.includes("CrOS")) {
+                    deviceName = "Chrome OS";
+                } else if (ua.includes("PlayStation")) {
+                    deviceName = "PlayStation";
+                } else if (ua.includes("Xbox")) {
+                    deviceName = "Xbox";
+                }
+                
+                realtimeDb.ref(`users/${activeUserId}/sessions/${sessionId}`).set({ device: deviceName, lastActive: Date.now() });
 
                 const connectedRef = realtimeDb.ref('.info/connected');
                 const myStatusRef = realtimeDb.ref(`users/${activeUserId}/status`);
