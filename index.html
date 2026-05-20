@@ -675,7 +675,7 @@
             } else { 
                 const g = globalCache.groups[currentActiveChat.id] || {}; 
                 // Убрали текст про кулдаун в шапке, как просил бро
-                statusEl.innerText = g.description ? `📋 ${g.description}` : `Групповой чат`; 
+                statusEl.innerText = g.description ? g.description : `Групповой чат`; 
             }
         }
 
