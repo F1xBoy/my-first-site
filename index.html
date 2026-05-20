@@ -47,9 +47,9 @@
         }
         /* Кнопка отправки */
         #sendMsgBtn {
-            border-radius: 20px !important; /* Округляем */
-            transition: all 0.2s ease !important; /* Анимация */
-            max-width: 80px !important; /* Фиксируем ширину, чтобы не раздувало */
+            border-radius: 20px !important;
+            transition: all 0.2s ease !important;
+            max-width: 80px !important;
             overflow: hidden !important;
             text-overflow: ellipsis !important;
             white-space: nowrap !important;
@@ -128,11 +128,13 @@
         .chat-row:hover .pin-action-btn, .chat-row.is-pinned .pin-action-btn { opacity: 1; }
         .chat-row.is-pinned { background: rgba(88, 166, 255, 0.02); }
 
-        .tg-body { flex: 1; display: flex; flex-direction: column; background: var(--bg-main); position: relative; height: 100%; }
+        .tg-body { flex: 1; display: flex; flex-direction: column; background: var(--bg-main); position: relative; height: 100%; overflow: hidden; }
         .body-header { padding: 10px 24px; background: var(--bg-card); display: flex; align-items: center; justify-content: space-between; height: 65px; border-bottom: 1px solid var(--border-color); }
         
-        .messages-container { flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-        .msg-bubble { max-width: 65%; padding: 12px 16px; border-radius: 16px; font-size: 14.5px; position: relative; line-height: 1.45; box-shadow: 0 2px 6px rgba(0,0,0,0.15); animation: fadeInUp 0.25s cubic-bezier(0.1, 1, 0.1, 1) forwards; display: flex; flex-direction: column; }
+        /* ФИКС ДЛЯ СООБЩЕНИЙ С КОДОМ */
+        .messages-container { flex: 1; padding: 24px; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 100%; }
+        .msg-bubble { max-width: 80% !important; padding: 12px 16px; border-radius: 16px; font-size: 14.5px; position: relative; line-height: 1.45; box-shadow: 0 2px 6px rgba(0,0,0,0.15); animation: fadeInUp 0.25s cubic-bezier(0.1, 1, 0.1, 1) forwards; display: flex; flex-direction: column; word-break: break-word; white-space: pre-wrap; }
+        .msg-bubble pre, .msg-bubble code { max-width: 100% !important; white-space: pre-wrap !important; word-break: break-all !important; overflow-x: auto !important; }
         .msg-bubble.from-me { align-self: flex-end; background: var(--msg-me); border-bottom-right-radius: 4px; }
         .msg-bubble.from-he { align-self: flex-start; background: var(--msg-he); border: 1px solid var(--border-color); border-bottom-left-radius: 4px; }
         .msg-author { font-size: 11px; color: var(--accent); font-weight: 800; margin-bottom: 4px; cursor: pointer; }
@@ -314,7 +316,7 @@
                 
                 <label style="font-size:12px; color:var(--text-muted); display:block; margin-top:8px;">Замедление чата (анти-спам кулдаун):</label>
                 <div class="custom-select-wrapper">
-                    <div class="custom-select-trigger" id="cooldownTrigger" onclick="toggleCustomDropdown()">
+                    <div class="custom-select-trigger" id="cooldownTrigger" onclick="toggleCustomDropdown(event)">
                         <span id="selectedCooldown">Выкл</span>
                         <span class="arrow">▼</span>
                     </div>
@@ -677,8 +679,10 @@
         function executeClearAppCache() { if(confirm("Очистить локальный кэш?")) { localStorage.clear(); location.reload(); } }
 
         function changeUserGroupRole(uid, newRole) { if(currentActiveChat) { realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${uid}`).set(newRole).then(() => openActiveChatContextInfo()); } }
+        
         // КАСТОМНЫЙ DROPDOWN И ЛОГИКА КУЛДАУНА
-        function toggleCustomDropdown() {
+        function toggleCustomDropdown(e) {
+            if(e) e.stopPropagation();
             document.getElementById('cooldownOptions').classList.toggle('show');
             document.getElementById('cooldownTrigger').classList.toggle('open');
         }
@@ -831,7 +835,8 @@
                 if (myRole !== 'owner' && !(myRole === 'admin' && perms.canEditMeta)) {
                     return showToast("Тебе нельзя редактировать настройки этой группы, бро!");
                 }
-let finalCd = parseInt(document.getElementById('editGrpCooldownCustom').value) || 0;
+                
+                let finalCd = parseInt(document.getElementById('editGrpCooldownCustom').value) || 0;
                 if (!document.getElementById('editGrpCooldownCustom').value || document.getElementById('editGrpCooldownCustom').style.display === 'none') {
                     const labelText = document.getElementById('selectedCooldown').innerText;
                     const valueMap = { 'Выкл': 0, '5 секунд': 5, '10 секунд': 10, '30 секунд': 30, '1 минута': 60 };
