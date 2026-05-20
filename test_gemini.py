@@ -1,16 +1,24 @@
 import os
 from google import genai
+import os
+
+client = genai.Client(api_key="AIzaSyCHTsDmMAbUbRCWKMWGEklMG8w2a6ATp80")
+
+print("Список доступных моделей:")
+for m in client.models.list():
+    print(f"- {m.name}")
+from google import genai
 from google.genai import types
 
 def generate():
     # Твой ключ прямо здесь
-    MY_KEY = "AIzaSyDkocmBv1w9Kdc9wnkAoiowdyPz6MQHh_k" 
+    MY_KEY = "AIzaSyCHTsDmMAbUbRCWKMWGEklMG8w2a6ATp80" 
     
     # Инициализация клиента
     client = genai.Client(api_key=MY_KEY)
     
     # Используем проверенную стабильную модель
-    model = "gemini-2.0-flash"
+    model = "gemini-2.0-flash-lite"
     
     # Сам запрос
     user_input = "Привет! Если ты это видишь, напиши 'Всё работает, бро!'"
