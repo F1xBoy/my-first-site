@@ -4,7 +4,7 @@ from google.genai import types
 
 def generate():
     # Твой ключ прямо здесь
-    MY_KEY = "AIzaSyCdcbvsoPRqXZ5-UWx-xAAcoMktBhg_7CY" 
+    MY_KEY = "AIzaSyDswDsWgZ1CbS98Ic6mupL7LhHvZ4tMJok" 
     
     # Инициализация клиента
     client = genai.Client(api_key=MY_KEY)
