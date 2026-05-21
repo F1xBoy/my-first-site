@@ -534,15 +534,7 @@
             localStorage.setItem('vchat_language', lang);
             document.getElementById('languageLabel').innerText = languageLabels[lang];
             toggleLanguageDropdown();
-            showToast('Язык изменён на ' + languageLabels[lang]);
         }
-        
-        // Инициализация языка при загрузке
-        document.addEventListener('DOMContentLoaded', function() {
-            if(document.getElementById('languageLabel')) {
-                document.getElementById('languageLabel').innerText = languageLabels[currentLanguage];
-            }
-        });
 
         let activeUserId = "", currentActiveChat = null, activeSidebarTab = 'chats';
         let globalCache = { users: {}, groups: {}, blockedUsers: {}, pinnedChats: {}, customNames: {}, contacts: {}, tabs: [] };
@@ -826,13 +818,9 @@
                     const uName = globalCache.users[uid]?.nickname || "Неизвестный";
                     blCont.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; margin-bottom:4px; background:var(--bg-hover); padding:6px; border-radius:6px;"><span>${escapeHTML(uName)}</span><button class="success" style="width:auto; padding:2px 6px; margin:0; font-size:10px;" onclick="executeUnblockFromProfile('${uid}')">Разблокировать</button></div>`;
                 }
-            } else { blCont.innerHTML = "<div style='color:var(--text-muted); font-size:12px; text-align:center;'>Тут пусто</div>"; }
-            
-            document.getElementById('myProfileModal').style.display='flex'; 
-            document.getElementById('languageLabel').innerText = languageLabels[currentLanguage];
-            const options = document.getElementById('languageOptions');
-            if(options.classList.contains('show')) options.classList.remove('show');
-        }
+            } else { blCont.innerHTML = "<div style='color:var(--text-muted);'>Нет заблокированных</div>"; }
+            document.getElementById('myProfileModal').style.display='flex';
+            if(document.getElementById('languageLabel')) document.getElementById('languageLabel').innerText = languageLabels[currentLanguage];
         }
         function executeUnblockFromProfile(uid) { realtimeDb.ref(`users/${activeUserId}/blocked/${uid}`).remove().then(() => { showToast("Разблокирован!"); openMyProfileSettings(); renderChatLists(); }); }
         function executeTerminateSession(sid) { realtimeDb.ref(`users/${activeUserId}/sessions/${sid}`).remove().then(() => openMyProfileSettings()); }
