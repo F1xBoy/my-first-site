@@ -332,10 +332,10 @@
             <h3 style="margin-top:0; text-align:center;">Мой Профиль</h3>
             <p id="myModalEmailDisplay" style="text-align:center; color:var(--text-muted); font-size:13px; margin:-10px 0 15px 0;"></p>
             <img id="myModalAvPreview" src="" style="width:80px; height:80px; border-radius:50%; display:block; margin:0 auto 15px; object-fit:cover;">
-            <input type="text" id="myModalNick" placeholder="Никнейм" data-i18n-placeholder="nickname">
-            <input type="text" id="myModalAvUrl" placeholder="URL аватарки" data-i18n-placeholder="avatar_url">
-            <textarea id="myModalBio" placeholder="О себе..." data-i18n-placeholder="about_me"></textarea>
-            <button class="success" onclick="saveMyProfileData()" data-i18n="save_profile">Сохранить профиль</button>
+            <input type="text" id="myModalNick" placeholder="Никнейм">
+            <input type="text" id="myModalAvUrl" placeholder="URL аватарки">
+            <textarea id="myModalBio" placeholder="О себе..."></textarea>
+            <button class="success" onclick="saveMyProfileData()">Сохранить профиль</button>
             
             <hr style="border-color:var(--border-color); margin:20px 0;">
             <h4 style="margin:0 0 10px 0; color:var(--accent);">Активные сессии 🖥️</h4>
@@ -344,12 +344,12 @@
             <h4 style="margin:10px 0 5px 0; color:var(--danger);">Чёрный список 🚫</h4>
             <div id="myBlacklistContainer" style="max-height:100px; overflow-y:auto; border:1px solid var(--border-color); padding:6px; border-radius:8px; margin-bottom:10px;"></div>
 
-            <button class="danger" onclick="executeClearAppCache()" style="background:#dc2626; margin-bottom: 5px;" data-i18n="clear_cache">🗑️ Очистить кэш приложения</button>
+            <button class="danger" onclick="executeClearAppCache()" style="background:#dc2626; margin-bottom: 5px;">🗑️ Очистить кэш приложения</button>
 
             <hr style="border-color:var(--border-color); margin:20px 0;">
-        <div style="text-align:center; color:var(--text-muted); font-size:12px; margin-bottom:10px;" data-i18n="version">Версия: VChat 1.3.8</div>
+        <div style="text-align:center; color:var(--text-muted); font-size:12px; margin-bottom:10px;">Версия: VChat 1.3.8</div>
             <div style="display:block; margin-bottom:12px; font-size:13px;">
-                <b style="display:block; margin-bottom:6px;" data-i18n="language">Язык интерфейса:</b>
+                <b style="display:block; margin-bottom:6px;">Язык интерфейса:</b>
                 <div class="custom-select-wrapper">
                     <div class="custom-select-trigger" onclick="toggleLanguageDropdown()" id="languageTrigger">
                         <span id="languageLabel">Русский</span>
@@ -368,26 +368,26 @@
                     </div>
                 </div>
             </div>
-            <button class="secondary" onclick="executeSignOut()" data-i18n="sign_out">Выйти из аккаунта</button>
-            <button class="danger" onclick="executeDeleteAccountPermanently()" style="background: #b91c1c; margin-top: 8px;" data-i18n="delete_account">⚠️ УДАЛИТЬ АККАУНТ НАВСЕГДА</button>
-            <button class="secondary" style="margin-top:12px;" onclick="closeModal('myProfileModal')" data-i18n="close">Закрыть</button>
+            <button class="secondary" onclick="executeSignOut()">Выйти из аккаунта</button>
+            <button class="danger" onclick="executeDeleteAccountPermanently()" style="background: #b91c1c; margin-top: 8px;">⚠️ УДАЛИТЬ АККАУНТ НАВСЕГДА</button>
+            <button class="secondary" style="margin-top:12px;" onclick="closeModal('myProfileModal')">Закрыть</button>
         </div>
     </div>
 
-    <div id="codeViewerModal" class="modal-overlay"><div class="modal-card" style="width:600px; max-width:90vw;"><h3 style="margin-top:0; color:var(--accent);">Просмотр документа 📝</h3><pre id="fullCodeDisplay" style="background:var(--bg-input); padding:15px; border-radius:10px; overflow:auto; font-family:monospace; font-size:13px; max-height:350px; border:1px solid var(--border-color); white-space:pre-wrap; word-break:break-all;"></pre><button class="success" id="copyCodeModalBtn" data-i18n="copy_code">📋 Скопировать весь text</button><button class="secondary" style="margin-top:8px;" onclick="closeModal('codeViewerModal')" data-i18n="close">Закрыть</button></div></div>
+    <div id="codeViewerModal" class="modal-overlay"><div class="modal-card" style="width:600px; max-width:90vw;"><h3 style="margin-top:0; color:var(--accent);">Просмотр документа 📝</h3><pre id="fullCodeDisplay" style="background:var(--bg-input); padding:15px; border-radius:10px; overflow:auto; font-family:monospace; font-size:13px; max-height:350px; border:1px solid var(--border-color); white-space:pre-wrap; word-break:break-all;"></pre><button class="success" id="copyCodeModalBtn">📋 Скопировать весь text</button><button class="secondary" style="margin-top:8px;" onclick="closeModal('codeViewerModal')">Закрыть</button></div></div>
 
     <div id="contextInfoModal" class="modal-overlay">
         <div class="modal-card" style="display: flex; flex-direction: column;">
             <img id="ctxAv" style="width:90px; height:90px; border-radius:50%; display:block; margin:0 auto 15px; object-fit:cover;">
-            <h3 id="ctxTitle" style="text-align:center; margin:0;" data-i18n="context_title">Context Title</h3>
-            <div id="ctxSubtitle" style="text-align:center; color:var(--text-muted); margin-top:5px; font-size:13.5px; line-height:1.4;" data-i18n="context_subtitle"></div>
-            <div id="ctxDescriptionContainer" style="text-align:center; margin:10px 0; color:var(--text-main); font-style:italic; font-size:14px;" data-i18n="context_description"></div>
+            <h3 id="ctxTitle" style="text-align:center; margin:0;"></h3>
+            <div id="ctxSubtitle" style="text-align:center; color:var(--text-muted); margin-top:5px; font-size:13.5px; line-height:1.4;"></div>
+            <div id="ctxDescriptionContainer" style="text-align:center; margin:10px 0; color:var(--text-main); font-style:italic; font-size:14px;"></div>
             
             <div id="ctxUserBlock" style="display:none;">
-                <button id="addContactBtn" class="success" onclick="executeToggleContact()" data-i18n="add_contact">➕ Добавить в Контакты</button>
-                <input type="text" id="localCustomName" placeholder="Локальное имя контакта" data-i18n-placeholder="local_name">
-                <button class="secondary" onclick="saveLocalContactName()" data-i18n="save_name">Сохранить имя</button>
-                <button id="blockToggleBtn" class="danger" onclick="executeToggleBlockUser()" data-i18n="block_user">Блокировать</button>
+                <button id="addContactBtn" class="success" onclick="executeToggleContact()">➕ Добавить в Контакты</button>
+                <input type="text" id="localCustomName" placeholder="Локальное имя контакта">
+                <button class="secondary" onclick="saveLocalContactName()">Сохранить имя</button>
+                <button id="blockToggleBtn" class="danger" onclick="executeToggleBlockUser()">Блокировать</button>
             </div>
 
             <div id="ctxGroupBlock" style="display:none; width: 100%;">
