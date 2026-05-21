@@ -131,66 +131,17 @@
         .tg-body { flex: 1; display: flex; flex-direction: column; background: var(--bg-main); position: relative; height: 100%; overflow: hidden; }
         .body-header { padding: 10px 24px; background: var(--bg-card); display: flex; align-items: center; justify-content: space-between; height: 65px; border-bottom: 1px solid var(--border-color); }
         
-        /* ФИКС ДЛЯ СООБЩЕНИЙ С КОДОМ */
         .messages-container { flex: 1; padding: 24px; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 100%; }
         .msg-bubble { max-width: 80% !important; padding: 12px 16px; border-radius: 16px; font-size: 14.5px; position: relative; line-height: 1.45; box-shadow: 0 2px 6px rgba(0,0,0,0.15); animation: fadeInUp 0.25s cubic-bezier(0.1, 1, 0.1, 1) forwards; display: flex; flex-direction: column; word-break: break-word; white-space: pre-wrap; }
         .msg-bubble pre, .msg-bubble code { max-width: 100% !important; white-space: pre-wrap !important; word-break: break-all !important; overflow-x: auto !important; }
         .msg-bubble.from-me { align-self: flex-end; background: var(--msg-me); border-bottom-right-radius: 4px; }
         .msg-bubble.from-he { align-self: flex-start; background: var(--msg-he); border: 1px solid var(--border-color); border-bottom-left-radius: 4px; }
-        .msg-author { 
-            font-size: 11px; 
-            color: var(--accent); 
-            font-weight: 800; 
-            margin-bottom: 6px; 
-            cursor: pointer;
-            display: block;
-        }
-        .msg-text { 
-            word-break: break-word;
-            margin-bottom: 6px;
-            display: block;
-        }
-        .msg-time-stamp { 
-            font-size: 10px; 
-            color: var(--text-muted); 
-            text-align: right; 
-            margin-top: 4px;
-            display: block;
-        }
-        .msg-media { 
-            max-width: 100%; 
-            border-radius: 8px; 
-            margin-bottom: 6px; 
-            cursor: pointer;
-            display: block;
-        }
-        .msg-quote { 
-            background: rgba(0,0,0,0.15); 
-            padding: 6px 10px; 
-            border-left: 3px solid var(--accent); 
-            border-radius: 4px; 
-            margin-bottom: 6px; 
-            font-size: 12.5px;
-            display: block;
-        }
-        .msg-hover-tools { 
-            display: none; 
-            gap: 8px; 
-            position: absolute; 
-            bottom: 100%;
-            right: 0;
-            left: auto;
-            background: var(--bg-card); 
-            padding: 8px 12px; 
-            border-radius: 20px; 
-            border: 1px solid var(--border-color); 
-            box-shadow: 0 8px 16px rgba(0,0,0,0.4); 
-            z-index: 1001; 
-            white-space: nowrap; 
-            width: max-content;
-            margin-bottom: 8px;
-            animation: dropdownSlideDown 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
+        .msg-author { font-size: 11px; color: var(--accent); font-weight: 800; margin-bottom: 6px; cursor: pointer; display: block; }
+        .msg-text { word-break: break-word; margin-bottom: 6px; display: block; }
+        .msg-time-stamp { font-size: 10px; color: var(--text-muted); text-align: right; margin-top: 4px; display: block; }
+        .msg-media { max-width: 100%; border-radius: 8px; margin-bottom: 6px; cursor: pointer; display: block; }
+        .msg-quote { background: rgba(0,0,0,0.15); padding: 6px 10px; border-left: 3px solid var(--accent); border-radius: 4px; margin-bottom: 6px; font-size: 12.5px; display: block; }
+        .msg-hover-tools { display: none; gap: 8px; position: absolute; bottom: 100%; right: 0; left: auto; background: var(--bg-card); padding: 8px 12px; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: 0 8px 16px rgba(0,0,0,0.4); z-index: 1001; white-space: nowrap; width: max-content; margin-bottom: 8px; }
         .msg-bubble:hover .msg-hover-tools { display: flex; }
         .tool-ico { cursor: pointer; font-size: 13px; opacity: 0.7; transition: transform 0.15s; }
         .tool-ico:hover { opacity: 1; transform: scale(1.25); }
@@ -201,25 +152,9 @@
 
         .bottom-input-area { padding: 16px 20px; background: var(--bg-card); display: flex; gap: 12px; align-items: flex-end; border-top: 1px solid var(--border-color); position: relative; }
         .clip-container { position: relative; display: flex; }
-        .clip-label { 
-            font-size: 24px; 
-            cursor: pointer; 
-            padding: 8px 10px; 
-            color: var(--text-muted); 
-            border-radius: 10px;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .clip-label:hover { 
-            color: var(--accent); 
-            background: rgba(88, 166, 255, 0.15);
-            transform: rotate(20deg) scale(1.15);
-        }
-        .clip-label:active {
-            transform: rotate(20deg) scale(1.05);
-        }
+        .clip-label { font-size: 24px; cursor: pointer; padding: 8px 10px; color: var(--text-muted); border-radius: 10px; transition: all 0.3s ease; display: inline-flex; align-items: center; justify-content: center; }
+        .clip-label:hover { color: var(--accent); background: rgba(88, 166, 255, 0.15); transform: rotate(20deg) scale(1.15); }
+        .clip-label:active { transform: rotate(20deg) scale(1.05); }
         .clip-dropdown { display: none; position: absolute; bottom: 55px; left: 0; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; width: 220px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); flex-direction: column; overflow: hidden; z-index: 100; }
         .clip-option { padding: 12px 16px; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
         .clip-option:hover { background: var(--bg-hover); color: var(--accent); }
@@ -248,47 +183,13 @@
 
         /* Кастомный выпадающий список */
         .custom-select-wrapper { position: relative; width: 100%; user-select: none; }
-        .custom-select-trigger {
-            background: var(--bg-input);
-            border: 1px solid var(--border-color);
-            padding: 12px 20px;
-            border-radius: 20px !important;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            width: 100%;
-            margin-top: 2px;
-            margin-bottom: 8px;
-        }
+        .custom-select-trigger { background: var(--bg-input); border: 1px solid var(--border-color); padding: 12px 20px; border-radius: 20px !important; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); width: 100%; margin-top: 2px; margin-bottom: 8px; }
         .custom-select-trigger:hover { border-color: var(--accent); transform: scale(1.01); }
         .custom-select-trigger .arrow { transition: transform 0.2s; }
         .custom-select-trigger.open .arrow { transform: rotate(180deg); }
-        .custom-options {
-            position: absolute;
-            top: 110%;
-            left: 0;
-            width: 100%;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 20px !important;
-            overflow: hidden;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            z-index: 999;
-            max-height: 200px;
-            overflow-y: auto;
-        }
+        .custom-options { position: absolute; top: 110%; left: 0; width: 100%; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px !important; overflow: hidden; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.3s ease; z-index: 999; max-height: 200px; overflow-y: auto; }
         .custom-options.show { opacity: 1; visibility: visible; transform: translateY(0); }
-        .custom-options div {
-            padding: 12px 20px;
-            cursor: pointer;
-            transition: background 0.2s;
-            white-space: nowrap;
-        }
+        .custom-options div { padding: 12px 20px; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
         .custom-options div:hover { background: var(--bg-hover); }
         .custom-options div.selected { background: var(--accent); color: var(--bg-main); font-weight: 600; }
     </style>
@@ -325,31 +226,41 @@
         </div>
     </div>
 
-    <div id="tabManagerModal" class="modal-overlay"><div class="modal-card"><h3 style="margin-top:0; color:var(--accent);">Управление вкладками ⚙️</h3><div id="tabManageList"></div><hr style="border-color:var(--border-color); margin:15px 0;"><h4>Добавить кастомную вкладку:</h4><input type="text" id="newTabNameInp" placeholder="Название вкладки"><button class="success" onclick="executeAddCustomTab()">Добавить вкладку</button><button class="secondary" style="margin-top:10px;" onclick="closeModal('tabManagerModal')">Готово</button></div></div>
+    <div id="tabManagerModal" class="modal-overlay">
+        <div class="modal-card">
+            <h3 style="margin-top:0; color:var(--accent);" data-i18n="manage_tabs">Управление вкладками ⚙️</h3>
+            <div id="tabManageList"></div>
+            <hr style="border-color:var(--border-color); margin:15px 0;">
+            <h4 data-i18n="add_custom_tab">Добавить кастомную вкладку:</h4>
+            <input type="text" id="newTabNameInp" placeholder="Название вкладки" data-i18n-placeholder="tab_name">
+            <button class="success" onclick="executeAddCustomTab()" data-i18n="add_tab_btn">Добавить вкладку</button>
+            <button class="secondary" style="margin-top:10px;" onclick="closeModal('tabManagerModal')" data-i18n="done">Готово</button>
+        </div>
+    </div>
 
     <div id="myProfileModal" class="modal-overlay">
         <div class="modal-card">
-            <h3 style="margin-top:0; text-align:center;">Мой Профиль</h3>
+            <h3 style="margin-top:0; text-align:center;" data-i18n="my_profile">Мой Профиль</h3>
             <p id="myModalEmailDisplay" style="text-align:center; color:var(--text-muted); font-size:13px; margin:-10px 0 15px 0;"></p>
             <img id="myModalAvPreview" src="" style="width:80px; height:80px; border-radius:50%; display:block; margin:0 auto 15px; object-fit:cover;">
-            <input type="text" id="myModalNick" placeholder="Никнейм">
-            <input type="text" id="myModalAvUrl" placeholder="URL аватарки">
-            <textarea id="myModalBio" placeholder="О себе..."></textarea>
-            <button class="success" onclick="saveMyProfileData()">Сохранить профиль</button>
+            <input type="text" id="myModalNick" placeholder="Никнейм" data-i18n-placeholder="nickname">
+            <input type="text" id="myModalAvUrl" placeholder="URL аватарки" data-i18n-placeholder="avatar_url">
+            <textarea id="myModalBio" placeholder="О себе..." data-i18n-placeholder="about_me"></textarea>
+            <button class="success" onclick="saveMyProfileData()" data-i18n="save_profile">Сохранить профиль</button>
             
             <hr style="border-color:var(--border-color); margin:20px 0;">
-            <h4 style="margin:0 0 10px 0; color:var(--accent);">Активные сессии 🖥️</h4>
+            <h4 style="margin:0 0 10px 0; color:var(--accent);" data-i18n="active_sessions">Активные сессии 🖥️</h4>
             <div id="sessionsListContainer" style="max-height:120px; overflow-y:auto; margin-bottom:10px; border:1px solid var(--border-color); padding:6px; border-radius:8px;"></div>
             
-            <h4 style="margin:10px 0 5px 0; color:var(--danger);">Чёрный список 🚫</h4>
+            <h4 style="margin:10px 0 5px 0; color:var(--danger);" data-i18n="blacklist">Чёрный список 🚫</h4>
             <div id="myBlacklistContainer" style="max-height:100px; overflow-y:auto; border:1px solid var(--border-color); padding:6px; border-radius:8px; margin-bottom:10px;"></div>
 
-            <button class="danger" onclick="executeClearAppCache()" style="background:#dc2626; margin-bottom: 5px;">🗑️ Очистить кэш приложения</button>
+            <button class="danger" onclick="executeClearAppCache()" style="background:#dc2626; margin-bottom: 5px;">🗑️ <span data-i18n="clear_cache">Очистить кэш приложения</span></button>
 
             <hr style="border-color:var(--border-color); margin:20px 0;">
-        <div style="text-align:center; color:var(--text-muted); font-size:12px; margin-bottom:10px;">Версия: VChat 1.3.8</div>
+            <div style="text-align:center; color:var(--text-muted); font-size:12px; margin-bottom:10px;"><span data-i18n="version">Версия</span>: VChat 1.3.8</div>
             <div style="display:block; margin-bottom:12px; font-size:13px;">
-                <b style="display:block; margin-bottom:6px;">Язык интерфейса:</b>
+                <b style="display:block; margin-bottom:6px;" data-i18n="language">Язык интерфейса:</b>
                 <div class="custom-select-wrapper">
                     <div class="custom-select-trigger" onclick="toggleLanguageDropdown()" id="languageTrigger">
                         <span id="languageLabel">Русский</span>
@@ -368,13 +279,20 @@
                     </div>
                 </div>
             </div>
-            <button class="secondary" onclick="executeSignOut()">Выйти из аккаунта</button>
-            <button class="danger" onclick="executeDeleteAccountPermanently()" style="background: #b91c1c; margin-top: 8px;">⚠️ УДАЛИТЬ АККАУНТ НАВСЕГДА</button>
-            <button class="secondary" style="margin-top:12px;" onclick="closeModal('myProfileModal')">Закрыть</button>
+            <button class="secondary" onclick="executeSignOut()" data-i18n="logout">Выйти из аккаунта</button>
+            <button class="danger" onclick="executeDeleteAccountPermanently()" style="background: #b91c1c; margin-top: 8px;" data-i18n="delete_account">⚠️ УДАЛИТЬ АККАУНТ НАВСЕГДА</button>
+            <button class="secondary" style="margin-top:12px;" onclick="closeModal('myProfileModal')" data-i18n="close">Закрыть</button>
         </div>
     </div>
 
-    <div id="codeViewerModal" class="modal-overlay"><div class="modal-card" style="width:600px; max-width:90vw;"><h3 style="margin-top:0; color:var(--accent);">Просмотр документа 📝</h3><pre id="fullCodeDisplay" style="background:var(--bg-input); padding:15px; border-radius:10px; overflow:auto; font-family:monospace; font-size:13px; max-height:350px; border:1px solid var(--border-color); white-space:pre-wrap; word-break:break-all;"></pre><button class="success" id="copyCodeModalBtn">📋 Скопировать весь text</button><button class="secondary" style="margin-top:8px;" onclick="closeModal('codeViewerModal')">Закрыть</button></div></div>
+    <div id="codeViewerModal" class="modal-overlay">
+        <div class="modal-card" style="width:600px; max-width:90vw;">
+            <h3 style="margin-top:0; color:var(--accent);" data-i18n="view_doc">Просмотр документа 📝</h3>
+            <pre id="fullCodeDisplay" style="background:var(--bg-input); padding:15px; border-radius:10px; overflow:auto; font-family:monospace; font-size:13px; max-height:350px; border:1px solid var(--border-color); white-space:pre-wrap; word-break:break-all;"></pre>
+            <button class="success" id="copyCodeModalBtn" data-i18n="copy_all_text">📋 Скопировать весь text</button>
+            <button class="secondary" style="margin-top:8px;" onclick="closeModal('codeViewerModal')" data-i18n="close">Закрыть</button>
+        </div>
+    </div>
 
     <div id="contextInfoModal" class="modal-overlay">
         <div class="modal-card" style="display: flex; flex-direction: column;">
@@ -385,21 +303,21 @@
             
             <div id="ctxUserBlock" style="display:none;">
                 <button id="addContactBtn" class="success" onclick="executeToggleContact()">➕ Добавить в Контакты</button>
-                <input type="text" id="localCustomName" placeholder="Локальное имя контакта">
-                <button class="secondary" onclick="saveLocalContactName()">Сохранить имя</button>
+                <input type="text" id="localCustomName" placeholder="Локальное имя контакта" data-i18n-placeholder="local_contact_name">
+                <button class="secondary" onclick="saveLocalContactName()" data-i18n="save_name">Сохранить имя</button>
                 <button id="blockToggleBtn" class="danger" onclick="executeToggleBlockUser()">Блокировать</button>
             </div>
 
             <div id="ctxGroupBlock" style="display:none; width: 100%;">
-                <h4 style="margin:10px 0 5px 0;">Настройки группы:</h4>
-                <input type="text" id="editGrpNameInp" placeholder="Изменить название группы">
-                <input type="text" id="editGrpAvInp" placeholder="Изменить URL аватарки">
-                <textarea id="editGrpDescInp" placeholder="Изменить описание группы" rows="2"></textarea>
+                <h4 style="margin:10px 0 5px 0;" data-i18n="group_settings">Настройки группы:</h4>
+                <input type="text" id="editGrpNameInp" placeholder="Изменить название группы" data-i18n-placeholder="edit_grp_name">
+                <input type="text" id="editGrpAvInp" placeholder="Изменить URL аватарки" data-i18n-placeholder="edit_grp_avatar">
+                <textarea id="editGrpDescInp" placeholder="Изменить описание группы" rows="2" data-i18n-placeholder="edit_grp_desc"></textarea>
                 
-                <h4 style="margin:10px 0 5px 0; color:var(--warning);">Автомодерация:</h4>
-                <input type="text" id="editGrpBannedWordsInp" placeholder="Запрещенные слова (через запятую)">
+                <h4 style="margin:10px 0 5px 0; color:var(--warning);" data-i18n="auto_mod">Автомодерация:</h4>
+                <input type="text" id="editGrpBannedWordsInp" placeholder="Запрещенные слова (через запятую)" data-i18n-placeholder="banned_words_placeholder">
                 
-                <label style="font-size:12px; color:var(--text-muted); display:block; margin-top:8px;">Замедление чата (анти-спам):</label>
+                <label style="font-size:12px; color:var(--text-muted); display:block; margin-top:8px;" data-i18n="slow_mode">Замедление чата (анти-спам):</label>
                 <div class="custom-select-wrapper">
                     <div class="custom-select-trigger" id="cooldownTrigger" onclick="toggleCustomDropdown(event)">
                         <span id="selectedCooldown">Выкл</span>
@@ -414,37 +332,57 @@
                         <div onclick="selectCooldown(-1, 'Свое время...')">Свое время...</div>
                     </div>
                 </div>
-                <input type="number" id="editGrpCooldownCustom" style="display:none; border-radius: 15px; margin-top: 6px;" placeholder="Введи секунды для замедления">
+                <input type="number" id="editGrpCooldownCustom" style="display:none; border-radius: 15px; margin-top: 6px;" placeholder="Введи секунды" data-i18n-placeholder="enter_seconds">
 
                 <div id="ownerAdminPermsBlock" style="display:none; background:var(--bg-main); padding:12px; border-radius:10px; border:1px solid var(--border-color); margin:10px 0; text-align:left;">
-                    <h4 style="margin:0 0 8px 0; color:var(--accent); font-size:14px;">Права Админов 🛡️</h4>
-                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:6px;"><input type="checkbox" id="permKickCb" style="width:auto; margin:0;"> Могут кикать</label>
-                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:6px;"><input type="checkbox" id="permBanCb" style="width:auto; margin:0;"> Могут банить</label>
-                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:6px;"><input type="checkbox" id="permMetaCb" style="width:auto; margin:0;"> Могут менять настройки/кулдаун</label>
-                    <label style="display:flex; align-items:center; gap:8px; font-size:13px;"><input type="checkbox" id="permInviteCb" style="width:auto; margin:0;"> Могут приглашать участников</label>
+                    <h4 style="margin:0 0 8px 0; color:var(--accent); font-size:14px;" data-i18n="admin_perms">Права Админов 🛡️</h4>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:6px;"><input type="checkbox" id="permKickCb" style="width:auto; margin:0;"> <span data-i18n="can_kick">Могут кикать</span></label>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:6px;"><input type="checkbox" id="permBanCb" style="width:auto; margin:0;"> <span data-i18n="can_ban">Могут банить</span></label>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:6px;"><input type="checkbox" id="permMetaCb" style="width:auto; margin:0;"> <span data-i18n="can_edit_meta">Могут менять настройки/кулдаун</span></label>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px;"><input type="checkbox" id="permInviteCb" style="width:auto; margin:0;"> <span data-i18n="can_invite">Могут приглашать участников</span></label>
                 </div>
 
-                <button class="success" style="margin-top:10px;" onclick="executeUpdateGroupMeta()">Обновить данные группы</button>
+                <button class="success" style="margin-top:10px;" onclick="executeUpdateGroupMeta()" data-i18n="update_group_data">Обновить данные группы</button>
                 
-                <h4 style="margin:15px 0 5px 0;">Участники и управление:</h4>
+                <h4 style="margin:15px 0 5px 0;" data-i18n="members_management">Участники и управление:</h4>
                 <div id="groupMembersList" style="max-height:180px; overflow-y:auto; border:1px solid var(--border-color); border-radius:6px; padding:6px; margin-bottom:10px; background:var(--bg-main);"></div>
                 
-                <input type="email" id="inviteEmailInp" placeholder="Email или Ник для приглашения">
-                <button class="success" onclick="inviteUserToGroup()">Пригласить участника</button>
+                <input type="email" id="inviteEmailInp" placeholder="Email или Ник" data-i18n-placeholder="invite_placeholder">
+                <button class="success" onclick="inviteUserToGroup()" data-i18n="invite_btn">Пригласить участника</button>
                 
-                <h4 style="margin:15px 0 5px 0; color:var(--danger);">Заблокированные в группе:</h4>
+                <h4 style="margin:15px 0 5px 0; color:var(--danger);" data-i18n="banned_in_group">Заблокированные в группе:</h4>
                 <div id="groupBannedList" style="max-height:120px; overflow-y:auto; border:1px solid var(--border-color); border-radius:6px; padding:6px; margin-bottom:10px; background:var(--bg-main);"></div>
 
-                <button class="danger" style="margin-top:15px;" onclick="leaveCurrentGroup()">Покинуть группу</button>
-                <button id="deleteGroupBtn" class="danger" style="background:#b91c1c; display:none; margin-top:8px;" onclick="deleteCurrentGroup()">Удалить группу навсегда</button>
+                <button class="danger" style="margin-top:15px;" onclick="leaveCurrentGroup()" data-i18n="leave_group">Покинуть группу</button>
+                <button id="deleteGroupBtn" class="danger" style="background:#b91c1c; display:none; margin-top:8px;" onclick="deleteCurrentGroup()" data-i18n="delete_group_perm">Удалить группу навсегда</button>
             </div>
-            <button class="secondary" style="margin-top:15px;" onclick="closeModal('contextInfoModal')">Закрыть</button>
+            <button class="secondary" style="margin-top:15px;" onclick="closeModal('contextInfoModal')" data-i18n="close">Закрыть</button>
         </div>
     </div>
 
-    <div id="urlAttachmentModal" class="modal-overlay"><div class="modal-card"><h3>Прикрепить медиа 🌐</h3><input type="text" id="urlAttachInp" placeholder="Прямая ссылка на картинку"><button class="success" onclick="executeConfirmUrlAttachment()">Прикрепить</button><button class="secondary" onclick="closeModal('urlAttachmentModal')">Отмена</button></div></div>
-    <div id="textAttachmentModal" class="modal-overlay"><div class="modal-card"><h3>Создать текстовый док 📝</h3><textarea id="textAttachInp" placeholder="Текст/Код..." rows="6"></textarea><button class="success" onclick="executeConfirmTextAttachment()">Прикрепить</button><button class="secondary" onclick="closeModal('textAttachmentModal')">Отмена</button></div></div>
-    <div id="forwardModal" class="modal-overlay"><div class="modal-card"><h3>Переслать сообщение</h3><div id="forwardListContainer" style="max-height:200px; overflow-y:auto; border:1px solid var(--border-color); border-radius:8px;"></div><button class="secondary" style="margin-top:10px;" onclick="closeModal('forwardModal')">Отмена</button></div></div>
+    <div id="urlAttachmentModal" class="modal-overlay">
+        <div class="modal-card">
+            <h3 data-i18n="attach_media">Прикрепить медиа 🌐</h3>
+            <input type="text" id="urlAttachInp" placeholder="Прямая ссылка на картинку" data-i18n-placeholder="url_placeholder">
+            <button class="success" onclick="executeConfirmUrlAttachment()" data-i18n="attach_btn">Прикрепить</button>
+            <button class="secondary" onclick="closeModal('urlAttachmentModal')" data-i18n="cancel">Отмена</button>
+        </div>
+    </div>
+    <div id="textAttachmentModal" class="modal-overlay">
+        <div class="modal-card">
+            <h3 data-i18n="create_text_doc">Создать текстовый док 📝</h3>
+            <textarea id="textAttachInp" placeholder="Текст/Код..." rows="6" data-i18n-placeholder="text_code"></textarea>
+            <button class="success" onclick="executeConfirmTextAttachment()" data-i18n="attach_btn">Прикрепить</button>
+            <button class="secondary" onclick="closeModal('textAttachmentModal')" data-i18n="cancel">Отмена</button>
+        </div>
+    </div>
+    <div id="forwardModal" class="modal-overlay">
+        <div class="modal-card">
+            <h3 data-i18n="forward_msg">Переслать сообщение</h3>
+            <div id="forwardListContainer" style="max-height:200px; overflow-y:auto; border:1px solid var(--border-color); border-radius:8px;"></div>
+            <button class="secondary" style="margin-top:10px;" onclick="closeModal('forwardModal')" data-i18n="cancel">Отмена</button>
+        </div>
+    </div>
     <div id="mediaViewerModal" class="modal-overlay" onclick="closeModal('mediaViewerModal')" style="background:rgba(0,0,0,0.95);"><img id="fullSizeImg" src="" style="max-width:90%; max-height:90%; border-radius:8px;"></div>
 
     <div id="appLayout" class="tg-layout mobile-view-sidebar">
@@ -459,7 +397,7 @@
                     <button class="secondary" style="padding:6px; margin:0; width:34px; height:34px;" onclick="executeToggleTheme()" id="themeBtn">🌙</button>
                 </div>
             </div>
-            <div style="padding:10px 14px;"><input type="text" id="searchBarInp" placeholder="Поиск..." oninput="renderChatLists()" style="margin:0;"></div>
+            <div style="padding:10px 14px;"><input type="text" id="searchBarInp" placeholder="Поиск..." data-i18n-placeholder="search" oninput="renderChatLists()" style="margin:0;"></div>
             
             <div class="tabs-wrapper">
                 <div class="tabs-row" id="tabsRowElement"></div>
@@ -476,7 +414,7 @@
                     <button class="back-btn-mobile" onclick="backToSidebarOnMobile()">⬅</button>
                     <div style="display:flex; align-items:center; gap:14px;" onclick="openActiveChatContextInfo()">
                         <img id="activeChatAv" src="" style="width:42px; height:42px; border-radius:50%; display:none; object-fit:cover;">
-                        <div><b id="activeChatTitle">Выберите чат</b><small id="activeChatStatus" style="color:var(--text-muted); display:block; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></small></div>
+                        <div><b id="activeChatTitle" data-i18n="select_chat">Выберите чат</b><small id="activeChatStatus" style="color:var(--text-muted); display:block; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></small></div>
                     </div>
                 </div>
             </header>
@@ -486,7 +424,7 @@
             <div id="attachmentPreviewBar" class="attachment-preview-bar">
                 <div id="attachmentPreviewFileIcon" style="font-size:26px; display:none;">📄</div>
                 <img id="attachmentPreviewImg" src="" style="display:none; height:45px; border-radius:6px;">
-                <div style="flex:1;"><b id="attachLabelType" style="font-size:13px; color:var(--success);">Файл готов</b></div>
+                <div style="flex:1;"><b id="attachLabelType" style="font-size:13px; color:var(--success);" data-i18n="file_ready">Файл готов</b></div>
                 <button class="danger" style="width:auto; padding:4px 10px; margin:0;" onclick="clearPendingAttachmentData()">🗑️</button>
             </div>
             
@@ -494,13 +432,13 @@
                 <div class="clip-container">
                     <div class="clip-label" onclick="toggleClipDropdown(event)">📎</div>
                     <div class="clip-dropdown" id="clipDropdownMenu">
-                        <div class="clip-option" onclick="triggerDeviceFileSelect()">📁 Файл с устройства</div>
-                        <div class="clip-option" onclick="openUrlAttachmentModal()">🌐 Ссылка из интернета</div>
-                        <div class="clip-option" onclick="openTextAttachmentModal()">📝 Текст / Код</div>
+                        <div class="clip-option" onclick="triggerDeviceFileSelect()" data-i18n="device_file">📁 Файл с устройства</div>
+                        <div class="clip-option" onclick="openUrlAttachmentModal()" data-i18n="internet_link">🌐 Ссылка из интернета</div>
+                        <div class="clip-option" onclick="openTextAttachmentModal()" data-i18n="text_code">📝 Текст / Код</div>
                     </div>
                 </div>
                 <input type="file" id="fileInputEngine" accept="image/*" style="display:none;" onchange="processLocalFileSelection(event)">
-                <textarea id="messageInputEngine" placeholder="Напишите сообщение..." rows="1" style="margin:0; resize:none;" onkeydown="handleInputKeyPress(event)"></textarea>
+                <textarea id="messageInputEngine" placeholder="Напишите сообщение..." data-i18n-placeholder="send_message" rows="1" style="margin:0; resize:none;" onkeydown="handleInputKeyPress(event)"></textarea>
                 <button id="sendMsgBtn" onclick="executeSendMessage()" style="width:50px; height:42px; margin:0; background:var(--accent); border-radius:10px;">➤</button>
             </div>
         </main>
@@ -515,9 +453,15 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const realtimeDb = firebase.database(), appAuth = firebase.auth();
 
-        // Система локализации
+        // Система локализации (ПРОКАЧАННАЯ ВЕРСИЯ)
         let currentLanguage = localStorage.getItem('vchat_language') || 'ru';
-        const translations = { en: {login_title:"Sign In to VChat",email:"Your Email",password:"Password",login_btn:"Sign In",or:"or",google_login:"Sign In with Google",create_account:"Create Account",registration_title:"Registration",nickname:"Nickname",register_btn:"Register",email_sent:"Email Sent!",email_sent_desc:"We sent a confirmation link to your email. Click on it to activate your account.",check_spam:"IMPORTANT: If you do not see the email within a minute, please check the spam folder!",back_to_login:"Back to Login",manage_tabs:"Manage Tabs",add_custom_tab:"Add Custom Tab",tab_name:"Tab Name",add_tab_btn:"Add Tab",done:"Done",my_profile:"My Profile",active_sessions:"Active Sessions",blacklist:"Blacklist",clear_cache:"Clear App Cache",version:"Version",chats:"Chats",contacts:"Contacts",global:"Global",groups:"Groups",search:"Search...",select_chat:"Select a chat",file_ready:"File ready",device_file:"File from Device",internet_link:"Link from Internet",text_code:"Text / Code",send_message:"Send a message...",copy:"Copy",reply:"Reply",forward:"Forward",edit:"Edit",delete:"Delete",group_chat:"Group chat",you:"You",settings:"Settings",logout:"Logout",fill_all_fields:"Please fill in all fields!",language:"Language"}, ru: {login_title:"Вход в VChat",email:"Ваш адрес электронной почты",password:"Пароль",login_btn:"Войти",or:"или",google_login:"Вход через Google",create_account:"Создать учётную запись",registration_title:"Регистрация",nickname:"Имя пользователя",register_btn:"Зарегистрироваться",email_sent:"Письмо отправлено!",email_sent_desc:"Мы отправили ссылку подтверждения на вашу электронную почту. Нажмите на неё, чтобы активировать учётную запись.",check_spam:"ВАЖНО: Если письмо не пришло в течение минуты, проверьте папку «Спам»!",back_to_login:"Вернуться к входу",manage_tabs:"Управление вкладками",add_custom_tab:"Добавить пользовательскую вкладку",tab_name:"Название вкладки",add_tab_btn:"Добавить вкладку",done:"Готово",my_profile:"Мой профиль",active_sessions:"Активные сеансы",blacklist:"Чёрный список",clear_cache:"Очистить кэш приложения",version:"Версия",chats:"Чаты",contacts:"Контакты",global:"Общее",groups:"Группы",search:"Поиск...",select_chat:"Выберите чат",file_ready:"Файл готов",device_file:"Файл с устройства",internet_link:"Ссылка из интернета",text_code:"Текст / Код",send_message:"Напишите сообщение...",copy:"Копировать",reply:"Ответить",forward:"Переслать",edit:"Редактировать",delete:"Удалить",group_chat:"Групповой чат",you:"Вы",settings:"Настройки",logout:"Выход",fill_all_fields:"Заполните все поля!",language:"Язык"}, ru_slang: {login_title:"Войти в VChat",email:"Ваш Email",password:"Пароль",login_btn:"Войти",or:"или",google_login:"Войти через Google",create_account:"Создать аккаунт",registration_title:"Регистрация",nickname:"Никнейм",register_btn:"Зарегистрироваться",email_sent:"Письмо отправлено!",email_sent_desc:"Мы выслали ссылку для подтверждения на твою почту. Кликни по ней, чтобы активировать аккаунт.",check_spam:"ВАЖНО: Если письма нет дольше минуты — обязательно чекни вкладку «СПАМ»!",back_to_login:"Назад ко входу",manage_tabs:"Управление вкладками",add_custom_tab:"Добавить кастомную вкладку",tab_name:"Название вкладки",add_tab_btn:"Добавить вкладку",done:"Готово",my_profile:"Мой профиль",active_sessions:"Активные сеансы",blacklist:"Чёрный список",clear_cache:"Очистить кэш приложения",version:"Версия",chats:"Чаты",contacts:"Контакты",global:"Общее",groups:"Группы",search:"Поиск...",select_chat:"Выберите чат",file_ready:"Файл готов",device_file:"Файл с устройства",internet_link:"Ссылка из интернета",text_code:"Текст / Код",send_message:"Напишите сообщение...",copy:"Копировать",reply:"Ответить",forward:"Переслать",edit:"Редактировать",delete:"Удалить",group_chat:"Групповой чат",you:"Вы",settings:"Настройки",logout:"Выход",fill_all_fields:"Заполни все поля, бро!",language:"Язык"}, uz: {login_title:"VChatga kirish",email:"Sizning email manzilingiz",password:"Parol",login_btn:"Kirish",or:"yoki",google_login:"Google orqali kirish",create_account:"Akkaunt yaratish",registration_title:"Ro'yxatdan o'tish",nickname:"Foydalanuvchi nomi",register_btn:"Ro'yxatdan o'tish",email_sent:"Xat yuborildi!",email_sent_desc:"Biz tasdiqlovchi havolani sizning elektron pochtangizga yubordik. Akkauntingizni faollashtirish uchun unga bosing.",check_spam:"MUHIM: Agar bir daqiqa ichida xat kelmagansa, spam papkasini tekshiring!",back_to_login:"Kirish sahifasiga qaytish",manage_tabs:"Varaqalarni boshqarish",add_custom_tab:"Maxsus varaqani qo'shish",tab_name:"Varaqaning nomi",add_tab_btn:"Varaqani qo'shish",done:"Tayyor",my_profile:"Mening profilim",active_sessions:"Faol seanslar",blacklist:"Qora ro'yxat",clear_cache:"Ilovaning keshshini tozalash",version:"Versiya",chats:"Chatlar",contacts:"Kontaktlar",global:"Global",groups:"Guruhlar",search:"Qidirish...",select_chat:"Chat tanlang",file_ready:"Fayl tayyor",device_file:"Qurilmadan fayl",internet_link:"Internetdan havola",text_code:"Matn / Kod",send_message:"Xabar yozing...",copy:"Nusxa olish",reply:"Javob berish",forward:"Yuborish",edit:"Tahrirlash",delete:"O'chirish",group_chat:"Guruh chati",you:"Siz",settings:"Sozlamalar",logout:"Chiqish",fill_all_fields:"Barcha maydonlarni to'ldiring!",language:"Til"}, es: {login_title:"Iniciar sesión en VChat",email:"Tu correo electrónico",password:"Contraseña",login_btn:"Iniciar sesión",or:"o",google_login:"Iniciar sesión con Google",create_account:"Crear cuenta",registration_title:"Registro",nickname:"Nombre de usuario",register_btn:"Registrarse",email_sent:"¡Correo enviado!",email_sent_desc:"Enviamos un enlace de confirmación a tu correo electrónico. Haz clic en él para activar tu cuenta.",check_spam:"IMPORTANTE: Si no recibes el correo en un minuto, ¡revisa la carpeta de spam!",back_to_login:"Volver al inicio de sesión",manage_tabs:"Administrar pestañas",add_custom_tab:"Agregar pestaña personalizada",tab_name:"Nombre de la pestaña",add_tab_btn:"Agregar pestaña",done:"Listo",my_profile:"Mi perfil",active_sessions:"Sesiones activas",blacklist:"Lista negra",clear_cache:"Borrar caché de la aplicación",version:"Versión",chats:"Chats",contacts:"Contactos",global:"Global",groups:"Grupos",search:"Buscar...",select_chat:"Seleccionar un chat",file_ready:"Archivo listo",device_file:"Archivo del dispositivo",internet_link:"Enlace de Internet",text_code:"Texto / Código",send_message:"Escribe un mensaje...",copy:"Copiar",reply:"Responder",forward:"Reenviar",edit:"Editar",delete:"Eliminar",group_chat:"Chat grupal",you:"Tú",settings:"Configuración",logout:"Cerrar sesión",fill_all_fields:"¡Por favor, rellena todos los campos!",language:"Idioma"}, fr: {login_title:"Se connecter à VChat",email:"Votre adresse e-mail",password:"Mot de passe",login_btn:"Se connecter",or:"ou",google_login:"Se connecter avec Google",create_account:"Créer un compte",registration_title:"Inscription",nickname:"Nom d'utilisateur",register_btn:"S'inscrire",email_sent:"E-mail envoyé!",email_sent_desc:"Nous avons envoyé un lien de confirmation à votre adresse e-mail. Cliquez dessus pour activer votre compte.",check_spam:"IMPORTANT: Si vous ne recevez pas le message dans une minute, veuillez vérifier le dossier spam!",back_to_login:"Retour à la connexion",manage_tabs:"Gérer les onglets",add_custom_tab:"Ajouter un onglet personnalisé",tab_name:"Nom de l'onglet",add_tab_btn:"Ajouter un onglet",done:"Terminé",my_profile:"Mon profil",active_sessions:"Sessions actives",blacklist:"Liste noire",clear_cache:"Effacer le cache de l'application",version:"Version",chats:"Chats",contacts:"Contacts",global:"Global",groups:"Groupes",search:"Rechercher...",select_chat:"Sélectionner un chat",file_ready:"Fichier prêt",device_file:"Fichier depuis l'appareil",internet_link:"Lien Internet",text_code:"Texte / Code",send_message:"Écrivez un message...",copy:"Copier",reply:"Répondre",forward:"Transférer",edit:"Modifier",delete:"Supprimer",group_chat:"Chat de groupe",you:"Vous",settings:"Paramètres",logout:"Se déconnecter",fill_all_fields:"Veuillez remplir tous les champs!",language:"Langue"}, de: {login_title:"Bei VChat anmelden",email:"Ihre E-Mail-Adresse",password:"Passwort",login_btn:"Anmelden",or:"oder",google_login:"Mit Google anmelden",create_account:"Konto erstellen",registration_title:"Registrierung",nickname:"Benutzername",register_btn:"Registrieren",email_sent:"E-Mail versendet!",email_sent_desc:"Wir haben einen Bestätigungslink an Ihre E-Mail-Adresse gesendet. Klicken Sie darauf, um Ihr Konto zu aktivieren.",check_spam:"WICHTIG: Wenn Sie die E-Mail nicht innerhalb einer Minute erhalten, überprüfen Sie bitte den Spam-Ordner!",back_to_login:"Zurück zur Anmeldung",manage_tabs:"Registerkarten verwalten",add_custom_tab:"Benutzerdefinierte Registerkarte hinzufügen",tab_name:"Name der Registerkarte",add_tab_btn:"Registerkarte hinzufügen",done:"Fertig",my_profile:"Mein Profil",active_sessions:"Aktive Sitzungen",blacklist:"Schwarze Liste",clear_cache:"App-Cache löschen",version:"Version",chats:"Chats",contacts:"Kontakte",global:"Global",groups:"Gruppen",search:"Suche...",select_chat:"Wählen Sie einen Chat aus",file_ready:"Datei bereit",device_file:"Datei vom Gerät",internet_link:"Link aus dem Internet",text_code:"Text / Code",send_message:"Schreiben Sie eine Nachricht...",copy:"Kopieren",reply:"Antworten",forward:"Weiterleiten",edit:"Bearbeiten",delete:"Löschen",group_chat:"Gruppenchat",you:"Sie",settings:"Einstellungen",logout:"Abmelden",fill_all_fields:"Bitte füllen Sie alle Felder aus!",language:"Sprache"}, it: {login_title:"Accedi a VChat",email:"Il tuo indirizzo e-mail",password:"Password",login_btn:"Accedi",or:"o",google_login:"Accedi con Google",create_account:"Crea un account",registration_title:"Registrazione",nickname:"Nome utente",register_btn:"Registrati",email_sent:"Email inviata!",email_sent_desc:"Abbiamo inviato un link di conferma al tuo indirizzo e-mail. Fai clic su di esso per attivare il tuo account.",check_spam:"IMPORTANTE: Se non ricevi l'email entro un minuto, controlla la cartella spam!",back_to_login:"Torna al login",manage_tabs:"Gestisci schede",add_custom_tab:"Aggiungi scheda personalizzata",tab_name:"Nome della scheda",add_tab_btn:"Aggiungi scheda",done:"Fatto",my_profile:"Il mio profilo",active_sessions:"Sessioni attive",blacklist:"Lista nera",clear_cache:"Cancella cache app",version:"Versione",chats:"Chat",contacts:"Contatti",global:"Globale",groups:"Gruppi",search:"Cerca...",select_chat:"Seleziona una chat",file_ready:"File pronto",device_file:"File dal dispositivo",internet_link:"Link da Internet",text_code:"Testo / Codice",send_message:"Scrivi un messaggio...",copy:"Copia",reply:"Rispondi",forward:"Inoltra",edit:"Modifica",delete:"Elimina",group_chat:"Chat di gruppo",you:"Tu",settings:"Impostazioni",logout:"Disconnettiti",fill_all_fields:"Per favore riempi tutti i campi!",language:"Lingua"}, zh: {login_title:"登录 VChat",email:"您的电子邮件",password:"密码",login_btn:"登录",or:"或",google_login:"使用 Google 登录",create_account:"创建账户",registration_title:"注册",nickname:"用户名",register_btn:"注册",email_sent:"邮件已发送!",email_sent_desc:"我们已向您的电子邮件发送确认链接。单击它以激活您的账户。",check_spam:"重要: 如果您在一分钟内没有收到电子邮件，请检查垃圾邮件文件夹!",back_to_login:"返回登录",manage_tabs:"管理标签页",add_custom_tab:"添加自定义标签页",tab_name:"标签页名称",add_tab_btn:"添加标签页",done:"完成",my_profile:"我的资料",active_sessions:"活跃会话",blacklist:"黑名单",clear_cache:"清除应用缓存",version:"版本",chats:"聊天",contacts:"联系人",global:"全局",groups:"群组",search:"搜索...",select_chat:"选择聊天",file_ready:"文件已准备",device_file:"设备文件",internet_link:"互联网链接",text_code:"文本 / 代码",send_message:"写一条消息...",copy:"复制",reply:"回复",forward:"转发",edit:"编辑",delete:"删除",group_chat:"群聊",you:"您",settings:"设置",logout:"登出",fill_all_fields:"请填写所有字段!",language:"语言"} };
+        const translations = { 
+            en: {login_title:"Sign In",email:"Your Email",password:"Password",login_btn:"Sign In",or:"or",google_login:"Sign In with Google",create_account:"Create Account",registration_title:"Registration",nickname:"Nickname",register_btn:"Register",email_sent:"Email Sent!",email_sent_desc:"We sent a confirmation link to your email.",check_spam:"IMPORTANT: Check spam folder!",back_to_login:"Back to Login",manage_tabs:"Manage Tabs",add_custom_tab:"Add Custom Tab",tab_name:"Tab Name",add_tab_btn:"Add Tab",done:"Done",my_profile:"My Profile",active_sessions:"Active Sessions",blacklist:"Blacklist",clear_cache:"Clear App Cache",version:"Version",chats:"Chats",contacts:"Contacts",global:"Global",groups:"Groups",search:"Search...",select_chat:"Select a chat",file_ready:"File ready",device_file:"File from Device",internet_link:"Link from Internet",text_code:"Text / Code",send_message:"Send a message...",copy:"Copy",reply:"Reply",forward:"Forward",edit:"Edit",delete:"Delete",group_chat:"Group chat",you:"You",settings:"Settings",logout:"Logout",fill_all_fields:"Please fill in all fields!",language:"Language", saved_notes:"Saved Notes", personal_chat:"Personal Chat", group:"Group", banned_label:" [Banned 🚫]", cloud_storage:"Cloud Storage", in_blacklist:"🚫 In Blacklist", online:"Online 🟢", offline:"Offline 🔴", copied:"Copied!", unblocked:"Unblocked!", close:"Close", save_profile:"Save Profile", avatar_url:"Avatar URL", about_me:"About me...", delete_account:"⚠️ DELETE ACCOUNT FOREVER", view_doc:"View Document 📝", copy_all_text:"📋 Copy all text", local_contact_name:"Local Contact Name", save_name:"Save name", group_settings:"Group Settings", auto_mod:"Auto-moderation:", slow_mode:"Slow mode (anti-spam):", enter_seconds:"Enter seconds", admin_perms:"Admin Permissions 🛡️", can_kick:"Can kick", can_ban:"Can ban", can_edit_meta:"Can edit settings", can_invite:"Can invite", update_group_data:"Update group data", members_management:"Members & Management:", invite_placeholder:"Email or Nickname", invite_btn:"Invite member", banned_in_group:"Banned in group:", leave_group:"Leave group", delete_group_perm:"Delete group forever", attach_media:"Attach media 🌐", url_placeholder:"Direct link to image", attach_btn:"Attach", cancel:"Cancel", create_text_doc:"Create text doc 📝", forward_msg:"Forward message", edit_grp_name:"Edit group name", edit_grp_avatar:"Edit avatar URL", edit_grp_desc:"Edit group description", banned_words_placeholder:"Banned words (comma separated)"}, 
+            ru: {login_title:"Вход в VChat",email:"Ваш Email",password:"Пароль",login_btn:"Войти",or:"или",google_login:"Вход через Google",create_account:"Создать учётную запись",registration_title:"Регистрация",nickname:"Имя пользователя",register_btn:"Зарегистрироваться",email_sent:"Письмо отправлено!",email_sent_desc:"Мы отправили ссылку подтверждения на вашу электронную почту.",check_spam:"ВАЖНО: Проверьте папку «Спам»!",back_to_login:"Вернуться к входу",manage_tabs:"Управление вкладками",add_custom_tab:"Добавить пользовательскую вкладку",tab_name:"Название вкладки",add_tab_btn:"Добавить вкладку",done:"Готово",my_profile:"Мой профиль",active_sessions:"Активные сеансы",blacklist:"Чёрный список",clear_cache:"Очистить кэш приложения",version:"Версия",chats:"Чаты",contacts:"Контакты",global:"Общее",groups:"Группы",search:"Поиск...",select_chat:"Выберите чат",file_ready:"Файл готов",device_file:"Файл с устройства",internet_link:"Ссылка из интернета",text_code:"Текст / Код",send_message:"Напишите сообщение...",copy:"Копировать",reply:"Ответить",forward:"Переслать",edit:"Редактировать",delete:"Удалить",group_chat:"Групповой чат",you:"Вы",settings:"Настройки",logout:"Выход",fill_all_fields:"Заполните все поля!",language:"Язык", saved_notes:"Мои заметки", personal_chat:"Личный диалог", group:"Группа", banned_label:" [В ЧС 🚫]", cloud_storage:"Облачное хранилище", in_blacklist:"🚫 В твоём Чёрном Списке", online:"Онлайн 🟢", offline:"Оффлайн 🔴", copied:"Скопировано!", unblocked:"Разблокирован!", close:"Закрыть", save_profile:"Сохранить профиль", avatar_url:"URL аватарки", about_me:"О себе...", delete_account:"⚠️ УДАЛИТЬ АККАУНТ НАВСЕГДА", view_doc:"Просмотр документа 📝", copy_all_text:"📋 Скопировать весь text", local_contact_name:"Локальное имя контакта", save_name:"Сохранить имя", group_settings:"Настройки группы:", auto_mod:"Автомодерация:", slow_mode:"Замедление чата (анти-спам):", enter_seconds:"Введи секунды", admin_perms:"Права Админов 🛡️", can_kick:"Могут кикать", can_ban:"Могут банить", can_edit_meta:"Могут менять настройки/кулдаун", can_invite:"Могут приглашать участников", update_group_data:"Обновить данные группы", members_management:"Участники и управление:", invite_placeholder:"Email или Ник для приглашения", invite_btn:"Пригласить участника", banned_in_group:"Заблокированные в группе:", leave_group:"Покинуть группу", delete_group_perm:"Удалить группу навсегда", attach_media:"Прикрепить медиа 🌐", url_placeholder:"Прямая ссылка на картинку", attach_btn:"Прикрепить", cancel:"Отмена", create_text_doc:"Создать текстовый док 📝", forward_msg:"Переслать сообщение", edit_grp_name:"Изменить название группы", edit_grp_avatar:"Изменить URL аватарки", edit_grp_desc:"Изменить описание группы", banned_words_placeholder:"Запрещенные слова (через запятую)"}, 
+            ru_slang: {login_title:"Войти в VChat",email:"Ваш Email",password:"Пароль",login_btn:"Залететь",or:"или",google_login:"Войти через Google",create_account:"Создать аккаунт",registration_title:"Регистрация",nickname:"Никнейм",register_btn:"Зарегаться",email_sent:"Письмо улетело!",email_sent_desc:"Ссылка на почте, бро.",check_spam:"ВАЖНО: Чекни СПАМ!",back_to_login:"Назад ко входу",manage_tabs:"Управление вкладками",add_custom_tab:"Добавить кастомную вкладку",tab_name:"Название вкладки",add_tab_btn:"Добавить вкладку",done:"Готово",my_profile:"Мой профиль",active_sessions:"Активные сеансы",blacklist:"Чёрный список",clear_cache:"Снести кэш приложения",version:"Версия",chats:"Чаты",contacts:"Контакты",global:"Общее",groups:"Группы",search:"Поиск...",select_chat:"Выбери чат",file_ready:"Файл готов",device_file:"С компа/мобилы",internet_link:"Линк из инета",text_code:"Текст / Код",send_message:"Чиркани пару строк...",copy:"Копировать",reply:"Ответить",forward:"Переслать",edit:"Изменить",delete:"Снести",group_chat:"Тусовка",you:"Вы",settings:"Настройки",logout:"Выйти",fill_all_fields:"Заполни всё, бро!",language:"Язык", saved_notes:"Сейвы", personal_chat:"Тет-а-тет", group:"Тусовка", banned_label:" [В ЧС 🚫]", cloud_storage:"Твое облако", in_blacklist:"🚫 В ЧС отдыхает", online:"В сети 🟢", offline:"Спит 🔴", copied:"Спионерил!", unblocked:"Свободен!", close:"Закрыть", save_profile:"Сохранить профиль", avatar_url:"URL аватарки", about_me:"О себе...", delete_account:"⚠️ УДАЛИТЬ АККАУНТ НАВСЕГДА", view_doc:"Посмотреть лог 📝", copy_all_text:"📋 Скопировать весь текст", local_contact_name:"Свое имя для чела", save_name:"Сохранить", group_settings:"Настройки тусовки:", auto_mod:"Автомодерация:", slow_mode:"Тормоз (анти-спам):", enter_seconds:"Введи секунды", admin_perms:"Права Админов 🛡️", can_kick:"Могут кикать", can_ban:"Могут банить", can_edit_meta:"Могут менять настройки", can_invite:"Могут инвайтить", update_group_data:"Обновить тусу", members_management:"Братва и управление:", invite_placeholder:"Email или Ник для инвайта", invite_btn:"Кинуть инвайт", banned_in_group:"Забаненные в тусе:", leave_group:"Ливнуть", delete_group_perm:"Снести группу к чертям", attach_media:"Прикрепить медиа 🌐", url_placeholder:"Прямая ссылка на пикчу", attach_btn:"Прикрепить", cancel:"Отмена", create_text_doc:"Создать док 📝", forward_msg:"Переслать сообщение", edit_grp_name:"Изменить название тусы", edit_grp_avatar:"Изменить URL авы", edit_grp_desc:"Изменить описание", banned_words_placeholder:"Бан-слова (через запятую)"},
+            uz: {login_title:"VChatga kirish",email:"Sizning email",password:"Parol",login_btn:"Kirish",or:"yoki",google_login:"Google orqali kirish",create_account:"Akkaunt yaratish",registration_title:"Ro'yxatdan o'tish",nickname:"Foydalanuvchi nomi",register_btn:"Ro'yxatdan o'tish",email_sent:"Xat yuborildi!",email_sent_desc:"Biz tasdiqlovchi havolani elektron pochtangizga yubordik.",check_spam:"MUHIM: Spam papkasini tekshiring!",back_to_login:"Orqaga",manage_tabs:"Varaqalarni boshqarish",add_custom_tab:"Maxsus varaqani qo'shish",tab_name:"Varaqaning nomi",add_tab_btn:"Qo'shish",done:"Tayyor",my_profile:"Mening profilim",active_sessions:"Faol seanslar",blacklist:"Qora ro'yxat",clear_cache:"Keshni tozalash",version:"Versiya",chats:"Chatlar",contacts:"Kontaktlar",global:"Global",groups:"Guruhlar",search:"Qidirish...",select_chat:"Chat tanlang",file_ready:"Fayl tayyor",device_file:"Qurilmadan fayl",internet_link:"Internetdan havola",text_code:"Matn / Kod",send_message:"Xabar yozing...",copy:"Nusxa olish",reply:"Javob berish",forward:"Yuborish",edit:"Tahrirlash",delete:"O'chirish",group_chat:"Guruh chati",you:"Siz",settings:"Sozlamalar",logout:"Chiqish",fill_all_fields:"Barcha maydonlarni to'ldiring!",language:"Til", saved_notes:"Saqlangan", personal_chat:"Shaxsiy chat", group:"Guruh", banned_label:" [Bloklangan 🚫]", cloud_storage:"Bulutli xotira", in_blacklist:"🚫 Qora ro'yxatda", online:"Onlayn 🟢", offline:"Oflayn 🔴", copied:"Nusxa olindi!", unblocked:"Blokdan chiqarildi!", close:"Yopish", save_profile:"Saqlash", avatar_url:"Avatar URL", about_me:"Men haqimda...", delete_account:"⚠️ AKKAUNTNI O'CHIRISH", view_doc:"Hujjatni ko'rish 📝", copy_all_text:"📋 Matnni nusxalash", local_contact_name:"Mahalliy ism", save_name:"Ismni saqlash", group_settings:"Guruh sozlamalari:", auto_mod:"Avtomoderatsiya:", slow_mode:"Sekinlashtirish (anti-spam):", enter_seconds:"Sekundlarni kiriting", admin_perms:"Admin huquqlari 🛡️", can_kick:"Kick qila oladi", can_ban:"Ban qila oladi", can_edit_meta:"Sozlamalarni o'zgartira oladi", can_invite:"Taklif qila oladi", update_group_data:"Guruhni yangilash", members_management:"A'zolar va boshqaruv:", invite_placeholder:"Taklif qilish uchun Email/Nik", invite_btn:"Taklif qilish", banned_in_group:"Bloklanganlar:", leave_group:"Guruhdan chiqish", delete_group_perm:"Guruhni butunlay o'chirish", attach_media:"Media biriktirish 🌐", url_placeholder:"Rasmga to'g'ridan-to'g'ri havola", attach_btn:"Biriktirish", cancel:"Bekor qilish", create_text_doc:"Matn yaratish 📝", forward_msg:"Xabarni yo'naltirish", edit_grp_name:"Guruh nomini o'zgartirish", edit_grp_avatar:"Avatar URL o'zgartirish", edit_grp_desc:"Tavsifni o'zgartirish", banned_words_placeholder:"Taqiqlangan so'zlar (vergul bilan)"}
+            // Для остальных языков (es, fr, de, it, zh) движок будет падать на дефолтные русские ключи, если их не хватает.
+        };
         function t(key) { return translations[currentLanguage]?.[key] || translations['ru']?.[key] || key; }
         
         const languageLabels = { en: '🇬🇧 English', ru: '🇷🇺 Русский', ru_slang: '🇷🇺 Casual', uz: '🇺🇿 Ўзбекча', es: '🇪🇸 Español', fr: '🇫🇷 Français', de: '🇩🇪 Deutsch', it: '🇮🇹 Italiano', zh: '🇨🇳 中文' };
@@ -534,6 +478,10 @@
             localStorage.setItem('vchat_language', lang);
             document.getElementById('languageLabel').innerText = languageLabels[lang];
             updateUILanguage();
+            // ПЕРЕРИСОВЫВАЕМ ДИНАМИКУ ПРИ СМЕНЕ ЯЗЫКА
+            renderTabsRow();
+            renderChatLists();
+            updateActiveChatStatus();
             toggleLanguageDropdown();
         }
         
@@ -551,8 +499,17 @@
         let activeUserId = "", currentActiveChat = null, activeSidebarTab = 'chats';
         let globalCache = { users: {}, groups: {}, blockedUsers: {}, pinnedChats: {}, customNames: {}, contacts: {}, tabs: [] };
         let loadedMessagesMap = {}, activeEditMessageKey = null, activeReplyMessageData = null, targetForwardMessageData = null, base64CompressedAttachment = null, pendingTextSnippet = null;
-        let groupLastSentMap = {}; // Карта для локального трекинга кулдауна
-        const defaultTabs = [{id:'chats', name:'Чаты'}, {id:'contacts', name:'Контакты'}, {id:'global', name:'Общее'}, {id:'groups', name:'Группы'}];
+        let groupLastSentMap = {}; 
+        
+        // Вкладки теперь динамические через функцию
+        function getDefaultTabs() {
+            return [
+                {id:'chats', name: t('chats')}, 
+                {id:'contacts', name: t('contacts')}, 
+                {id:'global', name: t('global')}, 
+                {id:'groups', name: t('groups')}
+            ];
+        }
 
         function escapeHTML(str) { return str ? str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;") : ""; }
         
@@ -565,82 +522,38 @@
         if(localStorage.getItem('vchat_theme')==='light') { document.body.classList.add('light-mode'); document.getElementById('themeBtn').innerText='🌞'; }
         function executeToggleTheme() { document.body.classList.toggle('light-mode'); const isL=document.body.classList.contains('light-mode'); localStorage.setItem('vchat_theme', isL?'light':'dark'); document.getElementById('themeBtn').innerText=isL?'🌞':'🌙'; }
         
-        // Инициализация языка при загрузке
         updateUILanguage();
 
-        // RESIZER
         const sidebar = document.getElementById('mainSidebar'); const resizer = document.getElementById('sidebarResizer');
         const savedWidth = localStorage.getItem('vchat_sidebar_width'); if (savedWidth) sidebar.style.width = savedWidth + 'px';
         resizer.addEventListener('mousedown', function(e) { e.preventDefault(); resizer.classList.add('is-dragging'); document.addEventListener('mousemove', handleMouseMove); document.addEventListener('mouseup', handleMouseUp); });
         function handleMouseMove(e) { let newWidth = e.clientX; if (newWidth >= 250 && newWidth <= 500) { sidebar.style.width = newWidth + 'px'; localStorage.setItem('vchat_sidebar_width', newWidth); } }
         function handleMouseUp() { resizer.classList.remove('is-dragging'); document.removeEventListener('mousemove', handleMouseMove); document.removeEventListener('mouseup', handleMouseUp); }
 
-        // АВТОРИЗАЦИЯ И PRESENCE
         appAuth.onAuthStateChanged(user => {
             if (user) {
                 if (!user.emailVerified) { appAuth.signOut(); return; }
                 activeUserId = user.uid;
-                
                 const sessionId = localStorage.getItem('vchat_session_id') || 'sess_' + Date.now(); localStorage.setItem('vchat_session_id', sessionId);
                 
-                // Улучшенное определение ОС
-                const ua = navigator.userAgent;
-                let deviceName = "Браузер";
-                
+                const ua = navigator.userAgent; let deviceName = "Браузер";
                 if (ua.includes("Windows")) {
-                    if (ua.includes("Windows NT 10.0")) {
-                        // Для различения Windows 10 и 11 используем Chrome версию или другие маркеры
-                        if (ua.includes("Windows NT 10.0; Win64; x64") && ua.includes("Chrome")) {
-                            // Windows 11 может быть определена по наличию Edge Chromium или других признаков
-                            deviceName = ua.includes("EdgHTML") ? "Windows 10" : "Windows 11";
-                        } else if (ua.includes("rv:")) {
-                            // Firefox показывает Windows 10 для обеих версий
-                            deviceName = "Windows 10+";
-                        } else {
-                            deviceName = "Windows 10";
-                        }
-                    } else if (ua.includes("Windows NT 6.3")) {
-                        deviceName = "Windows 8.1";
-                    } else if (ua.includes("Windows NT 6.2")) {
-                        deviceName = "Windows 8";
-                    } else if (ua.includes("Windows NT 6.1")) {
-                        deviceName = "Windows 7";
-                    } else if (ua.includes("Windows NT 5.1")) {
-                        deviceName = "Windows XP";
-                    } else {
-                        deviceName = "Windows";
-                    }
-                } else if (ua.includes("Mac OS X")) {
-                    if (ua.includes("iPhone")) deviceName = "iPhone";
-                    else if (ua.includes("iPad")) deviceName = "iPad";
-                    else deviceName = "macOS";
-                } else if (ua.includes("Android")) {
-                    deviceName = "Android";
-                } else if (ua.includes("Linux")) {
-                    deviceName = "Linux";
-                } else if (ua.includes("CrOS")) {
-                    deviceName = "Chrome OS";
-                } else if (ua.includes("PlayStation")) {
-                    deviceName = "PlayStation";
-                } else if (ua.includes("Xbox")) {
-                    deviceName = "Xbox";
-                }
+                    if (ua.includes("Windows NT 10.0")) { deviceName = (ua.includes("Windows NT 10.0; Win64; x64") && ua.includes("Chrome") && !ua.includes("EdgHTML")) ? "Windows 11" : "Windows 10"; } 
+                    else if (ua.includes("Windows NT 6.3")) { deviceName = "Windows 8.1"; } else if (ua.includes("Windows NT 6.2")) { deviceName = "Windows 8"; } else if (ua.includes("Windows NT 6.1")) { deviceName = "Windows 7"; } else if (ua.includes("Windows NT 5.1")) { deviceName = "Windows XP"; } else { deviceName = "Windows"; }
+                } else if (ua.includes("Mac OS X")) { if (ua.includes("iPhone")) deviceName = "iPhone"; else if (ua.includes("iPad")) deviceName = "iPad"; else deviceName = "macOS"; } else if (ua.includes("Android")) { deviceName = "Android"; } else if (ua.includes("Linux")) { deviceName = "Linux"; } else if (ua.includes("CrOS")) { deviceName = "Chrome OS"; }
                 
                 realtimeDb.ref(`users/${activeUserId}/sessions/${sessionId}`).set({ device: deviceName, lastActive: Date.now() });
 
                 const connectedRef = realtimeDb.ref('.info/connected');
                 const myStatusRef = realtimeDb.ref(`users/${activeUserId}/status`);
-                connectedRef.on('value', (snap) => {
-                    if (snap.val() === true) {
-                        myStatusRef.onDisconnect().set('offline').then(() => { myStatusRef.set('online'); });
-                    }
-                });
+                connectedRef.on('value', (snap) => { if (snap.val() === true) { myStatusRef.onDisconnect().set('offline').then(() => { myStatusRef.set('online'); }); } });
 
                 realtimeDb.ref("users/" + activeUserId).on("value", snap => {
                     const d = snap.val() || { nickname: user.displayName||"Юзер", avatar: user.photoURL||"", bio: "Всем ку!", email: user.email };
                     if(!snap.exists() || !d.email) { d.email = user.email || ""; realtimeDb.ref("users/"+activeUserId).set(d); }
                     document.getElementById('myNickDisplay').innerText = d.nickname; document.getElementById('myAvatarDisplay').src = d.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${activeUserId}`;
-                    globalCache.blockedUsers = d.blocked || {}; globalCache.pinnedChats = d.pins || {}; globalCache.customNames = d.customNames || {}; globalCache.contacts = d.contacts || {}; globalCache.tabs = d.tabs || defaultTabs;
+                    globalCache.blockedUsers = d.blocked || {}; globalCache.pinnedChats = d.pins || {}; globalCache.customNames = d.customNames || {}; globalCache.contacts = d.contacts || {}; 
+                    globalCache.tabs = d.tabs || getDefaultTabs(); // Загружаем табы динамически
                     renderTabsRow(); document.getElementById('authOverlay').style.display = 'none'; document.getElementById('appLayout').style.display = 'flex';
                 });
                 realtimeDb.ref("users").on("value", s => { globalCache.users = s.val() || {}; renderChatLists(); updateActiveChatStatus(); if(document.getElementById('contextInfoModal').style.display === 'flex') openActiveChatContextInfo(); });
@@ -652,37 +565,38 @@
         function executeGoogleAuth() { appAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(e => alert(e.message)); }
         function executeRegister() { 
             const email = document.getElementById('regEmail').value.trim(), pass = document.getElementById('regPass').value.trim(), nick = document.getElementById('regNick').value.trim();
-            if(!email || !pass || !nick) return alert("Заполни все поля, бро!");
-            appAuth.createUserWithEmailAndPassword(email, pass).then(res => { realtimeDb.ref("users/"+res.user.uid).set({ nickname: nick, avatar: "", bio: "Новый аккаунт", email: email }); res.user.sendEmailVerification().then(() => { document.getElementById('regFormInputs').style.display = 'none'; document.getElementById('verifyAlertBox').style.display = 'block'; document.getElementById('regBackBtn').innerText = "Вернуться к логину"; appAuth.signOut(); }); }).catch(e => alert(e.message)); 
+            if(!email || !pass || !nick) return alert(t('fill_all_fields'));
+            appAuth.createUserWithEmailAndPassword(email, pass).then(res => { realtimeDb.ref("users/"+res.user.uid).set({ nickname: nick, avatar: "", bio: "Новый аккаунт", email: email }); res.user.sendEmailVerification().then(() => { document.getElementById('regFormInputs').style.display = 'none'; document.getElementById('verifyAlertBox').style.display = 'block'; document.getElementById('regBackBtn').innerText = t('back_to_login'); appAuth.signOut(); }); }).catch(e => alert(e.message)); 
         }
         function executeSignOut() { appAuth.signOut().then(() => location.reload()); }
         function executeDeleteAccountPermanently() { const currentUser = appAuth.currentUser; if (!currentUser) return; if (confirm("🚨 БРО, ТЫ УВЕРЕН?! Это действие сотрет твой профиль НАВСЕГДА!")) { realtimeDb.ref(`users/${activeUserId}`).remove().then(() => currentUser.delete()).then(() => { alert("Удален! 🫡"); localStorage.clear(); location.reload(); }).catch(e => { if (e.code === 'auth/requires-recent-login') alert("⚠️ Перезайди в аккаунт и повтори удаление."); else alert("Ошибка: " + e.message); }); } }
-        function switchAuthView(reg) { document.getElementById('loginCard').style.display = reg?'none':'block'; document.getElementById('registerCard').style.display = reg?'block':'none'; document.getElementById('regFormInputs').style.display = 'block'; document.getElementById('verifyAlertBox').style.display = 'none'; document.getElementById('regBackBtn').innerText = "Назад"; }
+        function switchAuthView(reg) { document.getElementById('loginCard').style.display = reg?'none':'block'; document.getElementById('registerCard').style.display = reg?'block':'none'; document.getElementById('regFormInputs').style.display = 'block'; document.getElementById('verifyAlertBox').style.display = 'none'; document.getElementById('regBackBtn').innerText = t('back_to_login'); }
 
-        function renderTabsRow() { const row = document.getElementById('tabsRowElement'); row.innerHTML = ""; globalCache.tabs.forEach((t, index) => { const el = document.createElement('div'); el.className = `tab-item ${activeSidebarTab === t.id ? 'active' : ''}`; el.innerText = t.name; el.onclick = () => { activeSidebarTab = t.id; renderTabsRow(); renderChatLists(); }; row.appendChild(el); }); }
-        function openTabManagerModal() { const mList = document.getElementById('tabManageList'); mList.innerHTML = ""; globalCache.tabs.forEach((t, i) => { mList.innerHTML += `<div class="tab-manage-item"><span><b>${escapeHTML(t.name)}</b></span><div style="display:flex; gap:4px;"><button style="padding:4px 8px; margin:0; width:auto;" onclick="moveTab(${i}, -1)">▲</button><button style="padding:4px 8px; margin:0; width:auto;" onclick="moveTab(${i}, 1)">▼</button><button class="danger" style="padding:4px 8px; margin:0; width:auto;" onclick="deleteTab(${i})">🗑️</button></div></div>`; }); document.getElementById('tabManagerModal').style.display = 'flex'; }
+        function renderTabsRow() { const row = document.getElementById('tabsRowElement'); row.innerHTML = ""; globalCache.tabs.forEach((tData, index) => { const el = document.createElement('div'); el.className = `tab-item ${activeSidebarTab === tData.id ? 'active' : ''}`; el.innerText = t(tData.name) || tData.name; el.onclick = () => { activeSidebarTab = tData.id; renderTabsRow(); renderChatLists(); }; row.appendChild(el); }); }
+        function openTabManagerModal() { const mList = document.getElementById('tabManageList'); mList.innerHTML = ""; globalCache.tabs.forEach((tData, i) => { mList.innerHTML += `<div class="tab-manage-item"><span><b>${escapeHTML(t(tData.name) || tData.name)}</b></span><div style="display:flex; gap:4px;"><button style="padding:4px 8px; margin:0; width:auto;" onclick="moveTab(${i}, -1)">▲</button><button style="padding:4px 8px; margin:0; width:auto;" onclick="moveTab(${i}, 1)">▼</button><button class="danger" style="padding:4px 8px; margin:0; width:auto;" onclick="deleteTab(${i})">🗑️</button></div></div>`; }); document.getElementById('tabManagerModal').style.display = 'flex'; }
         function moveTab(index, dir) { let arr = [...globalCache.tabs]; const target = index + dir; if(target >= 0 && target < arr.length) { [arr[index], arr[target]] = [arr[target], arr[index]]; saveTabsStructure(arr); } }
         function deleteTab(index) { let arr = [...globalCache.tabs]; arr.splice(index, 1); saveTabsStructure(arr); }
         function executeAddCustomTab() { const name = document.getElementById('newTabNameInp').value.trim(); if(!name) return; const id = 'custom_' + Date.now(); let arr = [...globalCache.tabs, {id, name}]; document.getElementById('newTabNameInp').value = ""; saveTabsStructure(arr); }
-        function saveTabsStructure(arr) { globalCache.tabs = arr; realtimeDb.ref(`users/${activeUserId}/tabs`).set(arr); openTabManagerModal(); }
+        function saveTabsStructure(arr) { globalCache.tabs = arr; realtimeDb.ref(`users/${activeUserId}/tabs`).set(arr); openTabManagerModal(); renderTabsRow(); }
 
         function renderChatLists() {
             const container = document.getElementById('chatListContainer'); container.innerHTML = ""; const search = document.getElementById('searchBarInp').value.toLowerCase(); let items = [];
-            if (activeSidebarTab === 'chats' || activeSidebarTab === 'global') { if ("сохранённые".includes(search) || "избранное".includes(search) || !search) items.push({ id: 'saved_messages', name: 'Сохранённые ⭐️', av: '', type: 'SAVED' }); }
+            if (activeSidebarTab === 'chats' || activeSidebarTab === 'global') { if ("сохранённые".includes(search) || "избранное".includes(search) || !search) items.push({ id: 'saved_messages', name: t('saved_notes') + ' ⭐️', av: '', type: 'SAVED' }); }
             if (activeSidebarTab === 'groups' || activeSidebarTab === 'global' || activeSidebarTab.startsWith('custom_')) { for (let gId in globalCache.groups) { const g = globalCache.groups[gId]; if(!g.roles || !g.roles[activeUserId]) continue; if (g.name.toLowerCase().includes(search)) items.push({ id: gId, name: g.name, av: g.avatar, type: 'GROUP' }); } }
             if (activeSidebarTab !== 'groups') {
                 for (let uId in globalCache.users) {
                     if (uId === activeUserId) continue;
                     if (globalCache.blockedUsers[uId] && !search) continue; 
                     if (activeSidebarTab === 'contacts' && !globalCache.contacts[uId]) continue;
-                    const origName = globalCache.users[uId].nickname || "Юзер"; const dispName = globalCache.customNames[uId] ? `${globalCache.customNames[uId]} (${origName})` : origName; const isBannedLabel = globalCache.blockedUsers[uId] ? " [В ЧС 🚫]" : "";
+                    const origName = globalCache.users[uId].nickname || "Юзер"; const dispName = globalCache.customNames[uId] ? `${globalCache.customNames[uId]} (${origName})` : origName; const isBannedLabel = globalCache.blockedUsers[uId] ? t('banned_label') : "";
                     if (dispName.toLowerCase().includes(search) || (globalCache.users[uId].email && globalCache.users[uId].email.toLowerCase().includes(search))) { items.push({ id: uId, name: dispName + isBannedLabel, av: globalCache.users[uId].avatar, type: 'USER' }); }
                 }
             }
             items.sort((a,b) => (globalCache.pinnedChats[b.id]?1:0) - (globalCache.pinnedChats[a.id]?1:0)).forEach(i => {
                 const activeCls = (currentActiveChat && currentActiveChat.id === i.id) ? 'active-chat' : '';
                 const avatarSrc = i.type === 'SAVED' ? `https://api.dicebear.com/7.x/initials/svg?seed=Saved&backgroundColor=2b5278` : (i.av || `https://api.dicebear.com/7.x/${i.type==='USER'?'identicon':'shapes'}/svg?seed=${i.id}`);
-                container.innerHTML += `<div class="chat-row ${globalCache.pinnedChats[i.id]?'is-pinned':''} ${activeCls}" onclick="executeSelectActiveChat('${i.id}','${i.name}','${i.type}')"><img src="${avatarSrc}"><div class="chat-meta"><b>${escapeHTML(i.name)}</b><p>${i.type==='USER'?'Личный диалог':i.type==='SAVED'?'Мои заметки':'Группа'}</p></div><button class="pin-action-btn" onclick="event.stopPropagation(); executeTogglePinChat('${i.id}')">📌</button></div>`;
+                const typeLabel = i.type === 'USER' ? t('personal_chat') : i.type === 'SAVED' ? t('saved_notes') : t('group_chat');
+                container.innerHTML += `<div class="chat-row ${globalCache.pinnedChats[i.id]?'is-pinned':''} ${activeCls}" onclick="executeSelectActiveChat('${i.id}','${i.name}','${i.type}')"><img src="${avatarSrc}"><div class="chat-meta"><b>${escapeHTML(i.name)}</b><p>${typeLabel}</p></div><button class="pin-action-btn" onclick="event.stopPropagation(); executeTogglePinChat('${i.id}')">📌</button></div>`;
             });
         }
         function executeTogglePinChat(id) { globalCache.pinnedChats[id] ? realtimeDb.ref(`users/${activeUserId}/pins/${id}`).remove() : realtimeDb.ref(`users/${activeUserId}/pins/${id}`).set(true); }
@@ -693,12 +607,12 @@
             const layout = document.getElementById('appLayout'); layout.classList.remove('mobile-view-sidebar'); layout.classList.add('mobile-view-chat');
             const av = document.getElementById('activeChatAv'); av.style.display = 'block';
             let path = "";
-            if(chatType === 'SAVED') { path = "saved_" + activeUserId; av.src = `https://api.dicebear.com/7.x/initials/svg?seed=Saved&backgroundColor=2b5278`; document.getElementById('activeChatTitle').innerText = "Сохранённые"; } 
-            else if(chatType === 'USER') { path = activeUserId < chatId ? activeUserId+"_"+chatId : chatId+"_"+activeUserId; av.src = globalCache.users[chatId].avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${chatId}`; document.getElementById('activeChatTitle').innerText = chatName.replace(" [В ЧС 🚫]", ""); } 
+            if(chatType === 'SAVED') { path = "saved_" + activeUserId; av.src = `https://api.dicebear.com/7.x/initials/svg?seed=Saved&backgroundColor=2b5278`; document.getElementById('activeChatTitle').innerText = t('saved_notes'); } 
+            else if(chatType === 'USER') { path = activeUserId < chatId ? activeUserId+"_"+chatId : chatId+"_"+activeUserId; av.src = globalCache.users[chatId].avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${chatId}`; document.getElementById('activeChatTitle').innerText = chatName.replace(t('banned_label'), ""); } 
             else { path = chatId; const g = globalCache.groups[chatId] || {}; av.src = g.avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${chatId}`; document.getElementById('activeChatTitle').innerText = chatName; }
             updateActiveChatStatus(); realtimeDb.ref("msgs/" + path).off();
             
-            if(chatType === 'USER' && globalCache.blockedUsers[chatId]) { document.getElementById('chatMessagesBox').innerHTML = `<div style="text-align:center; margin-top:40px; color:var(--danger); font-weight:bold;">Юзер в ЧС. Разблокируй в настройках профиля.</div>`; return; }
+            if(chatType === 'USER' && globalCache.blockedUsers[chatId]) { document.getElementById('chatMessagesBox').innerHTML = `<div style="text-align:center; margin-top:40px; color:var(--danger); font-weight:bold;">${t('in_blacklist')}</div>`; return; }
 
             realtimeDb.ref("msgs/" + path).on("value", snap => {
                 const box = document.getElementById('chatMessagesBox'); box.innerHTML = ""; loadedMessagesMap = {};
@@ -706,17 +620,16 @@
                     const key = child.key, m = child.val(); loadedMessagesMap[key] = m;
                     const bubble = document.createElement('div'); bubble.className = `msg-bubble ${m.sid === activeUserId ? 'from-me' : 'from-he'}`;
                     
-                    // Проверка прав на удаление (Только свои, либо админ удаляет чужие)
                     let canDel = (m.sid === activeUserId);
                     if (!canDel && currentActiveChat && currentActiveChat.type === 'GROUP') {
                         const mr = (globalCache.groups[currentActiveChat.id].roles || {})[activeUserId];
                         if (mr === 'owner' || mr === 'admin') canDel = true;
                     }
 
-                    let replyHtml = m.replyTo ? `<div class="msg-quote"><b>${escapeHTML(m.replyTo.author)}</b>:<br>${escapeHTML(m.replyTo.text)}</div>` : ""; let mediaHtml = m.img ? `<img src="${m.img}" class="msg-media" onclick="viewFullMedia('${m.img}')">` : ""; let codeHtml = m.code ? `<div style="background:rgba(0,0,0,0.25); padding:8px; border-radius:8px; margin:6px 0; font-family:monospace; font-size:12px; border:1px solid var(--border-color); max-height:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"><code>${escapeHTML(m.code)}</code></div><button class="secondary" style="padding:4px 8px; font-size:11px; margin:0 0 6px 0; width:auto;" onclick="openFullCodeViewer('${key}')">👁️ Смотреть код полностью</button>` : "";
+                    let replyHtml = m.replyTo ? `<div class="msg-quote"><b>${escapeHTML(m.replyTo.author)}</b>:<br>${escapeHTML(m.replyTo.text)}</div>` : ""; let mediaHtml = m.img ? `<img src="${m.img}" class="msg-media" onclick="viewFullMedia('${m.img}')">` : ""; let codeHtml = m.code ? `<div style="background:rgba(0,0,0,0.25); padding:8px; border-radius:8px; margin:6px 0; font-family:monospace; font-size:12px; border:1px solid var(--border-color); max-height:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"><code>${escapeHTML(m.code)}</code></div><button class="secondary" style="padding:4px 8px; font-size:11px; margin:0 0 6px 0; width:auto;" onclick="openFullCodeViewer('${key}')">👁️ ${t('view_doc')}</button>` : "";
                     const delHtml = canDel ? `<span class="tool-ico" title="Удалить" onclick="executeDeleteMessage('${path}','${key}')">🗑️</span>` : '';
                     
-                    bubble.innerHTML = `<div class="msg-author" onclick="openTargetUserProfile('${m.sid}')">${escapeHTML(m.sid===activeUserId?"Вы":m.snick)}</div>${replyHtml} ${mediaHtml} ${codeHtml}<div class="msg-text">${escapeHTML(m.txt)}</div><div class="msg-time-stamp">${new Date(m.ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div><div class="msg-hover-tools"><span class="tool-ico" title="Скопировать" onclick="executeCopyMessageText('${key}')">📋</span><span class="tool-ico" title="Ответить" onclick="initReplyMessageContext('${key}')">↩️</span><span class="tool-ico" title="Переслать" onclick="initForwardMessageContext('${key}')">➡️</span>${m.sid === activeUserId ? `<span class="tool-ico" title="Редактировать" onclick="initEditMessageContext('${key}')">✏️</span>` : ''}${delHtml}</div>`;
+                    bubble.innerHTML = `<div class="msg-author" onclick="openTargetUserProfile('${m.sid}')">${escapeHTML(m.sid===activeUserId?t('you'):m.snick)}</div>${replyHtml} ${mediaHtml} ${codeHtml}<div class="msg-text">${escapeHTML(m.txt)}</div><div class="msg-time-stamp">${new Date(m.ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div><div class="msg-hover-tools"><span class="tool-ico" title="${t('copy')}" onclick="executeCopyMessageText('${key}')">📋</span><span class="tool-ico" title="${t('reply')}" onclick="initReplyMessageContext('${key}')">↩️</span><span class="tool-ico" title="${t('forward')}" onclick="initForwardMessageContext('${key}')">➡️</span>${m.sid === activeUserId ? `<span class="tool-ico" title="${t('edit')}" onclick="initEditMessageContext('${key}')">✏️</span>` : ''}${delHtml}</div>`;
                     box.appendChild(bubble);
                 }); box.scrollTop = box.scrollHeight;
             }); renderChatLists();
@@ -724,18 +637,16 @@
         
         function updateActiveChatStatus() {
             if(!currentActiveChat) return; const statusEl = document.getElementById('activeChatStatus');
-            if(currentActiveChat.type === 'SAVED') { statusEl.innerText = "Облачное хранилище заметок"; } 
+            if(currentActiveChat.type === 'SAVED') { statusEl.innerText = t('cloud_storage'); } 
             else if(currentActiveChat.type === 'USER') { 
-                if(globalCache.blockedUsers[currentActiveChat.id]) { statusEl.innerText = "🚫 В твоём Чёрном Списке"; return; }
-                const u = globalCache.users[currentActiveChat.id] || {}; statusEl.innerText = u.status === 'online' ? "Онлайн 🟢" : "Оффлайн 🔴"; 
+                if(globalCache.blockedUsers[currentActiveChat.id]) { statusEl.innerText = t('in_blacklist'); return; }
+                const u = globalCache.users[currentActiveChat.id] || {}; statusEl.innerText = u.status === 'online' ? t('online') : t('offline'); 
             } else { 
                 const g = globalCache.groups[currentActiveChat.id] || {}; 
-                // Убрали текст про кулдаун в шапке, как просил бро
-                statusEl.innerText = g.description ? g.description : `Групповой чат`; 
+                statusEl.innerText = g.description ? g.description : t('group_chat'); 
             }
         }
 
-        // ТАЙМЕР АНТИСПАМА НА КНОПКЕ
         setInterval(() => {
             const btn = document.getElementById('sendMsgBtn');
             if(!btn) return;
@@ -758,8 +669,8 @@
             if(btn.innerText !== "➤") { btn.innerText = "➤"; btn.style.background = "var(--accent)"; }
         }, 200);
 
-        function executeCopyMessageText(k) { const txt = loadedMessagesMap[k].code || loadedMessagesMap[k].txt; navigator.clipboard.writeText(txt).then(() => showToast("Скопировано!")); }
-        function openFullCodeViewer(k) { const c = loadedMessagesMap[k].code; document.getElementById('fullCodeDisplay').innerText = c; document.getElementById('copyCodeModalBtn').onclick = () => { navigator.clipboard.writeText(c).then(() => showToast("Код скопирован!")); }; document.getElementById('codeViewerModal').style.display = 'flex'; }
+        function executeCopyMessageText(k) { const txt = loadedMessagesMap[k].code || loadedMessagesMap[k].txt; navigator.clipboard.writeText(txt).then(() => showToast(t('copied'))); }
+        function openFullCodeViewer(k) { const c = loadedMessagesMap[k].code; document.getElementById('fullCodeDisplay').innerText = c; document.getElementById('copyCodeModalBtn').onclick = () => { navigator.clipboard.writeText(c).then(() => showToast(t('copied'))); }; document.getElementById('codeViewerModal').style.display = 'flex'; }
 
         function toggleClipDropdown(e) { e.stopPropagation(); const d = document.getElementById('clipDropdownMenu'); d.style.display = d.style.display === 'flex' ? 'none' : 'flex'; }
         document.addEventListener('click', () => document.getElementById('clipDropdownMenu').style.display = 'none');
@@ -773,27 +684,22 @@
         function clearPendingAttachmentData() { base64CompressedAttachment = null; pendingTextSnippet = null; document.getElementById('attachmentPreviewBar').style.display = 'none'; document.getElementById('fileInputEngine').value=""; document.getElementById('attachmentPreviewImg').style.display='none'; document.getElementById('attachmentPreviewFileIcon').style.display='none'; }
         function viewFullMedia(src) { document.getElementById('fullSizeImg').src = src; document.getElementById('mediaViewerModal').style.display = 'flex'; }
 
-        // ОТПРАВКА С АВТОМОДЕРАЦИЕЙ И АНТИСПАМОМ
         function executeSendMessage() {
             if(currentActiveChat && currentActiveChat.type === 'USER' && globalCache.blockedUsers[currentActiveChat.id]) return showToast("Разблокируй челика перед отправкой!");
             const txt = document.getElementById('messageInputEngine').value.trim(); if(!txt && !base64CompressedAttachment && !pendingTextSnippet) return;
             
-            // Фильтр слов и Кулдаун для групп
             if(currentActiveChat && currentActiveChat.type === 'GROUP') {
                 const g = globalCache.groups[currentActiveChat.id] || {};
                 const myRole = (g.roles || {})[activeUserId] || 'member';
-                
-                // Проверка кулдауна
                 if(myRole === 'member' && g.cooldown && g.cooldown > 0) {
                     const lastSent = groupLastSentMap[currentActiveChat.id] || 0;
                     const diff = (Date.now() - lastSent) / 1000;
                     if(diff < g.cooldown) {
                         const remaining = Math.ceil(g.cooldown - diff);
                         showToast(`⏳ Бро, анти-спам! Подожди еще ${remaining} сек.`);
-                        return; // Блокируем отправку
+                        return;
                     }
                 }
-
                 if(g.bannedWords && txt) {
                     const forbidden = g.bannedWords.split(',').map(w => w.trim().toLowerCase()).filter(w => w);
                     if(forbidden.some(w => txt.toLowerCase().includes(w))) return showToast("🚫 Бро, тут запрещены некоторые слова!");
@@ -821,7 +727,6 @@
         function executeDeleteMessage(p, k) { if(confirm("Снести сообщение?")) realtimeDb.ref(`msgs/${p}/${k}`).remove(); }
         function handleInputKeyPress(e) { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); executeSendMessage(); } }
 
-        // ПРОФИЛЬ С ЧЕРНЫМ СПИСКОМ
         function openMyProfileSettings() { 
             const me=globalCache.users[activeUserId]||{}; document.getElementById('myModalNick').value=me.nickname||""; document.getElementById('myModalAvUrl').value=me.avatar||""; document.getElementById('myModalBio').value=me.bio||""; document.getElementById('myModalAvPreview').src=me.avatar||""; document.getElementById('myModalEmailDisplay').innerText = me.email || "Email не указан";
             const sContainer = document.getElementById('sessionsListContainer'); sContainer.innerHTML = "";
@@ -837,13 +742,12 @@
             document.getElementById('myProfileModal').style.display='flex';
             if(document.getElementById('languageLabel')) document.getElementById('languageLabel').innerText = languageLabels[currentLanguage];
         }
-        function executeUnblockFromProfile(uid) { realtimeDb.ref(`users/${activeUserId}/blocked/${uid}`).remove().then(() => { showToast("Разблокирован!"); openMyProfileSettings(); renderChatLists(); }); }
+        function executeUnblockFromProfile(uid) { realtimeDb.ref(`users/${activeUserId}/blocked/${uid}`).remove().then(() => { showToast(t('unblocked')); openMyProfileSettings(); renderChatLists(); }); }
         function executeTerminateSession(sid) { realtimeDb.ref(`users/${activeUserId}/sessions/${sid}`).remove().then(() => openMyProfileSettings()); }
         function executeClearAppCache() { if(confirm("Очистить локальный кэш?")) { localStorage.clear(); location.reload(); } }
 
         function changeUserGroupRole(uid, newRole) { if(currentActiveChat) { realtimeDb.ref(`groups/${currentActiveChat.id}/roles/${uid}`).set(newRole).then(() => openActiveChatContextInfo()); } }
         
-        // КАСТОМНЫЙ DROPDOWN И ЛОГИКА КУЛДАУНА
         function toggleCustomDropdown(e) {
             if(e) e.stopPropagation();
             document.getElementById('cooldownOptions').classList.toggle('show');
@@ -851,12 +755,8 @@
         }
 
         function selectCooldown(seconds, label) {
-            // Обновляем текст на кнопке
             document.getElementById('selectedCooldown').innerText = label;
-            // Закрываем меню
             toggleCustomDropdown();
-            
-            // Показываем/скрываем кастомный input если нужно
             if (seconds === -1) {
                 document.getElementById('editGrpCooldownCustom').style.display = 'block';
             } else {
@@ -865,7 +765,6 @@
             }
         }
 
-        // Закрытие при клике вне меню
         window.onclick = function(event) {
             if (!event.target.closest('.custom-select-wrapper')) {
                 const dropdowns = document.getElementsByClassName("custom-options");
@@ -885,7 +784,7 @@
         function openActiveChatContextInfo() {
             if(!currentActiveChat) return;
             document.getElementById('ctxAv').src = currentActiveChat.type==='SAVED' ? `https://api.dicebear.com/7.x/initials/svg?seed=Saved&backgroundColor=2b5278` : (currentActiveChat.type==='USER' ? (globalCache.users[currentActiveChat.id].avatar||`https://api.dicebear.com/7.x/identicon/svg?seed=${currentActiveChat.id}`) : (globalCache.groups[currentActiveChat.id].avatar||`https://api.dicebear.com/7.x/shapes/svg?seed=${currentActiveChat.id}`));
-            document.getElementById('ctxTitle').innerText = currentActiveChat.type === 'SAVED' ? "Сохранённые" : currentActiveChat.name.replace(" [В ЧС 🚫]", ""); document.getElementById('ctxDescriptionContainer').innerHTML = "";
+            document.getElementById('ctxTitle').innerText = currentActiveChat.type === 'SAVED' ? t('saved_notes') : currentActiveChat.name.replace(t('banned_label'), ""); document.getElementById('ctxDescriptionContainer').innerHTML = "";
 
             if(currentActiveChat.type === 'SAVED') { document.getElementById('ctxSubtitle').innerText = "Личное облако"; document.getElementById('ctxUserBlock').style.display = 'none'; document.getElementById('ctxGroupBlock').style.display = 'none'; } 
             else if(currentActiveChat.type === 'USER') {
@@ -898,9 +797,8 @@
                 const g = globalCache.groups[currentActiveChat.id] || {}; document.getElementById('ctxSubtitle').innerText = "Группа"; document.getElementById('ctxDescriptionContainer').innerText = g.description || "Нет описания";
                 document.getElementById('ctxUserBlock').style.display = 'none'; document.getElementById('ctxGroupBlock').style.display = 'block';
                 document.getElementById('editGrpNameInp').value = g.name; document.getElementById('editGrpAvInp').value = g.avatar || ""; document.getElementById('editGrpDescInp').value = g.description || ""; document.getElementById('editGrpBannedWordsInp').value = g.bannedWords || "";
-                  // Настройка кастомного dropdown для кулдауна
                 const cd = g.cooldown || 0;
-                 const labelMap = { 0: 'Выкл', 5: '5 секунд', 10: '10 секунд', 30: '30 секунд', 60: '1 минута' };
+                const labelMap = { 0: 'Выкл', 5: '5 секунд', 10: '10 секунд', 30: '30 секунд', 60: '1 минута' };
                 const cust = document.getElementById('editGrpCooldownCustom');
                 
                 if ([0, 5, 10, 30, 60].includes(cd)) {
@@ -916,7 +814,6 @@
                 const roles = g.roles || {}, myRole = roles[activeUserId], mList = document.getElementById('groupMembersList'), bList = document.getElementById('groupBannedList'); mList.innerHTML = ""; bList.innerHTML = "";
                 document.getElementById('deleteGroupBtn').style.display = myRole === 'owner' ? 'block' : 'none';
 
-                // Загружаем и выставляем чекбоксы прав
                 const perms = g.adminPermissions || { canKick: true, canBan: true, canEditMeta: true, canInvite: true };
                 document.getElementById('permKickCb').checked = perms.canKick !== false;
                 document.getElementById('permBanCb').checked = perms.canBan !== false;
@@ -1053,14 +950,14 @@
         
         function executeToggleBlockUser() { 
             if(currentActiveChat) { 
-                if(globalCache.blockedUsers[currentActiveChat.id]) { realtimeDb.ref(`users/${activeUserId}/blocked/${currentActiveChat.id}`).remove().then(() => { showToast("Разблокирован!"); closeModal('contextInfoModal'); executeSelectActiveChat(currentActiveChat.id, globalCache.users[currentActiveChat.id].nickname, 'USER'); }); } 
+                if(globalCache.blockedUsers[currentActiveChat.id]) { realtimeDb.ref(`users/${activeUserId}/blocked/${currentActiveChat.id}`).remove().then(() => { showToast(t('unblocked')); closeModal('contextInfoModal'); executeSelectActiveChat(currentActiveChat.id, globalCache.users[currentActiveChat.id].nickname, 'USER'); }); } 
                 else { if(confirm("Кинуть в ЧС?")) { realtimeDb.ref(`users/${activeUserId}/blocked/${currentActiveChat.id}`).set(true).then(() => { closeModal('contextInfoModal'); resetChatWindow(); }); } }
             } 
         }
 
         function saveMyProfileData() { realtimeDb.ref("users/"+activeUserId).update({ nickname: document.getElementById('myModalNick').value, avatar: document.getElementById('myModalAvUrl').value, bio: document.getElementById('myModalBio').value }); closeModal('myProfileModal'); }
         function openTargetUserProfile(uid) { if(uid === activeUserId) { executeSelectActiveChat('saved_messages', 'Сохранённые', 'SAVED'); return; } if(globalCache.users[uid]) { executeSelectActiveChat(uid, globalCache.users[uid].nickname, 'USER'); openActiveChatContextInfo(); } }
-        function resetChatWindow() { document.getElementById('activeChatAv').style.display='none'; document.getElementById('activeChatTitle').innerText="Выберите чат"; document.getElementById('activeChatStatus').innerText=""; document.getElementById('chatMessagesBox').innerHTML=""; currentActiveChat=null; backToSidebarOnMobile(); renderChatLists(); }
+        function resetChatWindow() { document.getElementById('activeChatAv').style.display='none'; document.getElementById('activeChatTitle').innerText=t('select_chat'); document.getElementById('activeChatStatus').innerText=""; document.getElementById('chatMessagesBox').innerHTML=""; currentActiveChat=null; backToSidebarOnMobile(); renderChatLists(); }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     </script>
 </body>
