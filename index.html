@@ -299,29 +299,29 @@
 
     <div id="authOverlay" class="modal-overlay" style="display: flex;">
         <div class="modal-card" id="loginCard">
-            <h2 style="text-align: center; color: var(--accent); margin-top: 0; font-size: 26px;">Войти в VChat</h2>
-            <input type="email" id="authEmail" placeholder="Ваш Email">
-            <input type="password" id="authPass" placeholder="Пароль">
-            <button class="success" onclick="executeLogin()">Войти</button>
-            <div style="text-align: center; margin: 12px 0; color: var(--text-muted);">или</div>
-            <button onclick="executeGoogleAuth()" style="background: #fff; color: #000;">🌐 Войти через Google</button>
-            <p style="text-align: center; color: var(--accent); cursor: pointer; margin-top: 15px;" onclick="switchAuthView(true)">Создать аккаунт</p>
+            <h2 style="text-align: center; color: var(--accent); margin-top: 0; font-size: 26px;" data-i18n="login_title">Войти в VChat</h2>
+            <input type="email" id="authEmail" placeholder="Ваш Email" data-i18n-placeholder="email">
+            <input type="password" id="authPass" placeholder="Пароль" data-i18n-placeholder="password">
+            <button class="success" onclick="executeLogin()" data-i18n="login_btn">Войти</button>
+            <div style="text-align: center; margin: 12px 0; color: var(--text-muted);" data-i18n="or">или</div>
+            <button onclick="executeGoogleAuth()" style="background: #fff; color: #000;" data-i18n="google_login">🌐 Войти через Google</button>
+            <p style="text-align: center; color: var(--accent); cursor: pointer; margin-top: 15px;" onclick="switchAuthView(true)" data-i18n="create_account">Создать аккаунт</p>
         </div>
         
         <div class="modal-card" id="registerCard" style="display: none;">
-            <h2 style="text-align: center; color: var(--success); margin-top: 0;">Регистрация</h2>
+            <h2 style="text-align: center; color: var(--success); margin-top: 0;" data-i18n="registration_title">Регистрация</h2>
             <div id="regFormInputs">
-                <input type="text" id="regNick" placeholder="Никнейм">
-                <input type="email" id="regEmail" placeholder="Email">
-                <input type="password" id="regPass" placeholder="Пароль">
-                <button class="success" onclick="executeRegister()">Зарегистрироваться</button>
+                <input type="text" id="regNick" placeholder="Никнейм" data-i18n-placeholder="nickname">
+                <input type="email" id="regEmail" placeholder="Email" data-i18n-placeholder="email">
+                <input type="password" id="regPass" placeholder="Пароль" data-i18n-placeholder="password">
+                <button class="success" onclick="executeRegister()" data-i18n="register_btn">Зарегистрироваться</button>
             </div>
             <div id="verifyAlertBox" class="verify-alert-box">
-                <b style="color: var(--warning); display: block; margin-bottom: 4px; font-size: 15px;">🚀 Письмо отправлено!</b>
-                Мы выслали ссылку для подтверждения на твою почту. Кликни по ней, чтобы активировать аккаунт.<br><br>
-                <span style="color: var(--danger); font-weight: bold;">⚠️ ВАЖНО: Если письма нет дольше минуты — обязательно чекни вкладку «СПАМ»!</span>
+                <b style="color: var(--warning); display: block; margin-bottom: 4px; font-size: 15px;" data-i18n="email_sent">🚀 Письмо отправлено!</b>
+                <span data-i18n="email_sent_desc">Мы выслали ссылку для подтверждения на твою почту. Кликни по ней, чтобы активировать аккаунт.</span><br><br>
+                <span style="color: var(--danger); font-weight: bold;" data-i18n="check_spam">⚠️ ВАЖНО: Если письма нет дольше минуты — обязательно чекни вкладку «СПАМ»!</span>
             </div>
-            <button class="secondary" id="regBackBtn" style="margin-top: 12px;" onclick="switchAuthView(false)">Назад ко входу</button>
+            <button class="secondary" id="regBackBtn" style="margin-top: 12px;" onclick="switchAuthView(false)" data-i18n="back_to_login">Назад ко входу</button>
         </div>
     </div>
 
@@ -533,7 +533,19 @@
             currentLanguage = lang;
             localStorage.setItem('vchat_language', lang);
             document.getElementById('languageLabel').innerText = languageLabels[lang];
+            updateUILanguage();
             toggleLanguageDropdown();
+        }
+        
+        function updateUILanguage() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                el.innerText = t(key);
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                el.placeholder = t(key);
+            });
         }
 
         let activeUserId = "", currentActiveChat = null, activeSidebarTab = 'chats';
@@ -552,6 +564,9 @@
 
         if(localStorage.getItem('vchat_theme')==='light') { document.body.classList.add('light-mode'); document.getElementById('themeBtn').innerText='🌞'; }
         function executeToggleTheme() { document.body.classList.toggle('light-mode'); const isL=document.body.classList.contains('light-mode'); localStorage.setItem('vchat_theme', isL?'light':'dark'); document.getElementById('themeBtn').innerText=isL?'🌞':'🌙'; }
+        
+        // Инициализация языка при загрузке
+        updateUILanguage();
 
         // RESIZER
         const sidebar = document.getElementById('mainSidebar'); const resizer = document.getElementById('sidebarResizer');
