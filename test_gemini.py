@@ -7,8 +7,6 @@ client = genai.Client(api_key="AIzaSyCHTsDmMAbUbRCWKMWGEklMG8w2a6ATp80")
 print("Список доступных моделей:")
 for m in client.models.list():
     print(f"- {m.name}")
-from google import genai
-from google.genai import types
 
 def generate():
     # Твой ключ прямо здесь
