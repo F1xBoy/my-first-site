@@ -507,6 +507,8 @@
             return "Браузер";
         }
         
+        function escapeHTML(str) { return str ? str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;") : ""; }
+        
         let toastTimeout;
         function showToast(msg) {
             const tEl = document.getElementById('toastBox'); tEl.innerText = msg; tEl.classList.add('show');
@@ -515,8 +517,6 @@
 
         if(localStorage.getItem('vchat_theme')==='light') { document.body.classList.add('light-mode'); document.getElementById('themeBtn').innerText='🌞'; }
         function executeToggleTheme() { document.body.classList.toggle('light-mode'); const isL=document.body.classList.contains('light-mode'); localStorage.setItem('vchat_theme', isL?'light':'dark'); document.getElementById('themeBtn').innerText=isL?'🌞':'🌙'; }
-        
-        updateUILanguage();
 
         const sidebar = document.getElementById('mainSidebar'); const resizer = document.getElementById('sidebarResizer');
         const savedWidth = localStorage.getItem('vchat_sidebar_width'); if (savedWidth) sidebar.style.width = savedWidth + 'px';
