@@ -181,7 +181,8 @@ const VCHAT_AI_STORAGE = {
 
     const modal = document.getElementById('aiSummaryModal');
     const body = document.getElementById('aiSummaryBody');
-    modal.style.display = 'flex';
+    if (typeof openModal === 'function') openModal('aiSummaryModal');
+    else modal.style.display = 'flex';
     body.innerHTML = `<div class="ai-loading"><span class="ai-spinner"></span> ${aiT('ai_summary_loading')}</div>`;
 
     const messages = collectRecentMessages(10);
