@@ -7,7 +7,7 @@
  * Compatible with OpenAI API (GPT-4o-mini, etc.)
  */
 const VCHAT_AI_CONFIG = {
-  apiKey: '', // ← ВСТАВЬТЕ СЮДА свой OpenAI API key (sk-...)
+  apiKey: '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', // ← ВСТАВЬТЕ СЮДА свой OpenAI API key (sk-...)
   baseUrl: 'https://api.openai.com/v1',
   model: 'gpt-4o-mini',
 };
