@@ -281,11 +281,17 @@ const VCHAT_AI_CONFIG = {
     };
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  function bootAIFeatures() {
     initVoiceInput();
     registerServiceWorker();
     updateSummaryButtonVisibility();
-  });
+  }
 
   window.updateSummaryButtonVisibility = updateSummaryButtonVisibility;
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootAIFeatures);
+  } else {
+    bootAIFeatures();
+  }
 })();
