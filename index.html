@@ -62,7 +62,7 @@
 
         body, html { margin: 0; padding: 0; height: 100%; background: var(--bg-main); color: var(--text-main); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; overflow: hidden; }
         *, *::before, *::after { box-sizing: border-box; }
-        button, input, textarea, select, .tab-item, .chat-row, .custom-select-trigger, .smart-reply-chip, .clip-label, #sendMsgBtn, .voice-btn {
+        button, input, textarea, .tab-item, .chat-row, .custom-select-trigger, .smart-reply-chip, .clip-label, #sendMsgBtn, .voice-btn {
             transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease, opacity 0.15s ease;
         }
         
@@ -77,8 +77,8 @@
         .modal-card { background: var(--bg-card); padding: 25px; border-radius: 18px; width: 440px; border: 1px solid var(--border-color); max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6); position: relative; }
         @media (max-width: 480px) { .modal-card { width: 90%; padding: 15px; } }
 
-        input, textarea, select { width: 100%; padding: 12px 16px; margin: 8px 0; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); outline: none; font-size: 14px; }
-        input:focus, textarea:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15); }
+        input, textarea { width: 100%; padding: 12px 16px; margin: 8px 0; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); outline: none; font-size: 14px; }
+        input:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15); }
 
         button { width: 100%; padding: 12px; background: var(--border-color); color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; margin-top: 8px; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 6px; }
         button:hover { background: var(--accent); transform: translateY(-1px); }
@@ -302,11 +302,19 @@
             <hr style="border-color:var(--border-color); margin:20px 0;">
             <h4 style="margin:10px 0 5px 0; color:var(--accent);" data-i18n="ai_settings">🤖 AI (summary & replies)</h4>
             <div style="background:var(--bg-input); padding:12px; border-radius:10px; border:1px solid var(--border-color); margin-bottom:10px;">
+                
                 <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;" data-i18n="ai_provider_label">Provider</label>
-                <select id="aiProviderSelect" style="margin-top:0; margin-bottom:10px; padding:8px 12px; border-radius:8px; width: 100%;">
-                    <option value="gemini" data-i18n-opt="ai_provider_gemini">Google Gemini (Free)</option>
-                    <option value="openai" data-i18n-opt="ai_provider_openai">OpenAI (ChatGPT)</option>
-                </select>
+                
+                <div class="custom-select-wrapper" style="margin-bottom: 10px;">
+                    <div class="custom-select-trigger" onclick="toggleAIProviderDropdown(event)" id="aiProviderTrigger" data-value="gemini">
+                        <span id="aiProviderLabel" data-i18n="ai_provider_gemini">Google Gemini (Free)</span>
+                        <span class="arrow">▼</span>
+                    </div>
+                    <div class="custom-options" id="aiProviderOptions">
+                        <div onclick="selectAIProvider('gemini')"><span data-i18n="ai_provider_gemini">Google Gemini (Free)</span></div>
+                        <div onclick="selectAIProvider('openai')"><span data-i18n="ai_provider_openai">OpenAI (ChatGPT)</span></div>
+                    </div>
+                </div>
                 
                 <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:4px;" data-i18n="ai_key_label">API Key</label>
                 <input type="password" id="aiKeyInput" placeholder="Paste your API key here..." style="margin-top:0;">
@@ -318,11 +326,12 @@
             </div>
 
             <hr style="border-color:var(--border-color); margin:20px 0;">
-            <div style="text-align:center; color:var(--text-muted); font-size:12px; margin-bottom:10px;"><span data-i18n="version">Version</span>: VChat 1.4.2</div>
+            <div style="text-align:center; color:var(--text-muted); font-size:12px; margin-bottom:10px;"><span data-i18n="version">Version</span>: VChat 1.4.3</div>
+            
             <div style="display:block; margin-bottom:12px; font-size:13px;">
                 <b style="display:block; margin-bottom:6px;" data-i18n="language">Language:</b>
                 <div class="custom-select-wrapper">
-                    <div class="custom-select-trigger" onclick="toggleLanguageDropdown()" id="languageTrigger">
+                    <div class="custom-select-trigger" onclick="toggleLanguageDropdown(event)" id="languageTrigger">
                         <span id="languageLabel">🇬🇧 English</span>
                         <span class="arrow">▼</span>
                     </div>
@@ -339,6 +348,7 @@
                     </div>
                 </div>
             </div>
+            
             <button class="secondary" onclick="executeSignOut()" data-i18n="logout">Logout</button>
             <button class="danger" onclick="executeDeleteAccountPermanently()" style="background: #b91c1c; margin-top: 8px;" data-i18n="delete_account">⚠️ DELETE ACCOUNT FOREVER</button>
             <button class="secondary" style="margin-top:12px;" onclick="closeModal('myProfileModal')" data-i18n="close">Close</button>
@@ -609,21 +619,51 @@
         
         const languageLabels = { en: '🇬🇧 English', ru: '🇷🇺 Русский', ru_slang: '🇷🇺 Casual', uz: '🇺🇿 Ўзбекча', es: '🇪🇸 Español', fr: '🇫🇷 Français', de: '🇩🇪 Deutsch', it: '🇮🇹 Italiano', zh: '🇨🇳 中文' };
         
-        function toggleLanguageDropdown() {
+        function toggleLanguageDropdown(e) {
+            if(e) e.stopPropagation();
             document.getElementById('languageOptions').classList.toggle('show');
             document.getElementById('languageTrigger').classList.toggle('open');
         }
+        
         function toggleAuthLanguageDropdown(e) {
-            e.stopPropagation();
+            if(e) e.stopPropagation();
             document.getElementById('authLanguageOptions').classList.toggle('show');
             document.getElementById('authLanguageTrigger').classList.toggle('open');
+        }
+        
+        /* НОВАЯ ФУНКЦИЯ ДЛЯ ВЫПАДАЮЩЕГО СПИСКА ПРОВАЙДЕРА ИИ */
+        function toggleAIProviderDropdown(e) {
+            if(e) e.stopPropagation();
+            document.getElementById('aiProviderOptions').classList.toggle('show');
+            document.getElementById('aiProviderTrigger').classList.toggle('open');
+        }
+
+        /* НОВАЯ ФУНКЦИЯ ДЛЯ ВЫБОРА ПРОВАЙДЕРА ИИ */
+        function selectAIProvider(provider) {
+            const trigger = document.getElementById('aiProviderTrigger');
+            trigger.dataset.value = provider;
+            
+            const label = document.getElementById('aiProviderLabel');
+            if(provider === 'gemini') {
+                label.setAttribute('data-i18n', 'ai_provider_gemini');
+            } else {
+                label.setAttribute('data-i18n', 'ai_provider_openai');
+            }
+            
+            document.getElementById('aiProviderOptions').classList.remove('show');
+            trigger.classList.remove('open');
+            
+            updateUILanguage(); // Моментально переводим текст выбранного пункта
         }
         
         function changeLanguage(lang) {
             currentLanguage = lang;
             localStorage.setItem('vchat_language', lang);
+            
             document.getElementById('languageLabel').innerText = languageLabels[lang];
-            if(document.getElementById('authLanguageLabel')) document.getElementById('authLanguageLabel').innerText = languageLabels[lang];
+            if(document.getElementById('authLanguageLabel')) {
+                document.getElementById('authLanguageLabel').innerText = languageLabels[lang];
+            }
             
             updateUILanguage();
             renderTabsRow();
@@ -663,8 +703,10 @@
             return el && getComputedStyle(el).display === 'flex';
         }
 
+        // ЭТА ФУНКЦИЯ ОБНОВЛЯЕТ ВСЕ ТЕКСТЫ ПО АТРИБУТАМ DATA-I18N
         function updateUILanguage() {
             document.documentElement.lang = currentLanguage === 'zh' ? 'zh' : (currentLanguage.startsWith('ru') ? 'ru' : currentLanguage.split('_')[0]);
+            
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if (!key) return;
@@ -673,13 +715,15 @@
                 if (el.id === 'myNickDisplay' && activeUserId) return;
                 el.textContent = t(key);
             });
+            
             document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.getAttribute('data-i18n-placeholder')); });
             document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.getAttribute('data-i18n-title')); });
-            document.querySelectorAll('option[data-i18n-opt]').forEach(opt => { opt.textContent = t(opt.getAttribute('data-i18n-opt')); });
+            
             renderCooldownDropdown();
             if (typeof updateSummaryButtonVisibility === 'function') updateSummaryButtonVisibility();
             refreshContextActionBarI18n();
             refreshDynamicButtonsI18n();
+            
             const previewBar = document.getElementById('attachmentPreviewBar');
             if (previewBar && previewBar.style.display === 'flex') {
                 const label = document.getElementById('attachLabelType');
@@ -690,7 +734,7 @@
         document.getElementById('languageLabel').innerText = languageLabels[currentLanguage];
         if(document.getElementById('authLanguageLabel')) document.getElementById('authLanguageLabel').innerText = languageLabels[currentLanguage];
         renderCooldownDropdown();
-        updateUILanguage();
+        updateUILanguage(); // Вызов при старте приложения
         
         function getDefaultTabs() { return [{id:'chats', name: 'chats'}, {id:'contacts', name: 'contacts'}, {id:'global', name: 'global'}, {id:'groups', name: 'groups'}]; }
         
@@ -912,6 +956,7 @@
 
         function toggleClipDropdown(e) { e.stopPropagation(); const d = document.getElementById('clipDropdownMenu'); d.style.display = d.style.display === 'flex' ? 'none' : 'flex'; }
         
+        /* ЗАКРЫВАЕМ ВСЕ КАСТОМНЫЕ ДРОПДАУНЫ ПРИ КЛИКЕ В ПУСТОТУ */
         window.onclick = function(event) {
             if (!event.target.closest('.custom-select-wrapper')) {
                 const dropdowns = document.getElementsByClassName("custom-options"); for (let i = 0; i < dropdowns.length; i++) { if (dropdowns[i].classList.contains('show')) { dropdowns[i].classList.remove('show'); } }
@@ -965,7 +1010,8 @@
 
         /* BYOK Функции сохранения ключа */
         function saveAIKey() {
-            const provider = document.getElementById('aiProviderSelect').value;
+            // Читаем провайдера из кастомного селекта (атрибут data-value)
+            const provider = document.getElementById('aiProviderTrigger').dataset.value || 'gemini';
             const key = document.getElementById('aiKeyInput').value.trim();
             localStorage.setItem('vchat_ai_provider', provider);
             
@@ -995,10 +1041,23 @@
                 }
             } else { blCont.innerHTML = `<div style='color:var(--text-muted);'>-</div>`; }
 
-            // Загрузка сохраненного API ключа в UI
+            // Загрузка сохраненного API ключа в UI и выбор правильного провайдера в кастомном селекте
             const savedProvider = localStorage.getItem('vchat_ai_provider') || 'gemini';
             const savedKey = localStorage.getItem('vchat_ai_key');
-            document.getElementById('aiProviderSelect').value = savedProvider;
+            
+            const trigger = document.getElementById('aiProviderTrigger');
+            trigger.dataset.value = savedProvider;
+            const providerLabel = document.getElementById('aiProviderLabel');
+            
+            if(savedProvider === 'gemini') {
+                providerLabel.setAttribute('data-i18n', 'ai_provider_gemini');
+            } else {
+                providerLabel.setAttribute('data-i18n', 'ai_provider_openai');
+            }
+            
+            // Вызываем принудительный апдейт языка, чтобы текст в кнопке применился
+            updateUILanguage();
+
             if (savedKey) {
                 document.getElementById('aiKeyInput').placeholder = t('ai_key_saved_mask') + ' ' + savedKey.substring(0, 5) + '...';
             } else {
@@ -1006,7 +1065,6 @@
             }
 
             openModal('myProfileModal');
-            if(document.getElementById('languageLabel')) document.getElementById('languageLabel').innerText = languageLabels[currentLanguage];
         }
         function executeUnblockFromProfile(uid) { realtimeDb.ref(`users/${activeUserId}/blocked/${uid}`).remove().then(() => { showToast(t('unblocked')); openMyProfileSettings(); renderChatLists(); }); }
         function executeTerminateSession(sid) { realtimeDb.ref(`users/${activeUserId}/sessions/${sid}`).remove().then(() => openMyProfileSettings()); }
