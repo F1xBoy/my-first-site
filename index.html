@@ -746,7 +746,13 @@
             else { path = chatId; const g = globalCache.groups[chatId] || {}; av.src = g.avatar || `https://api.dicebear.com/7.x/shapes/svg?seed=${chatId}`; document.getElementById('activeChatTitle').innerText = chatName; }
             updateActiveChatStatus(); realtimeDb.ref("msgs/" + path).off();
             
-            if(chatType === 'USER' && globalCache.blockedUsers[chatId]) { document.getElementById('chatMessagesBox').innerHTML = `<div style="text-align:center; margin-top:40px; color:var(--danger); font-weight:bold;">${t('in_blacklist')}</div>`; return; }
+            if(chatType === 'USER' && globalCache.blockedUsers[chatId]) {
+                loadedMessagesMap = {};
+                document.getElementById('chatMessagesBox').innerHTML = `<div style="text-align:center; margin-top:40px; color:var(--danger); font-weight:bold;">${t('in_blacklist')}</div>`;
+                if (typeof refreshSmartReplies === 'function') refreshSmartReplies();
+                if (typeof updateSummaryButtonVisibility === 'function') updateSummaryButtonVisibility();
+                return;
+            }
 
             realtimeDb.ref("msgs/" + path).on("value", snap => {
                 const box = document.getElementById('chatMessagesBox'); box.innerHTML = ""; loadedMessagesMap = {};
