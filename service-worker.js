@@ -1,5 +1,5 @@
 /* VChat PWA Service Worker — cache shell, network-first for dynamic data */
-const CACHE_NAME = 'vchat-pwa-v2';
+const CACHE_NAME = 'vchat-pwa-v3';
 const SHELL = [
   './',
   './index.html',
@@ -29,6 +29,7 @@ self.addEventListener('fetch', (event) => {
 
   if (request.method !== 'GET') return;
 
+  // Игнорируем внешние API и Firebase, чтобы они всегда шли через сеть
   if (
     url.hostname.includes('firebaseio.com') ||
     url.hostname.includes('googleapis.com') ||
@@ -40,6 +41,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Для наших локальных файлов (HTML, JS)
   if (url.origin === location.origin) {
     event.respondWith(
       fetch(request)
