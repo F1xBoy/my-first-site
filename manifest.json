@@ -1,0 +1,29 @@
+{
+  "name": "VChat",
+  "short_name": "VChat",
+  "description": "Modern messenger with AI — summaries, smart replies, voice input",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0e1621",
+  "theme_color": "#17212b",
+  "lang": "ru",
+  "categories": ["social", "productivity"],
+  "icons": [
+    {
+      "src": "https://i.postimg.cc/5tjWHSRq/Gemini-Generated-Image-9f0qr19f0qr19f0q.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://i.postimg.cc/5tjWHSRq/Gemini-Generated-Image-9f0qr19f0qr19f0q.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
+}
