@@ -1,15 +1,21 @@
 /**
  * VChat AI & PWA helpers
  * ─────────────────────────────────────────────────────────────
- * API KEY: set VCHAT_AI_CONFIG.apiKey below, or in DevTools:
- *   localStorage.setItem('vchat_openai_api_key', 'sk-...');
- * Get a key: https://platform.openai.com/api-keys
- * Compatible with OpenAI API (GPT-4o-mini, etc.)
+ * Ключ НЕ храните в этом файле — Cursor/Git заблокируют.
+ *
+ * Способ 1 (рекомендуется): Профиль → AI → вставить ключ → «Сохранить»
+ * Способ 2: ai-config.local.js (см. ai-config.local.example.js, в .gitignore)
  */
 const VCHAT_AI_CONFIG = {
-  apiKey: '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', // ← ВСТАВЬТЕ СЮДА свой OpenAI API key (sk-...)
-  baseUrl: 'https://api.openai.com/v1',
-  model: 'gpt-4o-mini',
+  defaultProvider: 'gemini',
+  geminiModel: 'gemini-2.0-flash-lite',
+  openaiModel: 'gpt-4o-mini',
+  openaiBaseUrl: 'https://api.openai.com/v1',
+};
+
+const VCHAT_AI_STORAGE = {
+  provider: 'vchat_ai_provider',
+  apiKey: 'vchat_ai_api_key',
 };
 
 (function initVChatAIPWA() {
@@ -21,8 +27,79 @@ const VCHAT_AI_CONFIG = {
   let speechRecognition = null;
   let isListening = false;
 
+  function getLocalAIConfig() {
+    return window.VCHAT_AI_LOCAL_CONFIG || null;
+  }
+
+  function getProvider() {
+    return (
+      localStorage.getItem(VCHAT_AI_STORAGE.provider) ||
+      getLocalAIConfig()?.provider ||
+      VCHAT_AI_CONFIG.defaultProvider ||
+      'gemini'
+    );
+  }
+
   function getApiKey() {
-    return (VCHAT_AI_CONFIG.apiKey || localStorage.getItem('vchat_openai_api_key') || '').trim();
+    return (
+      localStorage.getItem(VCHAT_AI_STORAGE.apiKey) ||
+      getLocalAIConfig()?.apiKey ||
+      ''
+    ).trim();
+  }
+
+  function maskApiKey(key) {
+    if (!key || key.length < 8) return '';
+    return `${key.slice(0, 4)}••••${key.slice(-4)}`;
+  }
+
+  async function callGemini(apiKey, systemPrompt, userPrompt) {
+    const model =
+      getLocalAIConfig()?.geminiModel ||
+      VCHAT_AI_CONFIG.geminiModel;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: systemPrompt }] },
+        contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+        generationConfig: { temperature: 0.7 },
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(err || `Gemini HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+  }
+
+  async function callOpenAI(apiKey, systemPrompt, userPrompt) {
+    const model =
+      getLocalAIConfig()?.openaiModel ||
+      VCHAT_AI_CONFIG.openaiModel;
+    const res = await fetch(`${VCHAT_AI_CONFIG.openaiBaseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        temperature: 0.7,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(err || `OpenAI HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content?.trim() || '';
   }
 
   function aiT(key) {
@@ -57,29 +134,9 @@ const VCHAT_AI_CONFIG = {
   async function callVChatAI(systemPrompt, userPrompt) {
     const apiKey = getApiKey();
     if (!apiKey) return null;
-
-    const res = await fetch(`${VCHAT_AI_CONFIG.baseUrl}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: VCHAT_AI_CONFIG.model,
-        temperature: 0.7,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-      }),
-    });
-
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(err || `HTTP ${res.status}`);
-    }
-    const data = await res.json();
-    return data.choices?.[0]?.message?.content?.trim() || '';
+    const provider = getProvider();
+    if (provider === 'openai') return callOpenAI(apiKey, systemPrompt, userPrompt);
+    return callGemini(apiKey, systemPrompt, userPrompt);
   }
 
   function fallbackSummary(messages) {
@@ -281,10 +338,53 @@ const VCHAT_AI_CONFIG = {
     };
   }
 
+  window.loadAISettingsUI = function loadAISettingsUI() {
+    const providerEl = document.getElementById('aiProviderSelect');
+    const keyEl = document.getElementById('aiApiKeyInp');
+    const statusEl = document.getElementById('aiKeyStatus');
+    if (!providerEl || !keyEl) return;
+
+    providerEl.value = getProvider();
+    const saved = getApiKey();
+    keyEl.value = '';
+    keyEl.placeholder = saved
+      ? `${aiT('ai_key_saved_mask')} ${maskApiKey(saved)}`
+      : aiT('ai_key_placeholder');
+
+    if (statusEl) {
+      statusEl.textContent = saved
+        ? `${aiT('ai_key_active')} (${getProvider() === 'gemini' ? 'Gemini' : 'OpenAI'})`
+        : aiT('ai_key_missing');
+      statusEl.style.color = saved ? 'var(--success)' : 'var(--warning)';
+    }
+  };
+
+  window.saveAISettings = function saveAISettings() {
+    const providerEl = document.getElementById('aiProviderSelect');
+    const keyEl = document.getElementById('aiApiKeyInp');
+    if (!providerEl) return;
+
+    localStorage.setItem(VCHAT_AI_STORAGE.provider, providerEl.value);
+    const newKey = (keyEl?.value || '').trim();
+    if (newKey) localStorage.setItem(VCHAT_AI_STORAGE.apiKey, newKey);
+
+    showToast(aiT('ai_key_saved_toast'));
+    loadAISettingsUI();
+    if (currentActiveChat && typeof refreshSmartReplies === 'function') refreshSmartReplies();
+  };
+
+  window.clearAISettings = function clearAISettings() {
+    if (!confirm(aiT('ai_key_clear_confirm'))) return;
+    localStorage.removeItem(VCHAT_AI_STORAGE.apiKey);
+    showToast(aiT('ai_key_cleared'));
+    loadAISettingsUI();
+  };
+
   function bootAIFeatures() {
     initVoiceInput();
     registerServiceWorker();
     updateSummaryButtonVisibility();
+    loadAISettingsUI();
   }
 
   window.updateSummaryButtonVisibility = updateSummaryButtonVisibility;
