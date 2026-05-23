@@ -106,8 +106,17 @@ const VCHAT_AI_STORAGE = {
     return typeof t === 'function' ? t(key) : key;
   }
 
+  function appUserId() {
+    return typeof activeUserId !== 'undefined' ? activeUserId : '';
+  }
+
+  function appActiveChat() {
+    return typeof currentActiveChat !== 'undefined' ? currentActiveChat : null;
+  }
+
   function collectRecentMessages(limit = 10) {
-    const entries = Object.entries(typeof loadedMessagesMap !== 'undefined' ? loadedMessagesMap : {})
+    const map = typeof loadedMessagesMap !== 'undefined' ? loadedMessagesMap : {};
+    const entries = Object.entries(map)
       .map(([key, m]) => ({ key, ...m }))
       .sort((a, b) => (a.ts || 0) - (b.ts || 0));
     return entries.slice(-limit);
@@ -116,7 +125,7 @@ const VCHAT_AI_STORAGE = {
   function formatMessagesForAI(messages) {
     return messages
       .map((m) => {
-        const author = m.sid === activeUserId ? aiT('you') : (m.snick || aiT('default_user'));
+        const author = m.sid === appUserId() ? aiT('you') : (m.snick || aiT('default_user'));
         const body = [m.txt, m.code ? `[code] ${m.code}` : '', m.img ? '[image]' : ''].filter(Boolean).join(' ');
         return `${author}: ${body}`;
       })
@@ -126,7 +135,7 @@ const VCHAT_AI_STORAGE = {
   function getLastIncomingMessage() {
     const msgs = collectRecentMessages(30);
     for (let i = msgs.length - 1; i >= 0; i--) {
-      if (msgs[i].sid !== activeUserId) return msgs[i];
+      if (msgs[i].sid !== appUserId()) return msgs[i];
     }
     return null;
   }
@@ -142,7 +151,7 @@ const VCHAT_AI_STORAGE = {
   function fallbackSummary(messages) {
     if (!messages.length) return aiT('ai_summary_empty');
     const lines = messages.map((m) => {
-      const who = m.sid === activeUserId ? aiT('you') : m.snick;
+      const who = m.sid === appUserId() ? aiT('you') : m.snick;
       return `• ${who}: ${(m.txt || '').slice(0, 80)}`;
     });
     return `${aiT('ai_summary_fallback_title')}\n\n${lines.join('\n')}`;
@@ -168,7 +177,7 @@ const VCHAT_AI_STORAGE = {
   }
 
   window.executeAISummary = async function executeAISummary() {
-    if (!currentActiveChat) return showToast(aiT('select_chat'));
+    if (!appActiveChat()) return showToast(aiT('select_chat'));
 
     const modal = document.getElementById('aiSummaryModal');
     const body = document.getElementById('aiSummaryBody');
@@ -210,7 +219,8 @@ const VCHAT_AI_STORAGE = {
     const bar = document.getElementById('smartRepliesBar');
     if (!bar) return;
 
-    if (!currentActiveChat || currentActiveChat.type === 'SAVED') {
+    const chat = appActiveChat();
+    if (!chat || chat.type === 'SAVED') {
       bar.classList.add('hidden');
       return;
     }
@@ -256,7 +266,8 @@ const VCHAT_AI_STORAGE = {
 
   function updateSummaryButtonVisibility() {
     const btn = document.getElementById('aiSummaryBtn');
-    if (btn) btn.style.display = currentActiveChat ? 'inline-flex' : 'none';
+    const chat = typeof currentActiveChat !== 'undefined' ? currentActiveChat : null;
+    if (btn) btn.style.display = chat ? 'inline-flex' : 'none';
   }
 
   window.initVoiceInput = function initVoiceInput() {
@@ -370,7 +381,7 @@ const VCHAT_AI_STORAGE = {
 
     showToast(aiT('ai_key_saved_toast'));
     loadAISettingsUI();
-    if (currentActiveChat && typeof refreshSmartReplies === 'function') refreshSmartReplies();
+    if (appActiveChat() && typeof refreshSmartReplies === 'function') refreshSmartReplies();
   };
 
   window.clearAISettings = function clearAISettings() {
