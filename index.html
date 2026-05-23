@@ -447,6 +447,9 @@
                         <div><b id="activeChatTitle" data-i18n="select_chat">Select a chat</b><small id="activeChatStatus" style="color:var(--text-muted); display:block; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></small></div>
                     </div>
                 </div>
+                <div class="header-ai-actions">
+                    <button type="button" id="aiSummaryBtn" class="ai-summary-btn" onclick="executeAISummary()" data-i18n="ai_summary_btn">✨ Brief</button>
+                </div>
             </header>
             <div id="chatMessagesBox" class="messages-container"></div>
             <div id="contextActionBar" class="action-context-bar"><div style="display:flex; flex-direction:column;"><small id="contextActionTitle" style="color:var(--accent); font-weight:800;"></small><div id="contextActionText" style="font-size:13px; max-width:400px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div></div><button class="secondary" style="width:auto; padding:4px 10px; margin:0;" onclick="cancelCurrentContextAction()">✖</button></div>
