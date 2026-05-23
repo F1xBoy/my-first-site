@@ -1,5 +1,5 @@
 /* VChat PWA Service Worker — cache shell, network-first for dynamic data */
-const CACHE_NAME = 'vchat-pwa-v1';
+const CACHE_NAME = 'vchat-pwa-v2';
 const SHELL = [
   './',
   './index.html',
