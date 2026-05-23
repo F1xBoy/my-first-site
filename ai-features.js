@@ -1,7 +1,5 @@
 /**
  * VChat AI (frontend) — BYOK (Bring Your Own Key) модель.
- * Пользователь вводит свой ключ в настройках, он сохраняется в localStorage.
- * Запросы идут напрямую к API Google или OpenAI.
  */
 
 (function initVChatAIPWA() {
@@ -25,9 +23,6 @@
     return typeof currentActiveChat !== 'undefined' ? currentActiveChat : null;
   }
 
-  /**
-   * Главная функция вызова AI напрямую через ключи пользователя
-   */
   async function callAI(payload) {
     const provider = localStorage.getItem('vchat_ai_provider') || 'gemini';
     const apiKey = localStorage.getItem('vchat_ai_key');
@@ -179,7 +174,7 @@
 
     if (!localStorage.getItem('vchat_ai_key')) {
       bar.classList.add('hidden');
-      return; // Прячем подсказки, если нет ключа, чтобы не спамить ошибками
+      return;
     }
 
     bar.classList.remove('hidden');
@@ -284,9 +279,39 @@
   function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) return;
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+      navigator.serviceWorker.register('./service-worker.js').then(reg => {
+        reg.onupdatefound = () => {
+          const newWorker = reg.installing;
+          if (newWorker) {
+            newWorker.onstatechange = () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                if (typeof window.showUpdateNotification === 'function') {
+                  window.showUpdateNotification();
+                }
+              }
+            };
+          }
+        };
+      }).catch(() => {});
     });
   }
+
+  // Ядерная кнопка апдейта
+  window.updateApp = function updateApp() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        for (let registration of registrations) {
+          registration.unregister();
+        }
+        caches.keys().then(names => {
+          for (let name of names) caches.delete(name);
+          window.location.reload(true);
+        });
+      });
+    } else {
+      window.location.reload(true);
+    }
+  };
 
   window.resetAIFeaturesUI = function resetAIFeaturesUI() {
     const bar = document.getElementById('smartRepliesBar');
