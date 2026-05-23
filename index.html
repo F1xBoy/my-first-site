@@ -900,7 +900,21 @@
 
         function saveMyProfileData() { realtimeDb.ref("users/"+activeUserId).update({ nickname: document.getElementById('myModalNick').value, avatar: document.getElementById('myModalAvUrl').value, bio: document.getElementById('myModalBio').value }); closeModal('myProfileModal'); }
         function openTargetUserProfile(uid) { if(uid === activeUserId) { executeSelectActiveChat('saved_messages', 'Сохранённые', 'SAVED'); return; } if(globalCache.users[uid]) { executeSelectActiveChat(uid, globalCache.users[uid].nickname, 'USER'); openActiveChatContextInfo(); } }
-        function resetChatWindow() { document.getElementById('activeChatAv').style.display='none'; document.getElementById('activeChatTitle').innerText=t('select_chat'); document.getElementById('activeChatStatus').innerText=""; document.getElementById('chatMessagesBox').innerHTML=""; currentActiveChat=null; backToSidebarOnMobile(); renderChatLists(); }
+        function resetChatWindow() {
+            [
+                ['activeChatAv', el => el.style.display = 'none'],
+                ['activeChatTitle', el => el.innerText = t('select_chat')],
+                ['activeChatStatus', el => el.innerText = ""],
+                ['chatMessagesBox', el => el.innerHTML = ""]
+            ].forEach(([id, fn]) => {
+                const el = document.getElementById(id);
+                if(el) fn(el);
+            });
+            currentActiveChat = null;
+            backToSidebarOnMobile();
+            renderChatLists();
+        }
+   
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
     </script>
 </body>
