@@ -222,39 +222,39 @@
 
     <div id="tabManagerModal" class="modal-overlay">
         <div class="modal-card">
-            <h3 style="margin-top:0; color:var(--accent);" data-i18n="manage_tabs">Управление вкладками ⚙️</h3>
+            <h3 style="margin-top:0; color:var(--accent);" data-i18n="manage_tabs">Manage Tabs ⚙️</h3>
             <div id="tabManageList"></div>
             <hr style="border-color:var(--border-color); margin:15px 0;">
-            <h4 data-i18n="add_custom_tab">Добавить кастомную вкладку:</h4>
-            <input type="text" id="newTabNameInp" placeholder="Название вкладки" data-i18n-placeholder="tab_name">
-            <button class="success" onclick="executeAddCustomTab()" data-i18n="add_tab_btn">Добавить вкладку</button>
-            <button class="secondary" style="margin-top:10px;" onclick="closeModal('tabManagerModal')" data-i18n="done">Готово</button>
+            <h4 data-i18n="add_custom_tab">Add Custom Tab:</h4>
+            <input type="text" id="newTabNameInp" placeholder="Tab Name" data-i18n-placeholder="tab_name">
+            <button class="success" onclick="executeAddCustomTab()" data-i18n="add_tab_btn">Add Tab</button>
+            <button class="secondary" style="margin-top:10px;" onclick="closeModal('tabManagerModal')" data-i18n="done">Done</button>
         </div>
     </div>
 
     <div id="myProfileModal" class="modal-overlay">
         <div class="modal-card">
-            <h3 style="margin-top:0; text-align:center;" data-i18n="my_profile">Мой Профиль</h3>
+            <h3 style="margin-top:0; text-align:center;" data-i18n="my_profile">My Profile</h3>
             <p id="myModalEmailDisplay" style="text-align:center; color:var(--text-muted); font-size:13px; margin:-10px 0 15px 0;"></p>
             <img id="myModalAvPreview" src="" style="width:80px; height:80px; border-radius:50%; display:block; margin:0 auto 15px; object-fit:cover;">
-            <input type="text" id="myModalNick" placeholder="Никнейм" data-i18n-placeholder="nickname">
-            <input type="text" id="myModalAvUrl" placeholder="URL аватарки" data-i18n-placeholder="avatar_url">
-            <textarea id="myModalBio" placeholder="О себе..." data-i18n-placeholder="about_me"></textarea>
-            <button class="success" onclick="saveMyProfileData()" data-i18n="save_profile">Сохранить профиль</button>
+            <input type="text" id="myModalNick" placeholder="Nickname" data-i18n-placeholder="nickname">
+            <input type="text" id="myModalAvUrl" placeholder="Avatar URL" data-i18n-placeholder="avatar_url">
+            <textarea id="myModalBio" placeholder="About me..." data-i18n-placeholder="about_me"></textarea>
+            <button class="success" onclick="saveMyProfileData()" data-i18n="save_profile">Save Profile</button>
             
             <hr style="border-color:var(--border-color); margin:20px 0;">
-            <h4 style="margin:0 0 10px 0; color:var(--accent);" data-i18n="active_sessions">Активные сессии 🖥️</h4>
+            <h4 style="margin:0 0 10px 0; color:var(--accent);" data-i18n="active_sessions">Active Sessions 🖥️</h4>
             <div id="sessionsListContainer" style="max-height:120px; overflow-y:auto; margin-bottom:10px; border:1px solid var(--border-color); padding:6px; border-radius:8px;"></div>
             
-            <h4 style="margin:10px 0 5px 0; color:var(--danger);" data-i18n="blacklist">Чёрный список 🚫</h4>
+            <h4 style="margin:10px 0 5px 0; color:var(--danger);" data-i18n="blacklist">Blacklist 🚫</h4>
             <div id="myBlacklistContainer" style="max-height:100px; overflow-y:auto; border:1px solid var(--border-color); padding:6px; border-radius:8px; margin-bottom:10px;"></div>
 
-            <button class="danger" onclick="executeClearAppCache()" style="background:#dc2626; margin-bottom: 5px;">🗑️ <span data-i18n="clear_cache">Очистить кэш приложения</span></button>
+            <button class="danger" onclick="executeClearAppCache()" style="background:#dc2626; margin-bottom: 5px;">🗑️ <span data-i18n="clear_cache">Clear App Cache</span></button>
 
             <hr style="border-color:var(--border-color); margin:20px 0;">
-            <div style="text-align:center; color:var(--text-muted); font-size:12px; margin-bottom:10px;"><span data-i18n="version">Версия</span>: VChat 1.4.1</div>
+            <div style="text-align:center; color:var(--text-muted); font-size:12px; margin-bottom:10px;"><span data-i18n="version">Version</span>: VChat 1.4.2</div>
             <div style="display:block; margin-bottom:12px; font-size:13px;">
-                <b style="display:block; margin-bottom:6px;" data-i18n="language">Язык интерфейса:</b>
+                <b style="display:block; margin-bottom:6px;" data-i18n="language">Language:</b>
                 <div class="custom-select-wrapper">
                     <div class="custom-select-trigger" onclick="toggleLanguageDropdown()" id="languageTrigger">
                         <span id="languageLabel">🇬🇧 English</span>
@@ -273,18 +273,18 @@
                     </div>
                 </div>
             </div>
-            <button class="secondary" onclick="executeSignOut()" data-i18n="logout">Выйти из аккаунта</button>
-            <button class="danger" onclick="executeDeleteAccountPermanently()" style="background: #b91c1c; margin-top: 8px;" data-i18n="delete_account">⚠️ УДАЛИТЬ АККАУНТ НАВСЕГДА</button>
-            <button class="secondary" style="margin-top:12px;" onclick="closeModal('myProfileModal')" data-i18n="close">Закрыть</button>
+            <button class="secondary" onclick="executeSignOut()" data-i18n="logout">Logout</button>
+            <button class="danger" onclick="executeDeleteAccountPermanently()" style="background: #b91c1c; margin-top: 8px;" data-i18n="delete_account">⚠️ DELETE ACCOUNT FOREVER</button>
+            <button class="secondary" style="margin-top:12px;" onclick="closeModal('myProfileModal')" data-i18n="close">Close</button>
         </div>
     </div>
 
     <div id="codeViewerModal" class="modal-overlay">
         <div class="modal-card" style="width:600px; max-width:90vw;">
-            <h3 style="margin-top:0; color:var(--accent);" data-i18n="view_doc">Просмотр документа 📝</h3>
+            <h3 style="margin-top:0; color:var(--accent);" data-i18n="view_doc">View Document 📝</h3>
             <pre id="fullCodeDisplay" style="background:var(--bg-input); padding:15px; border-radius:10px; overflow:auto; font-family:monospace; font-size:13px; max-height:350px; border:1px solid var(--border-color); white-space:pre-wrap; word-break:break-all;"></pre>
-            <button class="success" id="copyCodeModalBtn" data-i18n="copy_all_text">📋 Скопировать весь text</button>
-            <button class="secondary" style="margin-top:8px;" onclick="closeModal('codeViewerModal')" data-i18n="close">Закрыть</button>
+            <button class="success" id="copyCodeModalBtn" data-i18n="copy_all_text">📋 Copy all text</button>
+            <button class="secondary" style="margin-top:8px;" onclick="closeModal('codeViewerModal')" data-i18n="close">Close</button>
         </div>
     </div>
 
@@ -296,85 +296,85 @@
             <div id="ctxDescriptionContainer" style="text-align:center; margin:10px 0; color:var(--text-main); font-style:italic; font-size:14px;"></div>
             
             <div id="ctxUserBlock" style="display:none;">
-                <button id="addContactBtn" class="success" onclick="executeToggleContact()">➕ Добавить в Контакты</button>
-                <input type="text" id="localCustomName" placeholder="Локальное имя контакта" data-i18n-placeholder="local_contact_name">
-                <button class="secondary" onclick="saveLocalContactName()" data-i18n="save_name">Сохранить имя</button>
-                <button id="blockToggleBtn" class="danger" onclick="executeToggleBlockUser()">Блокировать</button>
+                <button id="addContactBtn" class="success" onclick="executeToggleContact()">➕ Add Contact</button>
+                <input type="text" id="localCustomName" placeholder="Local Contact Name" data-i18n-placeholder="local_contact_name">
+                <button class="secondary" onclick="saveLocalContactName()" data-i18n="save_name">Save name</button>
+                <button id="blockToggleBtn" class="danger" onclick="executeToggleBlockUser()">Block</button>
             </div>
 
             <div id="ctxGroupBlock" style="display:none; width: 100%;">
-                <h4 style="margin:10px 0 5px 0;" data-i18n="group_settings">Настройки группы:</h4>
-                <input type="text" id="editGrpNameInp" placeholder="Изменить название группы" data-i18n-placeholder="edit_grp_name">
-                <input type="text" id="editGrpAvInp" placeholder="Изменить URL аватарки" data-i18n-placeholder="edit_grp_avatar">
-                <textarea id="editGrpDescInp" placeholder="Изменить описание группы" rows="2" data-i18n-placeholder="edit_grp_desc"></textarea>
+                <h4 style="margin:10px 0 5px 0;" data-i18n="group_settings">Group Settings:</h4>
+                <input type="text" id="editGrpNameInp" placeholder="Edit group name" data-i18n-placeholder="edit_grp_name">
+                <input type="text" id="editGrpAvInp" placeholder="Edit avatar URL" data-i18n-placeholder="edit_grp_avatar">
+                <textarea id="editGrpDescInp" placeholder="Edit group description" rows="2" data-i18n-placeholder="edit_grp_desc"></textarea>
                 
-                <h4 style="margin:10px 0 5px 0; color:var(--warning);" data-i18n="auto_mod">Автомодерация:</h4>
-                <input type="text" id="editGrpBannedWordsInp" placeholder="Запрещенные слова (через запятую)" data-i18n-placeholder="banned_words_placeholder">
+                <h4 style="margin:10px 0 5px 0; color:var(--warning);" data-i18n="auto_mod">Auto-moderation:</h4>
+                <input type="text" id="editGrpBannedWordsInp" placeholder="Banned words (comma separated)" data-i18n-placeholder="banned_words_placeholder">
                 
-                <label style="font-size:12px; color:var(--text-muted); display:block; margin-top:8px;" data-i18n="slow_mode">Замедление чата (анти-спам):</label>
+                <label style="font-size:12px; color:var(--text-muted); display:block; margin-top:8px;" data-i18n="slow_mode">Slow mode (anti-spam):</label>
                 <div class="custom-select-wrapper">
                     <div class="custom-select-trigger" id="cooldownTrigger" onclick="toggleCustomDropdown(event)">
-                        <span id="selectedCooldown">Выкл</span>
+                        <span id="selectedCooldown">Off</span>
                         <span class="arrow">▼</span>
                     </div>
                     <div class="custom-options" id="cooldownOptions">
-                        <div onclick="selectCooldown(0, 'Выкл')">Выкл</div>
-                        <div onclick="selectCooldown(5, '5 секунд')">5 секунд</div>
-                        <div onclick="selectCooldown(10, '10 секунд')">10 секунд</div>
-                        <div onclick="selectCooldown(30, '30 секунд')">30 секунд</div>
-                        <div onclick="selectCooldown(60, '1 минута')">1 минута</div>
-                        <div onclick="selectCooldown(-1, 'Свое время...')">Свое время...</div>
+                        <div onclick="selectCooldown(0, 'Off')">Off</div>
+                        <div onclick="selectCooldown(5, '5 seconds')">5 seconds</div>
+                        <div onclick="selectCooldown(10, '10 seconds')">10 seconds</div>
+                        <div onclick="selectCooldown(30, '30 seconds')">30 seconds</div>
+                        <div onclick="selectCooldown(60, '1 minute')">1 minute</div>
+                        <div onclick="selectCooldown(-1, 'Custom time...')">Custom time...</div>
                     </div>
                 </div>
-                <input type="number" id="editGrpCooldownCustom" style="display:none; border-radius: 15px; margin-top: 6px;" placeholder="Введи секунды" data-i18n-placeholder="enter_seconds">
+                <input type="number" id="editGrpCooldownCustom" style="display:none; border-radius: 15px; margin-top: 6px;" placeholder="Enter seconds" data-i18n-placeholder="enter_seconds">
 
                 <div id="ownerAdminPermsBlock" style="display:none; background:var(--bg-main); padding:12px; border-radius:10px; border:1px solid var(--border-color); margin:10px 0; text-align:left;">
-                    <h4 style="margin:0 0 8px 0; color:var(--accent); font-size:14px;" data-i18n="admin_perms">Права Админов 🛡️</h4>
-                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:6px;"><input type="checkbox" id="permKickCb" style="width:auto; margin:0;"> <span data-i18n="can_kick">Могут кикать</span></label>
-                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:6px;"><input type="checkbox" id="permBanCb" style="width:auto; margin:0;"> <span data-i18n="can_ban">Могут банить</span></label>
-                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:6px;"><input type="checkbox" id="permMetaCb" style="width:auto; margin:0;"> <span data-i18n="can_edit_meta">Могут менять настройки/кулдаун</span></label>
-                    <label style="display:flex; align-items:center; gap:8px; font-size:13px;"><input type="checkbox" id="permInviteCb" style="width:auto; margin:0;"> <span data-i18n="can_invite">Могут приглашать участников</span></label>
+                    <h4 style="margin:0 0 8px 0; color:var(--accent); font-size:14px;" data-i18n="admin_perms">Admin Permissions 🛡️</h4>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:6px;"><input type="checkbox" id="permKickCb" style="width:auto; margin:0;"> <span data-i18n="can_kick">Can kick</span></label>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:6px;"><input type="checkbox" id="permBanCb" style="width:auto; margin:0;"> <span data-i18n="can_ban">Can ban</span></label>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; margin-bottom:6px;"><input type="checkbox" id="permMetaCb" style="width:auto; margin:0;"> <span data-i18n="can_edit_meta">Can edit settings</span></label>
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px;"><input type="checkbox" id="permInviteCb" style="width:auto; margin:0;"> <span data-i18n="can_invite">Can invite</span></label>
                 </div>
 
-                <button class="success" style="margin-top:10px;" onclick="executeUpdateGroupMeta()" data-i18n="update_group_data">Обновить данные группы</button>
+                <button class="success" style="margin-top:10px;" onclick="executeUpdateGroupMeta()" data-i18n="update_group_data">Update group data</button>
                 
-                <h4 style="margin:15px 0 5px 0;" data-i18n="members_management">Участники и управление:</h4>
+                <h4 style="margin:15px 0 5px 0;" data-i18n="members_management">Members & Management:</h4>
                 <div id="groupMembersList" style="max-height:180px; overflow-y:auto; border:1px solid var(--border-color); border-radius:6px; padding:6px; margin-bottom:10px; background:var(--bg-main);"></div>
                 
-                <input type="email" id="inviteEmailInp" placeholder="Email или Ник" data-i18n-placeholder="invite_placeholder">
-                <button class="success" onclick="inviteUserToGroup()" data-i18n="invite_btn">Пригласить участника</button>
+                <input type="email" id="inviteEmailInp" placeholder="Email or Nickname" data-i18n-placeholder="invite_placeholder">
+                <button class="success" onclick="inviteUserToGroup()" data-i18n="invite_btn">Invite member</button>
                 
-                <h4 style="margin:15px 0 5px 0; color:var(--danger);" data-i18n="banned_in_group">Заблокированные в группе:</h4>
+                <h4 style="margin:15px 0 5px 0; color:var(--danger);" data-i18n="banned_in_group">Banned in group:</h4>
                 <div id="groupBannedList" style="max-height:120px; overflow-y:auto; border:1px solid var(--border-color); border-radius:6px; padding:6px; margin-bottom:10px; background:var(--bg-main);"></div>
 
-                <button class="danger" style="margin-top:15px;" onclick="leaveCurrentGroup()" data-i18n="leave_group">Покинуть группу</button>
-                <button id="deleteGroupBtn" class="danger" style="background:#b91c1c; display:none; margin-top:8px;" onclick="deleteCurrentGroup()" data-i18n="delete_group_perm">Удалить группу навсегда</button>
+                <button class="danger" style="margin-top:15px;" onclick="leaveCurrentGroup()" data-i18n="leave_group">Leave group</button>
+                <button id="deleteGroupBtn" class="danger" style="background:#b91c1c; display:none; margin-top:8px;" onclick="deleteCurrentGroup()" data-i18n="delete_group_perm">Delete group forever</button>
             </div>
-            <button class="secondary" style="margin-top:15px;" onclick="closeModal('contextInfoModal')" data-i18n="close">Закрыть</button>
+            <button class="secondary" style="margin-top:15px;" onclick="closeModal('contextInfoModal')" data-i18n="close">Close</button>
         </div>
     </div>
 
     <div id="urlAttachmentModal" class="modal-overlay">
         <div class="modal-card">
-            <h3 data-i18n="attach_media">Прикрепить медиа 🌐</h3>
-            <input type="text" id="urlAttachInp" placeholder="Прямая ссылка на картинку" data-i18n-placeholder="url_placeholder">
-            <button class="success" onclick="executeConfirmUrlAttachment()" data-i18n="attach_btn">Прикрепить</button>
-            <button class="secondary" onclick="closeModal('urlAttachmentModal')" data-i18n="cancel">Отмена</button>
+            <h3 data-i18n="attach_media">Attach media 🌐</h3>
+            <input type="text" id="urlAttachInp" placeholder="Direct image link" data-i18n-placeholder="url_placeholder">
+            <button class="success" onclick="executeConfirmUrlAttachment()" data-i18n="attach_btn">Attach</button>
+            <button class="secondary" onclick="closeModal('urlAttachmentModal')" data-i18n="cancel">Cancel</button>
         </div>
     </div>
     <div id="textAttachmentModal" class="modal-overlay">
         <div class="modal-card">
-            <h3 data-i18n="create_text_doc">Создать текстовый док 📝</h3>
-            <textarea id="textAttachInp" placeholder="Текст/Код..." rows="6" data-i18n-placeholder="text_code"></textarea>
-            <button class="success" onclick="executeConfirmTextAttachment()" data-i18n="attach_btn">Прикрепить</button>
-            <button class="secondary" onclick="closeModal('textAttachmentModal')" data-i18n="cancel">Отмена</button>
+            <h3 data-i18n="create_text_doc">Create text doc 📝</h3>
+            <textarea id="textAttachInp" placeholder="Text / Code..." rows="6" data-i18n-placeholder="text_code"></textarea>
+            <button class="success" onclick="executeConfirmTextAttachment()" data-i18n="attach_btn">Attach</button>
+            <button class="secondary" onclick="closeModal('textAttachmentModal')" data-i18n="cancel">Cancel</button>
         </div>
     </div>
     <div id="forwardModal" class="modal-overlay">
         <div class="modal-card">
-            <h3 data-i18n="forward_msg">Переслать сообщение</h3>
+            <h3 data-i18n="forward_msg">Forward message</h3>
             <div id="forwardListContainer" style="max-height:200px; overflow-y:auto; border:1px solid var(--border-color); border-radius:8px;"></div>
-            <button class="secondary" style="margin-top:10px;" onclick="closeModal('forwardModal')" data-i18n="cancel">Отмена</button>
+            <button class="secondary" style="margin-top:10px;" onclick="closeModal('forwardModal')" data-i18n="cancel">Cancel</button>
         </div>
     </div>
     <div id="mediaViewerModal" class="modal-overlay" onclick="closeModal('mediaViewerModal')" style="background:rgba(0,0,0,0.95);"><img id="fullSizeImg" src="" style="max-width:90%; max-height:90%; border-radius:8px;"></div>
@@ -391,7 +391,7 @@
                     <button class="secondary" style="padding:6px; margin:0; width:34px; height:34px;" onclick="executeToggleTheme()" id="themeBtn">🌙</button>
                 </div>
             </div>
-            <div style="padding:10px 14px;"><input type="text" id="searchBarInp" placeholder="Поиск..." data-i18n-placeholder="search" oninput="renderChatLists()" style="margin:0;"></div>
+            <div style="padding:10px 14px;"><input type="text" id="searchBarInp" placeholder="Search..." data-i18n-placeholder="search" oninput="renderChatLists()" style="margin:0;"></div>
             
             <div class="tabs-wrapper">
                 <div class="tabs-row" id="tabsRowElement"></div>
@@ -432,7 +432,7 @@
                     </div>
                 </div>
                 <input type="file" id="fileInputEngine" accept="image/*" style="display:none;" onchange="processLocalFileSelection(event)">
-                <textarea id="messageInputEngine" placeholder="Message..." data-i18n-placeholder="send_message" rows="1" style="margin:0; resize:none;" onkeydown="handleInputKeyPress(event)"></textarea>
+                <textarea id="messageInputEngine" placeholder="Send a message..." data-i18n-placeholder="send_message" rows="1" style="margin:0; resize:none;" onkeydown="handleInputKeyPress(event)"></textarea>
                 <button id="sendMsgBtn" onclick="executeSendMessage()" style="width:50px; height:42px; margin:0; background:var(--accent); border-radius:10px;">➤</button>
             </div>
         </main>
@@ -447,10 +447,8 @@
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const realtimeDb = firebase.database(), appAuth = firebase.auth();
 
-        // 1. АНГЛИЙСКИЙ ПО ДЕФОЛТУ
         let currentLanguage = localStorage.getItem('vchat_language') || 'en';
         
-        // 2. ПОЛНЫЙ СЛОВАРЬ (ДОБАВЛЕНЫ ВСЕ PROMPT И ЗАГЛУШКИ)
         const translations = { 
             en: {login_title:"Sign In",email:"Email",password:"Password",login_btn:"Sign In",or:"or",google_login:"Sign In with Google",create_account:"Create Account",registration_title:"Registration",nickname:"Nickname",register_btn:"Register",email_sent:"Email Sent!",email_sent_desc:"Check your inbox for verification link.",check_spam:"IMPORTANT: Check spam folder!",back_to_login:"Back to Login",manage_tabs:"Manage Tabs",add_custom_tab:"Add Custom Tab",tab_name:"Tab Name",add_tab_btn:"Add Tab",done:"Done",my_profile:"My Profile",active_sessions:"Active Sessions",blacklist:"Blacklist",clear_cache:"Clear App Cache",version:"Version",chats:"Chats",contacts:"Contacts",global:"Global",groups:"Groups",search:"Search...",select_chat:"Select a chat",file_ready:"File ready",device_file:"File from Device",internet_link:"Link from Internet",text_code:"Text / Code",send_message:"Send a message...",copy:"Copy",reply:"Reply",forward:"Forward",edit:"Edit",delete:"Delete",group_chat:"Group chat",you:"You",settings:"Settings",logout:"Logout",fill_all_fields:"Fill all fields!",language:"Language", saved_notes:"Saved Notes", personal_chat:"Personal Chat", group:"Group", banned_label:" [Banned 🚫]", cloud_storage:"Cloud Storage", in_blacklist:"🚫 In Blacklist", online:"Online 🟢", offline:"Offline 🔴", copied:"Copied!", unblocked:"Unblocked!", close:"Close", save_profile:"Save Profile", avatar_url:"Avatar URL", about_me:"About me...", delete_account:"⚠️ DELETE ACCOUNT FOREVER", view_doc:"View Document 📝", copy_all_text:"📋 Copy all text", local_contact_name:"Local Contact Name", save_name:"Save name", group_settings:"Group Settings", auto_mod:"Auto-moderation:", slow_mode:"Slow mode (anti-spam):", enter_seconds:"Enter seconds", admin_perms:"Admin Permissions 🛡️", can_kick:"Can kick", can_ban:"Can ban", can_edit_meta:"Can edit settings", can_invite:"Can invite", update_group_data:"Update group data", members_management:"Members & Management:", invite_placeholder:"Email or Nickname", invite_btn:"Invite member", banned_in_group:"Banned in group:", leave_group:"Leave group", delete_group_perm:"Delete group forever", attach_media:"Attach media 🌐", url_placeholder:"Direct image link", attach_btn:"Attach", cancel:"Cancel", create_text_doc:"Create text doc 📝", forward_msg:"Forward message", edit_grp_name:"Edit group name", edit_grp_avatar:"Edit avatar URL", edit_grp_desc:"Edit group description", banned_words_placeholder:"Banned words (comma separated)", current_session:"Current", add_contact:"Add Contact", remove_contact:"Remove Contact", block_user:"Block", unblock_user:"Unblock", unblock_to_send:"Unblock user to send messages!", spam_wait:"Anti-spam! Wait", banned_words_warning:"Message contains banned words!", forwarded_success:"Successfully forwarded!", no_kick_perms:"You don't have kick perms!", no_ban_perms:"You don't have ban perms!", no_unban_perms:"You don't have unban perms!", no_edit_perms:"You don't have edit perms!", no_invite_perms:"You don't have invite perms!", user_banned_in_group:"User is banned here! Unban first.", member_added:"Member added!", user_not_found:"User not found.", added:"Added!", delete_msg_confirm:"Delete message?", kick_confirm:"Kick member?", ban_confirm:"Ban member?", leave_confirm:"Leave group?", delete_group_confirm:"Delete group completely?", remove_contact_confirm:"Remove from contacts?", block_confirm:"Block user?", clear_cache_confirm:"Clear local cache?", delete_confirm:"ARE YOU SURE?! This deletes your account forever!", deleted_alert:"Account deleted!", default_user:"User", default_bio:"Hey!", new_account_bio:"New account", error_msg:"Error", group_name_prompt:"Group name:", group_desc_prompt:"Description:", email_hidden:"Email hidden", empty_bio:"Empty.", no_description:"No description", unknown_user:"Unknown"},
             ru: {login_title:"Вход в VChat",email:"Ваш Email",password:"Пароль",login_btn:"Войти",or:"или",google_login:"Вход через Google",create_account:"Создать аккаунт",registration_title:"Регистрация",nickname:"Имя пользователя",register_btn:"Зарегистрироваться",email_sent:"Письмо отправлено!",email_sent_desc:"Мы отправили ссылку на почту.",check_spam:"ВАЖНО: Проверьте папку «Спам»!",back_to_login:"Вернуться",manage_tabs:"Управление вкладками",add_custom_tab:"Добавить вкладку",tab_name:"Название",add_tab_btn:"Добавить",done:"Готово",my_profile:"Мой профиль",active_sessions:"Активные сеансы",blacklist:"Чёрный список",clear_cache:"Очистить кэш",version:"Версия",chats:"Чаты",contacts:"Контакты",global:"Общее",groups:"Группы",search:"Поиск...",select_chat:"Выберите чат",file_ready:"Файл готов",device_file:"Файл с устройства",internet_link:"Ссылка из интернета",text_code:"Текст / Код",send_message:"Сообщение...",copy:"Копировать",reply:"Ответить",forward:"Переслать",edit:"Изменить",delete:"Удалить",group_chat:"Групповой чат",you:"Вы",settings:"Настройки",logout:"Выход",fill_all_fields:"Заполните всё!",language:"Язык", saved_notes:"Мои заметки", personal_chat:"Личный диалог", group:"Группа", banned_label:" [В ЧС 🚫]", cloud_storage:"Облачное хранилище", in_blacklist:"🚫 В ЧС", online:"Онлайн 🟢", offline:"Оффлайн 🔴", copied:"Скопировано!", unblocked:"Разблокирован!", close:"Закрыть", save_profile:"Сохранить", avatar_url:"URL аватарки", about_me:"О себе...", delete_account:"⚠️ УДАЛИТЬ АККАУНТ", view_doc:"Просмотр 📝", copy_all_text:"📋 Скопировать", local_contact_name:"Локальное имя", save_name:"Сохранить", group_settings:"Настройки:", auto_mod:"Автомодерация:", slow_mode:"Замедление:", enter_seconds:"Секунды", admin_perms:"Права Админов 🛡️", can_kick:"Могут кикать", can_ban:"Могут банить", can_edit_meta:"Настройки", can_invite:"Приглашения", update_group_data:"Обновить данные", members_management:"Участники:", invite_placeholder:"Email или Ник", invite_btn:"Пригласить", banned_in_group:"Заблокированные:", leave_group:"Покинуть группу", delete_group_perm:"Удалить группу", attach_media:"Прикрепить 🌐", url_placeholder:"Ссылка на картинку", attach_btn:"Прикрепить", cancel:"Отмена", create_text_doc:"Текстовый док 📝", forward_msg:"Переслать", edit_grp_name:"Название группы", edit_grp_avatar:"URL аватарки", edit_grp_desc:"Описание", banned_words_placeholder:"Запрещенные слова", current_session:"Текущее", add_contact:"Добавить в контакты", remove_contact:"Удалить из контактов", block_user:"Блокировать", unblock_user:"Разблокировать", unblock_to_send:"Разблокируйте для отправки!", spam_wait:"Анти-спам! Ждите", banned_words_warning:"В сообщении запрещенные слова!", forwarded_success:"Переслано!", no_kick_perms:"Нет прав на исключение!", no_ban_perms:"Нет прав на бан!", no_unban_perms:"Нет прав на разбан!", no_edit_perms:"Нет прав на настройки!", no_invite_perms:"Нет прав приглашать!", user_banned_in_group:"В чёрном списке группы!", member_added:"Участник добавлен!", user_not_found:"Не найден.", added:"Добавлено!", delete_msg_confirm:"Удалить сообщение?", kick_confirm:"Исключить?", ban_confirm:"Забанить?", leave_confirm:"Выйти из группы?", delete_group_confirm:"Точно удалить группу?", remove_contact_confirm:"Удалить из контактов?", block_confirm:"В чёрный список?", clear_cache_confirm:"Очистить кэш?", delete_confirm:"ВЫ УВЕРЕНЫ?! Аккаунт удалится навсегда!", deleted_alert:"Аккаунт удален!", default_user:"Пользователь", default_bio:"Привет!", new_account_bio:"Новый аккаунт", error_msg:"Ошибка", group_name_prompt:"Название группы:", group_desc_prompt:"Описание:", email_hidden:"Email скрыт", empty_bio:"Пусто.", no_description:"Нет описания", unknown_user:"Неизвестный"},
@@ -466,7 +464,6 @@
         
         const languageLabels = { en: '🇬🇧 English', ru: '🇷🇺 Русский', ru_slang: '🇷🇺 Casual', uz: '🇺🇿 Ўзбекча', es: '🇪🇸 Español', fr: '🇫🇷 Français', de: '🇩🇪 Deutsch', it: '🇮🇹 Italiano', zh: '🇨🇳 中文' };
         
-        // 3. ФУНКЦИИ ПЕРЕКЛЮЧЕНИЯ ЯЗЫКА (ДЛЯ ПРОФИЛЯ И АВТОРИЗАЦИИ)
         function toggleLanguageDropdown() {
             document.getElementById('languageOptions').classList.toggle('show');
             document.getElementById('languageTrigger').classList.toggle('open');
@@ -488,6 +485,7 @@
             renderChatLists();
             updateActiveChatStatus();
             if(document.getElementById('contextInfoModal').style.display === 'flex') openActiveChatContextInfo();
+            if(document.getElementById('tabManagerModal').style.display === 'flex') openTabManagerModal();
             
             document.getElementById('languageOptions').classList.remove('show');
             document.getElementById('languageTrigger').classList.remove('open');
@@ -502,7 +500,6 @@
             document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.getAttribute('data-i18n-placeholder')); });
         }
 
-        // Применяем язык сразу при старте (чтобы английский загружался мгновенно)
         document.getElementById('languageLabel').innerText = languageLabels[currentLanguage];
         if(document.getElementById('authLanguageLabel')) document.getElementById('authLanguageLabel').innerText = languageLabels[currentLanguage];
         updateUILanguage();
@@ -512,8 +509,9 @@
         let loadedMessagesMap = {}, activeEditMessageKey = null, activeReplyMessageData = null, targetForwardMessageData = null, base64CompressedAttachment = null, pendingTextSnippet = null;
         let groupLastSentMap = {}; 
         
-        function getDefaultTabs() { return [{id:'chats', name: t('chats')}, {id:'contacts', name: t('contacts')}, {id:'global', name: t('global')}, {id:'groups', name: t('groups')}]; }
-        // Функция определения устройства
+        // ФИКС ВКЛАДОК: Храним только ключи
+        function getDefaultTabs() { return [{id:'chats', name: 'chats'}, {id:'contacts', name: 'contacts'}, {id:'global', name: 'global'}, {id:'groups', name: 'groups'}]; }
+        
         function detectDevice() {
             const ua = navigator.userAgent;
             if (ua.includes("Windows")) {
@@ -588,8 +586,29 @@
         function executeDeleteAccountPermanently() { const currentUser = appAuth.currentUser; if (!currentUser) return; if (confirm(t('delete_confirm'))) { realtimeDb.ref(`users/${activeUserId}`).remove().then(() => currentUser.delete()).then(() => { alert(t('deleted_alert')); localStorage.clear(); location.reload(); }).catch(e => { alert(t('error_msg') + ": " + e.message); }); } }
         function switchAuthView(reg) { document.getElementById('loginCard').style.display = reg?'none':'block'; document.getElementById('registerCard').style.display = reg?'block':'none'; document.getElementById('regFormInputs').style.display = 'block'; document.getElementById('verifyAlertBox').style.display = 'none'; document.getElementById('regBackBtn').innerText = t('back_to_login'); }
 
-        function renderTabsRow() { const row = document.getElementById('tabsRowElement'); row.innerHTML = ""; globalCache.tabs.forEach((tData, index) => { const el = document.createElement('div'); el.className = `tab-item ${activeSidebarTab === tData.id ? 'active' : ''}`; el.innerText = t(tData.name) || tData.name; el.onclick = () => { activeSidebarTab = tData.id; renderTabsRow(); renderChatLists(); }; row.appendChild(el); }); }
-        function openTabManagerModal() { const mList = document.getElementById('tabManageList'); mList.innerHTML = ""; globalCache.tabs.forEach((tData, i) => { mList.innerHTML += `<div class="tab-manage-item"><span><b>${escapeHTML(t(tData.name) || tData.name)}</b></span><div style="display:flex; gap:4px;"><button style="padding:4px 8px; margin:0; width:auto;" onclick="moveTab(${i}, -1)">▲</button><button style="padding:4px 8px; margin:0; width:auto;" onclick="moveTab(${i}, 1)">▼</button><button class="danger" style="padding:4px 8px; margin:0; width:auto;" onclick="deleteTab(${i})">🗑️</button></div></div>`; }); document.getElementById('tabManagerModal').style.display = 'flex'; }
+        // ФИКС РЕНДЕРА ВКЛАДОК (с маппером старых названий)
+        function renderTabsRow() { 
+            const row = document.getElementById('tabsRowElement'); row.innerHTML = ""; 
+            const oldNamesFix = { "Чаты": "chats", "Контакты": "contacts", "Общее": "global", "Группы": "groups", "Chats": "chats", "Contacts": "contacts", "Global": "global", "Groups": "groups" };
+            globalCache.tabs.forEach((tData, index) => { 
+                const el = document.createElement('div'); el.className = `tab-item ${activeSidebarTab === tData.id ? 'active' : ''}`; 
+                let safeKey = oldNamesFix[tData.name] || tData.name;
+                el.innerText = t(safeKey); 
+                el.onclick = () => { activeSidebarTab = tData.id; renderTabsRow(); renderChatLists(); }; 
+                row.appendChild(el); 
+            }); 
+        }
+        
+        function openTabManagerModal() { 
+            const mList = document.getElementById('tabManageList'); mList.innerHTML = ""; 
+            const oldNamesFix = { "Чаты": "chats", "Контакты": "contacts", "Общее": "global", "Группы": "groups", "Chats": "chats", "Contacts": "contacts", "Global": "global", "Groups": "groups" };
+            globalCache.tabs.forEach((tData, i) => { 
+                let safeKey = oldNamesFix[tData.name] || tData.name;
+                mList.innerHTML += `<div class="tab-manage-item"><span><b>${escapeHTML(t(safeKey))}</b></span><div style="display:flex; gap:4px;"><button style="padding:4px 8px; margin:0; width:auto;" onclick="moveTab(${i}, -1)">▲</button><button style="padding:4px 8px; margin:0; width:auto;" onclick="moveTab(${i}, 1)">▼</button><button class="danger" style="padding:4px 8px; margin:0; width:auto;" onclick="deleteTab(${i})">🗑️</button></div></div>`; 
+            }); 
+            document.getElementById('tabManagerModal').style.display = 'flex'; 
+        }
+        
         function moveTab(index, dir) { let arr = [...globalCache.tabs]; const target = index + dir; if(target >= 0 && target < arr.length) { [arr[index], arr[target]] = [arr[target], arr[index]]; saveTabsStructure(arr); } }
         function deleteTab(index) { let arr = [...globalCache.tabs]; arr.splice(index, 1); saveTabsStructure(arr); }
         function executeAddCustomTab() { const name = document.getElementById('newTabNameInp').value.trim(); if(!name) return; const id = 'custom_' + Date.now(); let arr = [...globalCache.tabs, {id, name}]; document.getElementById('newTabNameInp').value = ""; saveTabsStructure(arr); }
@@ -672,15 +691,12 @@
 
         function toggleClipDropdown(e) { e.stopPropagation(); const d = document.getElementById('clipDropdownMenu'); d.style.display = d.style.display === 'flex' ? 'none' : 'flex'; }
         
-        // ЗАКРЫВАЕМ ВСЕ ВЫПАДАШКИ ПО КЛИКУ ВНЕ
         window.onclick = function(event) {
             if (!event.target.closest('.custom-select-wrapper')) {
                 const dropdowns = document.getElementsByClassName("custom-options"); for (let i = 0; i < dropdowns.length; i++) { if (dropdowns[i].classList.contains('show')) { dropdowns[i].classList.remove('show'); } }
                 const triggers = document.getElementsByClassName("custom-select-trigger"); for (let i = 0; i < triggers.length; i++) { triggers[i].classList.remove('open'); }
             }
-            if (!event.target.closest('.clip-container') && document.getElementById('clipDropdownMenu')) {
-                document.getElementById('clipDropdownMenu').style.display = 'none';
-            }
+            if (!event.target.closest('.clip-container') && document.getElementById('clipDropdownMenu')) { document.getElementById('clipDropdownMenu').style.display = 'none'; }
         }
 
         function triggerDeviceFileSelect() { document.getElementById('fileInputEngine').click(); }
@@ -719,10 +735,10 @@
             } cancelCurrentContextAction();
         }
         function cancelCurrentContextAction() { activeEditMessageKey = null; activeReplyMessageData = null; pendingTextSnippet = null; document.getElementById('contextActionBar').style.display='none'; document.getElementById('messageInputEngine').value=""; clearPendingAttachmentData(); }
-        function initEditMessageContext(k) { activeEditMessageKey = k; document.getElementById('contextActionBar').style.display='flex'; document.getElementById('contextActionTitle').innerText="РЕДАКТИРОВАНИЕ"; document.getElementById('contextActionText').innerText=loadedMessagesMap[k].txt; document.getElementById('messageInputEngine').value=loadedMessagesMap[k].txt; }
-        function initReplyMessageContext(k) { activeReplyMessageData = { msgKey: k, author: loadedMessagesMap[k].snick, text: loadedMessagesMap[k].txt || "[Attachment]" }; document.getElementById('contextActionBar').style.display='flex'; document.getElementById('contextActionTitle').innerText=`ОТВЕТ ДЛЯ ${activeReplyMessageData.author.toUpperCase()}`; document.getElementById('contextActionText').innerText=activeReplyMessageData.text; }
+        function initEditMessageContext(k) { activeEditMessageKey = k; document.getElementById('contextActionBar').style.display='flex'; document.getElementById('contextActionTitle').innerText="EDIT"; document.getElementById('contextActionText').innerText=loadedMessagesMap[k].txt; document.getElementById('messageInputEngine').value=loadedMessagesMap[k].txt; }
+        function initReplyMessageContext(k) { activeReplyMessageData = { msgKey: k, author: loadedMessagesMap[k].snick, text: loadedMessagesMap[k].txt || "[Attachment]" }; document.getElementById('contextActionBar').style.display='flex'; document.getElementById('contextActionTitle').innerText=`REPLY TO ${activeReplyMessageData.author.toUpperCase()}`; document.getElementById('contextActionText').innerText=activeReplyMessageData.text; }
         function initForwardMessageContext(k) { targetForwardMessageData = loadedMessagesMap[k]; document.getElementById('forwardModal').style.display='flex'; const cont = document.getElementById('forwardListContainer'); cont.innerHTML = ""; for(let uid in globalCache.users) if(uid!==activeUserId && !globalCache.blockedUsers[uid]) cont.innerHTML += `<div style="padding:10px; cursor:pointer;" onclick="executeForwardTo('${uid}','USER')">👤 ${escapeHTML(globalCache.users[uid].nickname)}</div>`; for(let gid in globalCache.groups) cont.innerHTML += `<div style="padding:10px; cursor:pointer;" onclick="executeForwardTo('${gid}','GROUP')">👥 ${escapeHTML(globalCache.groups[gid].name)}</div>`; }
-        function executeForwardTo(id, type) { const path = type==='USER' ? (activeUserId<id ? activeUserId+"_"+id : id+"_"+activeUserId) : id; let fPayload = { sid: activeUserId, snick: globalCache.users[activeUserId].nickname, txt: `[Переслано]: ${targetForwardMessageData.txt||''}`, ts: Date.now() }; if (targetForwardMessageData.code) fPayload.code = targetForwardMessageData.code; if (targetForwardMessageData.img) fPayload.img = targetForwardMessageData.img; realtimeDb.ref("msgs/"+path).push().set(fPayload); closeModal('forwardModal'); targetForwardMessageData = null; showToast(t('forwarded_success')); }
+        function executeForwardTo(id, type) { const path = type==='USER' ? (activeUserId<id ? activeUserId+"_"+id : id+"_"+activeUserId) : id; let fPayload = { sid: activeUserId, snick: globalCache.users[activeUserId].nickname, txt: `[Forwarded]: ${targetForwardMessageData.txt||''}`, ts: Date.now() }; if (targetForwardMessageData.code) fPayload.code = targetForwardMessageData.code; if (targetForwardMessageData.img) fPayload.img = targetForwardMessageData.img; realtimeDb.ref("msgs/"+path).push().set(fPayload); closeModal('forwardModal'); targetForwardMessageData = null; showToast(t('forwarded_success')); }
         function executeDeleteMessage(p, k) { if(confirm(t('delete_msg_confirm'))) realtimeDb.ref(`msgs/${p}/${k}`).remove(); }
         function handleInputKeyPress(e) { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); executeSendMessage(); } }
 
@@ -775,7 +791,7 @@
                 const g = globalCache.groups[currentActiveChat.id] || {}; document.getElementById('ctxSubtitle').innerText = t('group'); document.getElementById('ctxDescriptionContainer').innerText = g.description || t('no_description');
                 document.getElementById('ctxUserBlock').style.display = 'none'; document.getElementById('ctxGroupBlock').style.display = 'block';
                 document.getElementById('editGrpNameInp').value = g.name; document.getElementById('editGrpAvInp').value = g.avatar || ""; document.getElementById('editGrpDescInp').value = g.description || ""; document.getElementById('editGrpBannedWordsInp').value = g.bannedWords || "";
-                const cd = g.cooldown || 0; const labelMap = { 0: 'Выкл', 5: '5 секунд', 10: '10 секунд', 30: '30 секунд', 60: '1 минута' };
+                const cd = g.cooldown || 0; const labelMap = { 0: 'Off', 5: '5 seconds', 10: '10 seconds', 30: '30 seconds', 60: '1 minute' };
                 const cust = document.getElementById('editGrpCooldownCustom');
                 if ([0, 5, 10, 30, 60].includes(cd)) { document.getElementById('selectedCooldown').innerText = labelMap[cd] || 'Off'; cust.style.display = 'none'; cust.value = ''; } else { document.getElementById('selectedCooldown').innerText = '...'; cust.style.display = 'block'; cust.value = cd; }
 
@@ -848,7 +864,7 @@
                 
                 let finalCd = parseInt(document.getElementById('editGrpCooldownCustom').value) || 0;
                 if (!document.getElementById('editGrpCooldownCustom').value || document.getElementById('editGrpCooldownCustom').style.display === 'none') {
-                    const labelText = document.getElementById('selectedCooldown').innerText; const valueMap = { 'Выкл': 0, '5 секунд': 5, '10 секунд': 10, '30 секунд': 30, '1 минута': 60 }; finalCd = valueMap[labelText] || 0;
+                    const labelText = document.getElementById('selectedCooldown').innerText; const valueMap = { 'Off': 0, '5 seconds': 5, '10 seconds': 10, '30 seconds': 30, '1 minute': 60 }; finalCd = valueMap[labelText] || 0;
                 }
 
                 let updateData = { name: document.getElementById('editGrpNameInp').value, avatar: document.getElementById('editGrpAvInp').value, description: document.getElementById('editGrpDescInp').value, bannedWords: document.getElementById('editGrpBannedWordsInp').value, cooldown: finalCd };
