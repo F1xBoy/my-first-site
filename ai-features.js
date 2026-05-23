@@ -380,7 +380,20 @@ const VCHAT_AI_STORAGE = {
     loadAISettingsUI();
   };
 
-  function bootAIFeatures() {
+  function loadOptionalLocalConfig() {
+    return new Promise((resolve) => {
+      if (window.VCHAT_AI_LOCAL_CONFIG) return resolve();
+      const s = document.createElement('script');
+      s.src = 'ai-config.local.js';
+      s.async = true;
+      s.onload = () => resolve();
+      s.onerror = () => resolve();
+      document.head.appendChild(s);
+    });
+  }
+
+  async function bootAIFeatures() {
+    await loadOptionalLocalConfig();
     initVoiceInput();
     registerServiceWorker();
     updateSummaryButtonVisibility();
