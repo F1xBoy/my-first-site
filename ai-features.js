@@ -1,21 +1,17 @@
 /**
- * VChat AI & PWA helpers
- * ─────────────────────────────────────────────────────────────
- * Ключ НЕ храните в этом файле — Cursor/Git заблокируют.
+ * VChat AI (frontend) — все запросы идут на ваш backend proxy.
  *
- * Способ 1 (рекомендуется): Профиль → AI → вставить ключ → «Сохранить»
- * Способ 2: ai-config.local.js (см. ai-config.local.example.js, в .gitignore)
+ * Настройте URL сервера:
+ *   window.VCHAT_API_BASE_URL = 'http://localhost:3001';
+ * или в этом файле: VCHAT_API_CONFIG.baseUrl
+ *
+ * Эндпоинт: POST {baseUrl}/api/chat
+ * Секретный ключ AI хранится только на сервере.
  */
-const VCHAT_AI_CONFIG = {
-  defaultProvider: 'gemini',
-  geminiModel: 'gemini-2.0-flash-lite',
-  openaiModel: 'gpt-4o-mini',
-  openaiBaseUrl: 'https://api.openai.com/v1',
-};
-
-const VCHAT_AI_STORAGE = {
-  provider: 'vchat_ai_provider',
-  apiKey: 'vchat_ai_api_key',
+const VCHAT_API_CONFIG = {
+  /** Origin вашего Node-сервера (без слэша в конце). Пустая строка = тот же хост, что и фронт. */
+  baseUrl: 'http://localhost:3001',
+  chatPath: '/api/chat',
 };
 
 (function initVChatAIPWA() {
@@ -26,81 +22,6 @@ const VCHAT_AI_STORAGE = {
 
   let speechRecognition = null;
   let isListening = false;
-
-  function getLocalAIConfig() {
-    return window.VCHAT_AI_LOCAL_CONFIG || null;
-  }
-
-  function getProvider() {
-    return (
-      localStorage.getItem(VCHAT_AI_STORAGE.provider) ||
-      getLocalAIConfig()?.provider ||
-      VCHAT_AI_CONFIG.defaultProvider ||
-      'gemini'
-    );
-  }
-
-  function getApiKey() {
-    return (
-      localStorage.getItem(VCHAT_AI_STORAGE.apiKey) ||
-      getLocalAIConfig()?.apiKey ||
-      ''
-    ).trim();
-  }
-
-  function maskApiKey(key) {
-    if (!key || key.length < 8) return '';
-    return `${key.slice(0, 4)}••••${key.slice(-4)}`;
-  }
-
-  async function callGemini(apiKey, systemPrompt, userPrompt) {
-    const model =
-      getLocalAIConfig()?.geminiModel ||
-      VCHAT_AI_CONFIG.geminiModel;
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: systemPrompt }] },
-        contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-        generationConfig: { temperature: 0.7 },
-      }),
-    });
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(err || `Gemini HTTP ${res.status}`);
-    }
-    const data = await res.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
-  }
-
-  async function callOpenAI(apiKey, systemPrompt, userPrompt) {
-    const model =
-      getLocalAIConfig()?.openaiModel ||
-      VCHAT_AI_CONFIG.openaiModel;
-    const res = await fetch(`${VCHAT_AI_CONFIG.openaiBaseUrl}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model,
-        temperature: 0.7,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-      }),
-    });
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(err || `OpenAI HTTP ${res.status}`);
-    }
-    const data = await res.json();
-    return data.choices?.[0]?.message?.content?.trim() || '';
-  }
 
   function aiT(key) {
     return typeof t === 'function' ? t(key) : key;
@@ -114,12 +35,70 @@ const VCHAT_AI_STORAGE = {
     return typeof currentActiveChat !== 'undefined' ? currentActiveChat : null;
   }
 
+  function getApiBaseUrl() {
+    const override = (typeof window !== 'undefined' && window.VCHAT_API_BASE_URL) || '';
+    const base = (override || VCHAT_API_CONFIG.baseUrl || '').trim();
+    return base.replace(/\/$/, '');
+  }
+
+  function getChatApiUrl() {
+    const base = getApiBaseUrl();
+    const path = VCHAT_API_CONFIG.chatPath || '/api/chat';
+    return base ? `${base}${path}` : path;
+  }
+
+  async function getProxyAuthHeaders() {
+    const headers = { 'Content-Type': 'application/json', Accept: 'application/json' };
+    if (typeof appAuth !== 'undefined' && appAuth.currentUser) {
+      try {
+        const token = await appAuth.currentUser.getIdToken();
+        if (token) headers.Authorization = `Bearer ${token}`;
+      } catch (_) { /* optional */ }
+    }
+    return headers;
+  }
+
+  /**
+   * @param {{ action: 'summary'|'smart_replies', system: string, prompt: string, language?: string, messages?: Array<{author:string,text:string,role?:string}>, meta?: object }} payload
+   * @returns {Promise<{ ok: boolean, result?: string|string[], error?: string }>}
+   */
+  async function callVChatBackend(payload) {
+    const url = getChatApiUrl();
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: await getProxyAuthHeaders(),
+      body: JSON.stringify({
+        ...payload,
+        language: payload.language || (typeof currentLanguage !== 'undefined' ? currentLanguage : 'en'),
+        meta: {
+          userId: appUserId() || null,
+          chatId: appActiveChat()?.id || null,
+          chatType: appActiveChat()?.type || null,
+          ...(payload.meta || {}),
+        },
+      }),
+    });
+
+    let data = null;
+    const raw = await res.text();
+    try {
+      data = raw ? JSON.parse(raw) : {};
+    } catch {
+      throw new Error(raw || `HTTP ${res.status}`);
+    }
+
+    if (!res.ok) {
+      throw new Error(data.error || data.message || `HTTP ${res.status}`);
+    }
+    return data;
+  }
+
   function collectRecentMessages(limit = 10) {
     const map = typeof loadedMessagesMap !== 'undefined' ? loadedMessagesMap : {};
-    const entries = Object.entries(map)
+    return Object.entries(map)
       .map(([key, m]) => ({ key, ...m }))
-      .sort((a, b) => (a.ts || 0) - (b.ts || 0));
-    return entries.slice(-limit);
+      .sort((a, b) => (a.ts || 0) - (b.ts || 0))
+      .slice(-limit);
   }
 
   function formatMessagesForAI(messages) {
@@ -132,20 +111,20 @@ const VCHAT_AI_STORAGE = {
       .join('\n');
   }
 
+  function messagesToPayload(messages) {
+    return messages.map((m) => ({
+      author: m.sid === appUserId() ? aiT('you') : (m.snick || aiT('default_user')),
+      text: [m.txt, m.code ? `[code] ${m.code}` : '', m.img ? '[image]' : ''].filter(Boolean).join(' ').trim(),
+      role: m.sid === appUserId() ? 'user' : 'other',
+    }));
+  }
+
   function getLastIncomingMessage() {
     const msgs = collectRecentMessages(30);
     for (let i = msgs.length - 1; i >= 0; i--) {
       if (msgs[i].sid !== appUserId()) return msgs[i];
     }
     return null;
-  }
-
-  async function callVChatAI(systemPrompt, userPrompt) {
-    const apiKey = getApiKey();
-    if (!apiKey) return null;
-    const provider = getProvider();
-    if (provider === 'openai') return callOpenAI(apiKey, systemPrompt, userPrompt);
-    return callGemini(apiKey, systemPrompt, userPrompt);
   }
 
   function fallbackSummary(messages) {
@@ -168,9 +147,16 @@ const VCHAT_AI_STORAGE = {
     return [aiT('ai_reply_gen_1'), aiT('ai_reply_gen_2'), aiT('ai_reply_gen_3')];
   }
 
+  function parseSmartRepliesResult(data) {
+    if (Array.isArray(data.replies)) return data.replies;
+    if (Array.isArray(data.result)) return data.result;
+    if (typeof data.result === 'string') return parseJsonArray(data.result) || [];
+    return [];
+  }
+
   function parseJsonArray(raw) {
     try {
-      const m = raw.match(/\[[\s\S]*\]/);
+      const m = String(raw).match(/\[[\s\S]*\]/);
       if (m) return JSON.parse(m[0]);
     } catch (_) { /* ignore */ }
     return null;
@@ -195,24 +181,20 @@ const VCHAT_AI_STORAGE = {
     const langHint = typeof currentLanguage !== 'undefined' ? currentLanguage : 'ru';
 
     try {
-      let summary = null;
-      if (getApiKey()) {
-        summary = await callVChatAI(
-          `You summarize chat conversations briefly in 3-5 bullet points. Reply in the user's app language (${langHint}). Be concise.`,
-          `Summarize this chat (last ${messages.length} messages):\n\n${transcript}`
-        );
-      }
-      if (!summary) {
-        if (!getApiKey()) {
-          body.innerHTML = `<p>${fallbackSummary(messages)}</p><p class="ai-hint">${aiT('ai_no_api')}</p>`;
-        } else {
-          body.textContent = fallbackSummary(messages);
-        }
-      } else {
-        body.textContent = summary;
-      }
+      const data = await callVChatBackend({
+        action: 'summary',
+        system: `You summarize chat conversations briefly in 3-5 bullet points. Reply in the user's app language (${langHint}). Be concise.`,
+        prompt: `Summarize this chat (last ${messages.length} messages):\n\n${transcript}`,
+        language: langHint,
+        messages: messagesToPayload(messages),
+      });
+
+      const summary = typeof data.result === 'string' ? data.result : (data.text || data.content || '');
+      body.textContent = summary || fallbackSummary(messages);
     } catch (e) {
-      body.innerHTML = `<p class="ai-error">${aiT('ai_error')}: ${e.message}</p><p>${fallbackSummary(messages)}</p>`;
+      const isNetwork = e.message === 'Failed to fetch' || e.name === 'TypeError';
+      body.innerHTML = `<p class="ai-error">${aiT('ai_error')}: ${escapeHTML(e.message)}</p><p>${fallbackSummary(messages)}</p>` +
+        (isNetwork ? `<p class="ai-hint">${aiT('ai_backend_offline')}</p>` : '');
     }
   };
 
@@ -243,14 +225,17 @@ const VCHAT_AI_STORAGE = {
     const langHint = typeof currentLanguage !== 'undefined' ? currentLanguage : 'ru';
 
     try {
-      if (getApiKey()) {
-        const raw = await callVChatAI(
-          `Generate exactly 3 short reply suggestions for a chat app. Return ONLY a JSON array of 3 strings, no markdown. Language: ${langHint}. Max 60 chars each.`,
-          `Reply to this message:\n"${lastIncoming.txt || aiT('attachment')}"\nFrom: ${lastIncoming.snick || 'User'}`
-        );
-        replies = parseJsonArray(raw) || [];
+      const data = await callVChatBackend({
+        action: 'smart_replies',
+        system: `Generate exactly 3 short reply suggestions for a chat app. Return JSON: { "replies": ["...", "...", "..."] }. Language: ${langHint}. Max 60 chars each.`,
+        prompt: `Reply to this message:\n"${lastIncoming.txt || aiT('attachment')}"\nFrom: ${lastIncoming.snick || 'User'}`,
+        language: langHint,
+      });
+      replies = parseSmartRepliesResult(data);
+      if (replies.length < 3 && typeof data.result === 'string') {
+        replies = parseJsonArray(data.result) || replies;
       }
-    } catch (_) { /* fallback below */ }
+    } catch (_) { /* fallback */ }
 
     if (replies.length < 3) replies = fallbackSmartReplies(lastIncoming);
 
@@ -267,8 +252,12 @@ const VCHAT_AI_STORAGE = {
 
   function updateSummaryButtonVisibility() {
     const btn = document.getElementById('aiSummaryBtn');
-    const chat = typeof currentActiveChat !== 'undefined' ? currentActiveChat : null;
+    const chat = appActiveChat();
     if (btn) btn.style.display = chat ? 'inline-flex' : 'none';
+  }
+
+  function escapeHTML(str) {
+    return str ? String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : '';
   }
 
   window.initVoiceInput = function initVoiceInput() {
@@ -350,69 +339,14 @@ const VCHAT_AI_STORAGE = {
     };
   }
 
-  window.loadAISettingsUI = function loadAISettingsUI() {
-    const providerEl = document.getElementById('aiProviderSelect');
-    const keyEl = document.getElementById('aiApiKeyInp');
-    const statusEl = document.getElementById('aiKeyStatus');
-    if (!providerEl || !keyEl) return;
-
-    providerEl.value = getProvider();
-    const saved = getApiKey();
-    keyEl.value = '';
-    keyEl.placeholder = saved
-      ? `${aiT('ai_key_saved_mask')} ${maskApiKey(saved)}`
-      : aiT('ai_key_placeholder');
-
-    if (statusEl) {
-      statusEl.textContent = saved
-        ? `${aiT('ai_key_active')} (${getProvider() === 'gemini' ? 'Gemini' : 'OpenAI'})`
-        : aiT('ai_key_missing');
-      statusEl.style.color = saved ? 'var(--success)' : 'var(--warning)';
-    }
-  };
-
-  window.saveAISettings = function saveAISettings() {
-    const providerEl = document.getElementById('aiProviderSelect');
-    const keyEl = document.getElementById('aiApiKeyInp');
-    if (!providerEl) return;
-
-    localStorage.setItem(VCHAT_AI_STORAGE.provider, providerEl.value);
-    const newKey = (keyEl?.value || '').trim();
-    if (newKey) localStorage.setItem(VCHAT_AI_STORAGE.apiKey, newKey);
-
-    showToast(aiT('ai_key_saved_toast'));
-    loadAISettingsUI();
-    if (appActiveChat() && typeof refreshSmartReplies === 'function') refreshSmartReplies();
-  };
-
-  window.clearAISettings = function clearAISettings() {
-    if (!confirm(aiT('ai_key_clear_confirm'))) return;
-    localStorage.removeItem(VCHAT_AI_STORAGE.apiKey);
-    showToast(aiT('ai_key_cleared'));
-    loadAISettingsUI();
-  };
-
-  function loadOptionalLocalConfig() {
-    return new Promise((resolve) => {
-      if (window.VCHAT_AI_LOCAL_CONFIG) return resolve();
-      const s = document.createElement('script');
-      s.src = 'ai-config.local.js';
-      s.async = true;
-      s.onload = () => resolve();
-      s.onerror = () => resolve();
-      document.head.appendChild(s);
-    });
-  }
-
-  async function bootAIFeatures() {
-    await loadOptionalLocalConfig();
+  function bootAIFeatures() {
     initVoiceInput();
     registerServiceWorker();
     updateSummaryButtonVisibility();
-    loadAISettingsUI();
   }
 
   window.updateSummaryButtonVisibility = updateSummaryButtonVisibility;
+  window.VCHAT_getChatApiUrl = getChatApiUrl;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', bootAIFeatures);
