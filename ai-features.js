@@ -49,9 +49,20 @@
         if (!res.ok) throw new Error(data.error?.message || "Gemini API Error");
         return { result: data.candidates?.[0]?.content?.parts?.[0]?.text || "" };
     } else {
-        const url = `https://api.openai.com/v1/chat/completions`;
+        // Универсальный обработчик для OpenAI-совместимых API (DeepSeek, Groq, OpenAI)
+        let url = "https://api.openai.com/v1/chat/completions";
+        let model = "gpt-4o-mini";
+
+        if (provider === 'deepseek') {
+            url = "https://api.deepseek.com/chat/completions";
+            model = "deepseek-chat";
+        } else if (provider === 'groq') {
+            url = "https://api.groq.com/openai/v1/chat/completions";
+            model = "llama3-8b-8192";
+        }
+
         const body = {
-            model: "gpt-4o-mini",
+            model: model,
             messages: [
                 { role: "system", content: sysPrompt },
                 { role: "user", content: userPrompt }
@@ -64,7 +75,7 @@
             body: JSON.stringify(body) 
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error?.message || "OpenAI API Error");
+        if (!res.ok) throw new Error(data.error?.message || "API Error");
         return { result: data.choices?.[0]?.message?.content || "" };
     }
   }
@@ -296,7 +307,6 @@
     });
   }
 
-  // Ядерная кнопка апдейта
   window.updateApp = function updateApp() {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(registrations => {
