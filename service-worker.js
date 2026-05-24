@@ -1,5 +1,5 @@
 /* VChat PWA Service Worker — cache shell, network-first for dynamic data */
-const CACHE_NAME = 'vchat-pwa-v3';
+const CACHE_NAME = 'vchat-pwa-v4';
 const SHELL = [
   './',
   './index.html',
@@ -36,7 +36,10 @@ self.addEventListener('fetch', (event) => {
     url.hostname.includes('gstatic.com') ||
     url.hostname.includes('google.com') ||
     url.hostname.includes('postimg.cc') ||
-    url.hostname.includes('dicebear.com')
+    url.hostname.includes('dicebear.com') ||
+    url.hostname.includes('openai.com') ||
+    url.hostname.includes('groq.com') ||
+    url.hostname.includes('deepseek.com')
   ) {
     return;
   }
